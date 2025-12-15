@@ -1,0 +1,144 @@
+/***
+ *    ┏┓┏┳┓┓┏┓ ┏┓  ┏┓
+ *    ┗┓ ┃ ┗┫┃ ┣ ━━┗┫
+ *    ┗┛ ┻ ┗┛┗┛┗┛  ┗┛
+ *                   
+ */
+
+
+// Config //
+configuration {
+    modi:                        "drun,filebrowser,window,run";
+    show-icons:                  true;
+    display-drun:                " ";
+    display-run:                 " ";
+    display-filebrowser:         " ";
+    display-window:              " ";
+    drun-display-format:         "{name}";
+    window-format:               "{w}{t}";
+}
+
+
+// Global Properties //
+@import  "~/.config/rofi/rofi-colors.rasi"
+
+// Main //
+window {
+    height:                      30em;
+    width:                       57em;
+    transparency:                "real";
+    fullscreen:                  false;
+    enabled:                     true;
+    cursor:                      "default";
+    spacing:                     0em;
+    padding:                     0em;
+    border-radius:               0.1em;
+    border-color:                @border-color;
+    background-color:            @background;
+}
+mainbox {
+    enabled:                     true;
+    spacing:                     1em;
+    padding:                     0.1em;
+    orientation:                 horizontal;
+    children:                    [ "inputbar" , "listbox" ];
+    background-color:            @background;
+}
+
+
+// Inputs //
+inputbar {
+    enabled:                     true;
+    width:                       27em;
+    spacing:                     0em;
+    padding:                     0em;
+    children:                    [ "entry" ];
+    background-color:            @background;
+    background-image:            url("~/nixos-dotfiles/walls/ghibli.jpeg", height);
+    border-radius:               0.1em;
+}
+entry {
+    enabled:                     false;
+}
+
+
+// Lists //
+listbox {
+    spacing:                     0em;
+    padding:                     0em;
+    children:                    [ "dummy" , "listview" , "dummy" ];
+    background-color:            @background;
+}
+listview {
+    enabled:                     true;
+    spacing:                     0em;
+    padding:                     1em;
+    columns:                     1;
+    lines:                       7;
+    cycle:                       true;
+    dynamic:                     true;
+    scrollbar:                   false;
+    layout:                      vertical;
+    reverse:                     false;
+    expand:                      false;
+    fixed-height:                true;
+    fixed-columns:               true;
+    cursor:                      "default";
+    background-color:            @background;
+    text-color:                  @foreground;
+}
+dummy {
+    background-color:            @background;
+}
+
+
+// Elements //
+element {
+    enabled:                     true;
+    spacing:                     0em;
+    border-radius:               0em;
+    padding:                     0em 0em 0em 0em;
+    cursor:                      pointer;
+    background-color:            @background;
+    text-color:                  @foreground;
+}
+element selected.normal {
+    background-color:            @selected;
+    text-color:                  @selected-alpha;
+}
+element-icon {
+    size:                        2.7em;
+    cursor:                      inherit;
+    background-color:            @background;
+    text-color:                  inherit;
+}
+element-text {
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+    cursor:                      inherit;
+    background-color:            @background;
+    text-color:                  inherit;
+}
+
+// Error message //
+error-message {
+    text-color:                  @foreground;
+    background-color:            @background;
+    text-transform:              capitalize;
+    children:                    [ "textbox" ];
+}
+
+textbox {
+    text-color:                  inherit;
+    background-color:            inherit;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+}
+
+configuration{
+  font: "IosevkaTerm Nerd Font 12";
+}
+
+element-text{
+    font: "IosevkaTerm Nerd Font 12";
+}
