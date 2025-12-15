@@ -2,13 +2,14 @@ return {
     {
         "nvim-treesitter/nvim-treesitter",
         build = ":TSUpdate",
-        dependencies = {
-            "nvim-treesitter/nvim-treesitter-textobjects",
-        },
         config = function()
-            local configs = require("nvim-treesitter.configs")
-            ---@diagnostic disable-next-line: missing-fields
-            configs.setup({
+            require("nvim-treesitter.configs").setup({
+                highlight = { enable = true },
+                indent = { enable = true },
+                autotag = { enable = true },
+                ensure_installed = { "lua", "vim", "vimdoc", "bash", "json", "python", "javascript", "typescript", "tsx", "html", "css", "c", "cpp", "rust", "zig", "yaml", "dockerfile", "gitignore", "markdown", "markdown_inline", "query", "java" },
+                auto_install = false,
+                sync_install = false,
                 textobjects = {
                     select = {
                         enable = true,
@@ -19,42 +20,17 @@ return {
                         },
                     },
                 },
-                -- enable syntax highlighting
-                highlight = {
-                    enable = true,
-                },
-                -- enable indentation
-                indent = { enable = true },
-                -- enable autotagging (w/ nvim-ts-autotag plugin)
-                autotag = { enable = true },
-                -- ensure these language parsers are installed
-                ensure_installed = {
-                    "java",
-                    "cpp",
-                    "json",
-                    "python",
-                    "javascript",
-                    "query",
-                    "typescript",
-                    "tsx",
-                    "rust",
-                    "zig",
-                    "yaml",
-                    "html",
-                    "css",
-                    "markdown",
-                    "markdown_inline",
-                    "bash",
-                    "lua",
-                    "vim",
-                    "vimdoc",
-                    "c",
-                    "dockerfile",
-                    "gitignore",
-                },
-                -- auto install above language parsers
-                auto_install = false,
             })
-        end
-    }
+        end,
+    },
+
+    {
+        "nvim-treesitter/nvim-treesitter-textobjects",
+        dependencies = { "nvim-treesitter/nvim-treesitter" },
+    },
+    {
+        "windwp/nvim-ts-autotag",
+        dependencies = { "nvim-treesitter/nvim-treesitter" },
+        opts = {},
+    },
 }
