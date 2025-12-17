@@ -4,11 +4,9 @@
 # Check his out here: https://github.com/argosnothing/mango-dwm-config/
 #startup stuff
 
-monitorrule=eDP-1,0.55,1,tile,0,1,0,0,1920,1080,60
+monitorrule=eDP-1,0.55,1,tile,0,1.4,0,0,3200,2000,165
 #basic preferences
 trackpad_natural_scrolling=1
-accel_profile = 1
-accel_speed = 0.8
 
 exec-once=~/.config/mango/autostart.sh
 bind=SUPER,Return,spawn,kitty
@@ -187,12 +185,10 @@ env=XMODIFIERS,@im=fcitx
 env=GLFW_IM_MODULE,ibus
 env=QT_QPA_PLATFORMTHEME,qt5ct
 env=QT_AUTO_SCREEN_SCALE_FACTOR,1
-env=QT_WAYLAND_FORCE_DPI,120
+env=QT_WAYLAND_FORCE_DPI,400
 env=QT_QPA_PLATFORM,Wayland;xcb
 # env=GDK_SCALE,2
 # env=XKB_DEFAULT_LAYOUT,us,ru
 # env=XKB_DEFAULT_VARIANT,colemak_dh_wide_iso,
 # env=XKB_DEFAULT_OPTIONS,caps:escape
 
-
-source=./dms/outputs.conf
