@@ -28,6 +28,10 @@
             "type": "cpu"
         },
         {
+            "keyColor": "green",
+            "type": "gpu"
+        },
+        {
             "keyColor": "yellow",
             "type": "memory"
         },

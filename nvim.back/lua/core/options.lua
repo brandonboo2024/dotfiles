@@ -1,3 +1,4 @@
+vim.opt.swapfile = false;
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.splitbelow = true
@@ -7,8 +8,9 @@ vim.opt.expandtab = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.scrolloff = 999
+vim.o.sidescrolloff = 4
 
--- allows virtual editing in visual block 
+-- allows virtual editing in visual block
 -- (cursor can go past end of line.)
 vim.opt.virtualedit = "block"
 vim.opt.inccommand = "split"
