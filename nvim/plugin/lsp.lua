@@ -18,7 +18,6 @@ vim.diagnostic.config({
 	},
 })
 
-
 local orig = vim.lsp.util.open_floating_preview
 ---@diagnostic disable-next-line: duplicate-set-field
 function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
@@ -46,7 +45,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 	end,
 })
 
--- local caps = require("cmp_nvim_lsp").default_capabilities()
+local caps = require("cmp_nvim_lsp").default_capabilities()
 
 local ok, cmp = pcall(require, "cmp_nvim_lsp")
 local caps = ok and cmp.default_capabilities() or vim.lsp.protocol.make_client_capabilities()
