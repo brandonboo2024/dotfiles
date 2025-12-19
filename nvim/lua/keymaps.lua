@@ -71,3 +71,14 @@ map("n", "<leader>n", ":enew<CR>")
 map("n", "<Tab>", ":bp<cr>")
 map("n", "<S-Tab>", ":bprev<CR>")
 map("n", "<leader>x", ":bd<cr>")
+
+local function tmux_nav(cmd)
+	return ("<cmd>packadd vim-tmux-navigator | <C-U>%s<cr>"):format(cmd)
+end
+
+local map = vim.keymap.set
+map("n", "<C-h>", tmux_nav("TmuxNavigateLeft"), { silent = true })
+map("n", "<C-j>", tmux_nav("TmuxNavigateDown"), { silent = true })
+map("n", "<C-k>", tmux_nav("TmuxNavigateUp"), { silent = true })
+map("n", "<C-l>", tmux_nav("TmuxNavigateRight"), { silent = true })
+map("n", "<C-\\>", tmux_nav("TmuxNavigatePrevious"), { silent = true })

@@ -54,7 +54,7 @@ inputbar {
     padding:                     0em;
     children:                    [ "entry" ];
     background-color:            @background;
-    background-image:            url("~/nixos-dotfiles/walls/street.png", height);
+    background-image:            url("~/nixos-dotfiles/walls/mountain.png", height);
     border-radius:               0.1em;
 }
 entry {
