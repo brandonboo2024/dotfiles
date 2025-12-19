@@ -23,3 +23,7 @@ vim.cmd([[hi @lsp.type.number gui=italic]])
 -- scrolling
 vim.opt.scrolloff = 999
 vim.o.sidescrolloff = 12
+
+
+vim.cmd("colorscheme vague")
+vim.cmd(":hi statusline guibg=NONE")

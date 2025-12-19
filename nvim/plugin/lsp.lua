@@ -45,10 +45,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
 	end,
 })
 
-local caps = require("cmp_nvim_lsp").default_capabilities()
-
-local ok, cmp = pcall(require, "cmp_nvim_lsp")
-local caps = ok and cmp.default_capabilities() or vim.lsp.protocol.make_client_capabilities()
 
 vim.lsp.config['luals'] = {
 	cmd = { 'lua-language-server' },

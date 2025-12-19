@@ -17,43 +17,39 @@ vim.pack.add({
 	{ src = "https://github.com/brenoprata10/nvim-highlight-colors" },
 	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
 	-- Autocomplete
-	{ src = "https://github.com/hrsh7th/nvim-cmp" },
-	{ src = "https://github.com/hrsh7th/cmp-nvim-lsp" },
-	{ src = "https://github.com/hrsh7th/cmp-path" },
-	{ src = "https://github.com/hrsh7th/cmp-buffer" },
+	{ src = "https://github.com/Saghen/blink.cmp",                       name = "blink",   version = vim.version.range("1.*") },
+	{ src = "https://github.com/sar/friendly-snippets.nvim" },
+	-- comments and tmux and autopairs
+	{ src = "https://github.com/numToStr/Comment.nvim" },
+	{ src = "https://github.com/windwp/nvim-autopairs" },
+	{ src = "https://github.com/christoomey/vim-tmux-navigator" },
+	-- colorscheme
+	{ src = "https://github.com/vague2k/vague.nvim" },
 })
 
 require("nvim-highlight-colors").setup {}
 require("bufferline").setup {}
-require("lualine").setup()
+require("lualine").setup({})
+require("nvim-autopairs").setup {}
+-- comment.nvim
+require("Comment").setup({
+})
 
 -- auto complete setup
-local cmp = require("cmp")
-cmp.setup({
-	preselect = cmp.PreselectMode.Item, -- <— preselect first item
-	completion = { completeopt = "menu,menuone,noinsert" },
-	window = { documentation = cmp.config.window.bordered() },
-	mapping = cmp.mapping.preset.insert({
-		["<CR>"]    = cmp.mapping.confirm({ select = false }),
-		["<C-e>"]   = cmp.mapping.abort(),
-		["<C-y>"]   = cmp.mapping.complete(), -- manual trigger if you want it
-		["<C-n>"]   = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-		["<C-p>"]   = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-		["<C-f>"]   = cmp.mapping.scroll_docs(4),
-		["<C-u>"]   = cmp.mapping.scroll_docs(-4),
-		["<Tab>"]   = cmp.mapping(function(fallback)
-			if cmp.visible() then cmp.select_next_item() else fallback() end
-		end, { "i", "s" }),
-		["<S-Tab>"] = cmp.mapping(function()
-			if cmp.visible() then cmp.select_prev_item() end
-		end, { "i", "s" }),
-	}),
-	sources = {
-		{ name = "nvim_lsp" },
-		{ name = "path" },
-		{ name = "buffer",  keyword_length = 3 },
+local blink_opts = {
+	keymap = { preset = "default" },
+	appearance = {
+		nerd_font_variant = "mono"
 	},
-})
+	completion = { documentation = { auto_show = false } },
+	sources = {
+		default = { "lsp", "path", "buffer" },
+	},
+	fuzzy = { implementation = "prefer_rust_with_warning" }
+}
+vim.list_extend(blink_opts.sources.default, { "snippets" })
+
+require("blink.cmp").setup(blink_opts)
 
 require("oil").setup({
 	lsp_file_methods = {
@@ -89,18 +85,6 @@ vim.lsp.enable({
 -- see treesitter.lua for setup
 require("nvim-treesitter").install(ensure_installed)
 
-
-vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end)
-vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
-
-vim.keymap.set("n", "<C-h>", function() harpoon:list():select(1) end)
-vim.keymap.set("n", "<C-t>", function() harpoon:list():select(2) end)
-vim.keymap.set("n", "<C-n>", function() harpoon:list():select(3) end)
-vim.keymap.set("n", "<C-s>", function() harpoon:list():select(4) end)
-
--- Toggle previous & next buffers stored within Harpoon list
-vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
-vim.keymap.set("n", "<C-S-N>", function() harpoon:list():next() end)
 
 local telescope = require("telescope")
 telescope.setup({
