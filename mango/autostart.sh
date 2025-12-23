@@ -2,9 +2,8 @@
 
 # obs
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=wlroots >/dev/null 2>&1
-systemctl --user start mango-session.target
 
-
+dms run --daemon
 
 
 # keep clipboard content
