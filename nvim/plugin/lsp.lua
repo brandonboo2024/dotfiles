@@ -45,6 +45,14 @@ vim.api.nvim_create_autocmd('LspAttach', {
 	end,
 })
 
+local lspconfig = require("lspconfig")
+lspconfig.opts = {
+	servers = {
+		clangd = {
+			mason = false,
+		},
+	},
+}
 
 vim.lsp.config['luals'] = {
 	cmd = { 'lua-language-server' },
@@ -144,13 +152,14 @@ vim.lsp.config['clangd'] = {
 		'--clang-tidy',
 		'--header-insertion=never',
 		'--completion-style=detailed',
-		'--query-driver=/nix/store/*-gcc-*/bin/gcc*,/nix/store/*-clang-*/bin/clang*,/run/current-system/sw/bin/cc*',
+		"--enable-config",
+		"--query-driver=/etc/profiles/per-user/*/bin/*,/run/current-system/sw/bin/*,/nix/store/*/bin/*,/nix/store/*/include/",
 	},
 	filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
-	root_markers = { 'compile_commands.json', '.clangd', 'configure.ac', 'Makefile', '.git', vim.uv.cwd() },
+	root_markers = { 'compile_commands.json', '.clangd', 'configure.ac', 'Makefile', '.git', },
 	capabilities = caps,
 	init_options = {
-		fallbackFlags = { '-std=c23' }, -- Default to C23
+		fallbackFlags = { '-Wall' },
 	},
 }
 
