@@ -25,6 +25,8 @@ vim.pack.add({
 	{ src = "https://github.com/christoomey/vim-tmux-navigator" },
 	-- colorscheme
 	{ src = "https://github.com/vague2k/vague.nvim" },
+	{ src = "https://github.com/zenbones-theme/zenbones.nvim" },
+	{ src = "https://github.com/rktjmp/lush.nvim" },
 })
 
 require("nvim-highlight-colors").setup {}
@@ -83,7 +85,6 @@ vim.lsp.enable({
 })
 
 -- see treesitter.lua for setup
-require("nvim-treesitter").install(ensure_installed)
 
 
 local telescope = require("telescope")
