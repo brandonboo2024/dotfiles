@@ -174,10 +174,12 @@ vim.lsp.config['pylsp'] = {
 	settings = {
 		pylsp = {
 			plugins = {
+				pyflakes = { enabled = true },
 				pycodestyle = {
 					ignore = { 'W391' },
 					maxLineLength = 120
-				}
+				},
+				black = { enabled = true },
 			}
 		}
 	},
