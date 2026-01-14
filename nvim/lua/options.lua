@@ -26,4 +26,6 @@ vim.o.sidescrolloff = 12
 
 
 vim.cmd("colorscheme vague")
+-- vim.cmd("set background=dark")
+-- vim.cmd("colorscheme zenbones")
 vim.cmd(":hi statusline guibg=NONE")
