@@ -16,6 +16,8 @@ local ensure_installed = {
 	"gitignore",
 }
 
+require 'nvim-treesitter'.install { ensure_installed }
+
 local filetypes = vim.iter(ensure_installed):map(vim.treesitter.language.get_filetypes):flatten():totable()
 
 

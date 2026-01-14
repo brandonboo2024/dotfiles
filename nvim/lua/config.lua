@@ -83,7 +83,7 @@ vim.lsp.enable({
 })
 
 -- see treesitter.lua for setup
-require("nvim-treesitter").install(ensure_installed)
+require("nvim-treesitter").setup {}
 
 
 local telescope = require("telescope")
