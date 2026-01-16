@@ -176,7 +176,7 @@ vim.lsp.config['pylsp'] = {
 			plugins = {
 				pyflakes = { enabled = true },
 				pycodestyle = {
-					ignore = { 'W391' },
+					ignore = { 'W391', 'W503' },
 					maxLineLength = 120
 				},
 				black = { enabled = true },
