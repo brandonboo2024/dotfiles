@@ -3,6 +3,8 @@ local function pack_clean()
 	local unused_plugins = {}
 
 	for _, plugin in ipairs(vim.pack.get()) do
+		print(_)
+		print(plugin)
 		active_plugins[plugin.spec.name] = plugin.active
 	end
 

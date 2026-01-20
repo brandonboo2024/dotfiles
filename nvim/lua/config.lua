@@ -12,12 +12,12 @@ vim.pack.add({
 	{ src = "https://github.com/folke/which-key.nvim" },
 	-- Additional things like file picking, oil, lualine etc
 	{ src = "https://github.com/stevearc/oil.nvim" },
-	{ src = "https://github.com/ThePrimeagen/harpoon",                   name = "harpoon", version = "harpoon2" },
+	{ src = "https://github.com/ThePrimeagen/harpoon",                   name = "harpoon",       version = "harpoon2" },
 	{ src = "https://github.com/akinsho/bufferline.nvim" },
 	{ src = "https://github.com/brenoprata10/nvim-highlight-colors" },
 	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
 	-- Autocomplete
-	{ src = "https://github.com/Saghen/blink.cmp",                       name = "blink",   version = vim.version.range("1.*") },
+	{ src = "https://github.com/Saghen/blink.cmp",                       name = "blink",         version = vim.version.range("1.*") },
 	{ src = "https://github.com/sar/friendly-snippets.nvim" },
 	-- comments and tmux and autopairs
 	{ src = "https://github.com/numToStr/Comment.nvim" },
@@ -25,8 +25,8 @@ vim.pack.add({
 	{ src = "https://github.com/christoomey/vim-tmux-navigator" },
 	-- colorscheme
 	{ src = "https://github.com/vague2k/vague.nvim" },
-	{ src = "https://github.com/zenbones-theme/zenbones.nvim" },
-	{ src = "https://github.com/rktjmp/lush.nvim" },
+	-- typst preview
+	{ src = "https://github.com/chomosuke/typst-preview.nvim",           name = "typst-preview", version = vim.version.range("1.*") },
 })
 
 require("nvim-highlight-colors").setup {}
@@ -36,6 +36,13 @@ require("nvim-autopairs").setup {}
 -- comment.nvim
 require("Comment").setup({
 })
+require("typst-preview").setup {
+	debug = true,
+	dependencies_bin = {
+		['tinymist'] = "tinymist",
+		['websocat'] = "websocat",
+	}
+}
 
 -- auto complete setup
 local blink_opts = {
@@ -82,6 +89,7 @@ vim.lsp.enable({
 	"jsonls",
 	"pylsp",
 	"jdtls",
+	"tinymist",
 })
 
 -- see treesitter.lua for setup
