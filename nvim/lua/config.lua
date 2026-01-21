@@ -25,8 +25,6 @@ vim.pack.add({
 	{ src = "https://github.com/christoomey/vim-tmux-navigator" },
 	-- colorscheme
 	{ src = "https://github.com/vague2k/vague.nvim" },
-	{ src = "https://github.com/zenbones-theme/zenbones.nvim" },
-	{ src = "https://github.com/rktjmp/lush.nvim" },
 })
 
 require("nvim-highlight-colors").setup {}
