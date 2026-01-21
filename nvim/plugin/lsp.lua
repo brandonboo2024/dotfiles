@@ -3,7 +3,7 @@ vim.diagnostic.config({
 	severity_sort = true,
 	float         = {
 		style  = 'minimal',
-		border = 'rounded',
+		border = 'single',
 		source = 'if_many',
 		header = '',
 		prefix = '',
@@ -54,7 +54,7 @@ lspconfig.opts = {
 	},
 }
 
-vim.lsp.config['luals'] = {
+vim.lsp.config['lua_ls'] = {
 	cmd = { 'lua-language-server' },
 	filetypes = { 'lua' },
 	root_markers = { { '.luarc.json', '.luarc.jsonc' }, '.git' },
@@ -176,7 +176,7 @@ vim.lsp.config['pylsp'] = {
 			plugins = {
 				pyflakes = { enabled = true },
 				pycodestyle = {
-					ignore = { 'W391' },
+					ignore = { 'W391', 'W503' },
 					maxLineLength = 120
 				},
 				black = { enabled = true },
@@ -199,6 +199,14 @@ vim.filetype.add({
 		h = 'c',
 	},
 })
+
+vim.lsp.config['tinymist'] = {
+	cmd = { "tinymist" },
+	filetypes = { "typst" },
+	settings = {
+		formatterMode = "typstyle"
+	},
+}
 
 vim.lsp.enable({
 	"luals",

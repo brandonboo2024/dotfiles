@@ -3,6 +3,8 @@ local function pack_clean()
 	local unused_plugins = {}
 
 	for _, plugin in ipairs(vim.pack.get()) do
+		print(_)
+		print(plugin)
 		active_plugins[plugin.spec.name] = plugin.active
 	end
 
@@ -35,6 +37,7 @@ map({ "n", "t" }, "<leader>x", "<Cmd>tabclose<CR>")
 for i = 1, 8 do
 	map({ "n", "t" }, "<Leader>" .. i, "<Cmd>tabnext " .. i .. "<CR>")
 end
+map({ "n" }, "<leader>m", ":make<CR>", { desc = "Run vim.make" })
 map({ "n", "v", "x" }, "<leader>n", ":norm ", { desc = "ENTER NORM COMMAND." })
 map({ "n", "v", "x" }, "<C-s>", [[:s/\V]], { desc = "Enter substitute mode in selection" })
 map({ "n", "v", "x" }, "<leader>lf", vim.lsp.buf.format, { desc = "Format current buffer" })

@@ -14,6 +14,7 @@ local ensure_installed = {
 	"bash",
 	"dockerfile",
 	"gitignore",
+	"typst",
 }
 
 
