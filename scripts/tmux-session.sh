@@ -1,8 +1,8 @@
 #!/bin/sh
 
 DIRS=(
-	"$HOME/Personal/001_Books_Programming/"
-	"$HOME/Personal/002_Code/"
+	"$HOME/Personal/001_Code/"
+	"$HOME/Personal/002_Books/"
 	"$HOME/Personal/003_School/"
 	"$HOME/nixos-dotfiles/"
 )
