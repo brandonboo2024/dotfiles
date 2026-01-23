@@ -3,8 +3,6 @@ local function pack_clean()
 	local unused_plugins = {}
 
 	for _, plugin in ipairs(vim.pack.get()) do
-		print(_)
-		print(plugin)
 		active_plugins[plugin.spec.name] = plugin.active
 	end
 
@@ -49,7 +47,7 @@ function git_files() builtin.find_files({ no_ignore = true }) end
 function grep() builtin.live_grep({ additional_args = { "-e" } }) end
 
 map({ "n" }, "<leader>g", grep)
-map({ "n" }, "<leader>sg", git_files)
+map({ "n" }, "<leader>sg", git_files, { desc = "search files in git repos" })
 map({ "n" }, "<leader>sb", builtin.buffers, { desc = "search buffers" })
 map({ "n" }, "<leader>si", builtin.grep_string, { desc = "search for string" })
 map({ "n" }, "<leader>sr", builtin.lsp_references, { desc = "LSP references" })
@@ -70,7 +68,7 @@ map({ "n" }, "<leader>w", "<Cmd>update<CR>", { desc = "Write the current buffer.
 map({ "n" }, "<leader>q", "<Cmd>:quit<CR>", { desc = "Quit the current buffer." })
 map({ "n" }, "<leader>Q", "<Cmd>:wqa<CR>", { desc = "Quit all buffers and write." })
 
-map("n", "<Tab>", ":bp<cr>")
+map("n", "<Tab>", ":bnext<CR>")
 map("n", "<S-Tab>", ":bprev<CR>")
 map("n", "<leader>x", ":bd<cr>")
 
@@ -78,7 +76,6 @@ local function tmux_nav(cmd)
 	return ("<cmd>packadd vim-tmux-navigator | <C-U>%s<cr>"):format(cmd)
 end
 
-local map = vim.keymap.set
 map("n", "<C-h>", tmux_nav("TmuxNavigateLeft"), { silent = true })
 map("n", "<C-j>", tmux_nav("TmuxNavigateDown"), { silent = true })
 map("n", "<C-k>", tmux_nav("TmuxNavigateUp"), { silent = true })

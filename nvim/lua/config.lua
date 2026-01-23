@@ -31,7 +31,11 @@ vim.pack.add({
 
 require("nvim-highlight-colors").setup {}
 require("bufferline").setup {}
-require("lualine").setup({})
+require("lualine").setup({
+	options = {
+		theme = 'vague',
+	}
+})
 require("nvim-autopairs").setup {}
 -- comment.nvim
 require("Comment").setup({
