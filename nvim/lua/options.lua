@@ -5,6 +5,9 @@ vim.opt.winborder = "single"
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.showtabline = 2
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.autoindent = true
 -- sign column on left for errors
 vim.opt.signcolumn = "yes"
 -- prevent wrapping to next line
