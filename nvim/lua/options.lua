@@ -1,4 +1,4 @@
-vim.opt.guicursor = ""
+vim.opt.guicursor = "n:blinkon0"
 -- for diagnostic border
 vim.opt.winborder = "single"
 -- tabs
