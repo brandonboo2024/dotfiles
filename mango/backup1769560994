@@ -4,10 +4,29 @@
 # Check his out here: https://github.com/argosnothing/mango-dwm-config/
 #startup stuff
 
+monitorrule=eDP-1,0.55,1,tile,0,1,0,0,1920,1080,60
+monitorrule=DP-5,0.55,1,tile,0,1,0,0,2560,1440,165
+monitorrule=HDMI-A-2,0.55,1,tile,0,1,2560,0,1920,1080,180
 #basic preferences
 trackpad_natural_scrolling=1
 accel_profile = 1
 accel_speed = 0.8
+
+#idle stuff
+idleinhibit_ignore_visible = 1
+
+# multi monitor shiii
+focus_cross_monitor = 1
+exchange_cross_monitor = 1
+focus_cross_tag = 0
+
+# misc
+drag_tile_to_tile = 1
+
+#master-stack layout setting
+new_is_master=1
+default_nmaster=1
+default_mfact=0.55
 
 exec-once=~/.config/mango/autostart.sh
 bind=SUPER,Return,spawn,kitty
@@ -42,13 +61,13 @@ bind=SUPER,a,togglegaps
 # Layouts in mango are per tag. So we'll set all tags to tile by default. 
 tagrule=id:1,layout_name:tile
 tagrule=id:2,layout_name:tile
-tagrule=id:3,layout_name:tile
+tagrule=id:3,layout_name:scroller
 tagrule=id:4,layout_name:scroller
-tagrule=id:5,layout_name:scroller
-tagrule=id:6,layout_name:scroller
-tagrule=id:7,layout_name:scroller
-tagrule=id:8,layout_name:scroller
-tagrule=id:9,layout_name:scroller
+tagrule=id:5,layout_name:tile
+tagrule=id:6,layout_name:tile
+tagrule=id:7,layout_name:tile
+tagrule=id:8,layout_name:tile
+tagrule=id:9,layout_name:tile
 
 # change tag + swap to it
 bind=SUPER+SHIFT,1,tag,1,0
@@ -69,7 +88,7 @@ gappiv=10
 gappoh=10
 gappov=10
 focused_opacity=1.0
-unfocused_opacity=0.90
+unfocused_opacity=0.95
 border_radius=0
 no_border_when_single=0
 scratchpad_width_ratio=0.8
@@ -77,7 +96,7 @@ scratchpad_height_ratio=0.9
 borderpx=2
 # rootcolor=0x201b14ff
 bordercolor=0x444444ff
-focuscolor=0xf17e2dff
+focuscolor=0xC2612Eff
 maximizescreencolor=0x89aa61ff
 urgentcolor=0xad401fff
 scratchpadcolor=0x516c93ff
@@ -143,6 +162,7 @@ scroller_prefer_center=0
 edge_scroller_pointer_focus=1
 scroller_default_proportion_single=1.0
 scroller_proportion_preset=0.5
+scroller_ignore_proportion_single=1.0
 
 bind=SUPER+SHIFT,f,togglefullscreen,
 bind=SUPER,f,togglefloating,
@@ -164,6 +184,7 @@ bind=SUPER+SHIFT,k,exchange_client,up
 bind=SUPER+SHIFT,j,exchange_client,down
 bind=SUPER+SHIFT,h,exchange_client,left
 bind=SUPER+SHIFT,l,exchange_client,right
+
 
 # Gesturebind
 gesturebind=none,left,3,viewtoright_have_client
@@ -188,7 +209,7 @@ env=XMODIFIERS,@im=fcitx
 env=GLFW_IM_MODULE,ibus
 env=QT_QPA_PLATFORMTHEME,qt5ct
 env=QT_AUTO_SCREEN_SCALE_FACTOR,1
-env=QT_WAYLAND_FORCE_DPI,120
+env=QT_WAYLAND_FORCE_DPI,100
 env=QT_QPA_PLATFORM,wayland;xcb
 env=ELECTRON_OZONE_PLATFORM_HINT,auto
 # env=GDK_SCALE,2
@@ -197,4 +218,3 @@ env=ELECTRON_OZONE_PLATFORM_HINT,auto
 # env=XKB_DEFAULT_OPTIONS,caps:escape
 
 
-source=./dms/outputs.conf
