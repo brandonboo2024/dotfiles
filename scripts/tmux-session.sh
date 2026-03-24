@@ -4,6 +4,7 @@ DIRS=(
 	"$HOME/Personal/001_Code/"
 	"$HOME/Personal/002_Books/"
 	"$HOME/Personal/003_School/"
+	"$HOME/Personal/005_Trading/"
 	"$HOME/nixos-dotfiles/"
 )
 
