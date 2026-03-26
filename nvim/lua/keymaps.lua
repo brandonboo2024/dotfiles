@@ -1,26 +1,26 @@
 local function pack_clean()
-	local active_plugins = {}
-	local unused_plugins = {}
+  local active_plugins = {}
+  local unused_plugins = {}
 
-	for _, plugin in ipairs(vim.pack.get()) do
-		active_plugins[plugin.spec.name] = plugin.active
-	end
+  for _, plugin in ipairs(vim.pack.get()) do
+    active_plugins[plugin.spec.name] = plugin.active
+  end
 
-	for _, plugin in ipairs(vim.pack.get()) do
-		if not active_plugins[plugin.spec.name] then
-			table.insert(unused_plugins, plugin.spec.name)
-		end
-	end
+  for _, plugin in ipairs(vim.pack.get()) do
+    if not active_plugins[plugin.spec.name] then
+      table.insert(unused_plugins, plugin.spec.name)
+    end
+  end
 
-	if #unused_plugins == 0 then
-		print("No unused plugins.")
-		return
-	end
+  if #unused_plugins == 0 then
+    print("No unused plugins.")
+    return
+  end
 
-	local choice = vim.fn.confirm("Remove unused plugins?", "&Yes\n&No", 2)
-	if choice == 1 then
-		vim.pack.del(unused_plugins)
-	end
+  local choice = vim.fn.confirm("Remove unused plugins?", "&Yes\n&No", 2)
+  if choice == 1 then
+    vim.pack.del(unused_plugins)
+  end
 end
 
 local builtin = require("telescope.builtin")
@@ -33,7 +33,7 @@ map({ "n", "t" }, "<leader>t", "<Cmd>tabnew<CR>")
 map({ "n", "t" }, "<leader>x", "<Cmd>tabclose<CR>")
 
 for i = 1, 8 do
-	map({ "n", "t" }, "<Leader>" .. i, "<Cmd>tabnext " .. i .. "<CR>")
+  map({ "n", "t" }, "<Leader>" .. i, "<Cmd>tabnext " .. i .. "<CR>")
 end
 map({ "n" }, "<leader>m", ":make<CR>", { desc = "Run vim.make" })
 map({ "n", "v", "x" }, "<leader>n", ":norm ", { desc = "ENTER NORM COMMAND." })
@@ -53,11 +53,11 @@ map({ "n" }, "<leader>si", builtin.grep_string, { desc = "search for string" })
 map({ "n" }, "<leader>sr", builtin.lsp_references, { desc = "LSP references" })
 map({ "n" }, "<leader>sd", builtin.diagnostics, { desc = "Diagnostics for entire workspace" })
 map({ "n" }, "<leader>sT", builtin.lsp_type_definitions, { desc = "Type Definitions" })
+map({ "n" }, "<leader>st", builtin.lsp_definitions, { desc = "LSP func Definitions" })
 map({ "n" }, "<leader>ss", builtin.current_buffer_fuzzy_find, { desc = "Search in current buffer" })
 map({ "n" }, "<leader>sc", builtin.git_bcommits, { desc = "Search git commits" })
 map({ "n" }, "<leader>sk", builtin.keymaps, { desc = "Telescope for keymaps" })
 map({ "n" }, "<leader>sm", builtin.man_pages, { desc = "Telescope for man_pages" })
-map({ "n" }, "<leader>sh", builtin.help_tags, { desc = "Telescope for help_tags" })
 map({ "n" }, "<leader>sh", builtin.help_tags, { desc = "Telescope for help_tags" })
 map({ "n" }, "<leader>se", "<cmd>Telescope env<cr>", { desc = "Search environment variables" })
 map({ "n" }, "<leader>sa", require("actions-preview").code_actions, { desc = "Code actions" })
@@ -76,7 +76,7 @@ map("n", "<S-Tab>", ":bprev<CR>")
 map("n", "<leader>x", ":bd<cr>")
 
 local function tmux_nav(cmd)
-	return ("<cmd>packadd vim-tmux-navigator | <C-U>%s<cr>"):format(cmd)
+  return ("<cmd>packadd vim-tmux-navigator | <C-U>%s<cr>"):format(cmd)
 end
 
 map("n", "<C-h>", tmux_nav("TmuxNavigateLeft"), { silent = true })
