@@ -70,6 +70,7 @@ map({ "n" }, "<C-q>", ":copen<CR>", { silent = true })
 map({ "n" }, "<leader>w", "<Cmd>update<CR>", { desc = "Write the current buffer." })
 map({ "n" }, "<leader>q", "<Cmd>:quit<CR>", { desc = "Quit the current buffer." })
 map({ "n" }, "<leader>Q", "<Cmd>:wqa<CR>", { desc = "Quit all buffers and write." })
+map({ "n" }, "<leader>u", require("undotree").open, { desc = "Open undotree plugin" })
 
 map("n", "<Tab>", ":bnext<CR>")
 map("n", "<S-Tab>", ":bprev<CR>")

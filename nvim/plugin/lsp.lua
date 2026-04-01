@@ -209,7 +209,7 @@ vim.lsp.config['tinymist'] = {
 }
 
 vim.lsp.enable({
-  "luals",
+  "lua_ls",
   "cssls",
   "ts_ls",
   "zls",
