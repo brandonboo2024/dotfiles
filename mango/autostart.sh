@@ -1,10 +1,7 @@
 #!/bin/sh
 
-# obs
-dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=wlroots >/dev/null 2>&1
-
-dms run --daemon
-
+# desktop-session-start >/dev/null 2>&1 &
+dms run -d
 
 # keep clipboard content
 wl-clip-persist --clipboard regular --reconnect-tries 0 >/dev/null 2>&1 &
