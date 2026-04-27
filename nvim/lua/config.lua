@@ -24,8 +24,6 @@ vim.pack.add({
   { src = "https://github.com/windwp/nvim-autopairs" },
   { src = "https://github.com/christoomey/vim-tmux-navigator" },
   -- colorscheme
-  { src = "https://github.com/oskarnurm/koda.nvim" },
-  -- require("koda").setup({ transparent = true })
   { src = "https://github.com/vague2k/vague.nvim" },
   -- typst preview
   { src = "https://github.com/chomosuke/typst-preview.nvim",           name = "typst-preview", version = vim.version.range("1.*") },
@@ -35,10 +33,11 @@ vim.cmd("packadd nvim.undotree")
 
 require("nvim-highlight-colors").setup {}
 require("bufferline").setup {}
-
 require("lualine").setup({
+  options = {
+    theme = 'vague',
+  }
 })
-
 require("nvim-autopairs").setup {}
 -- comment.nvim
 require("Comment").setup({
@@ -50,6 +49,7 @@ require("typst-preview").setup {
     ['websocat'] = "websocat",
   }
 }
+
 -- auto complete setup
 local blink_opts = {
   keymap = { preset = "default" },

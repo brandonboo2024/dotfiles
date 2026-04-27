@@ -28,8 +28,6 @@ vim.cmd([[hi @lsp.type.number gui=italic]])
 vim.opt.scrolloff = 999
 vim.o.sidescrolloff = 12
 
-require('vim._core.ui2').enable()
 
-vim.cmd("colorscheme koda")
--- vim.cmd("colorscheme vague")
+vim.cmd("colorscheme vague")
 vim.cmd(":hi statusline guibg=NONE")
