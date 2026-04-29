@@ -10,7 +10,13 @@ if [[ $url == *github.com* ]]; then
   url="${url/:/\/}"
   url="https://$url"
   fi
-  xdg-open "$url"
+elif [[ $url == *sr.ht* ]]; then
+  url="${url#git@}"
+  url="${url/:/\/}"
+  url="https://$url"
 else
-  echo "This is not a valid github repo"
+  echo "This is not a valid github/sourcehut repo"
+  exit 0
 fi
+
+xdg-open "$url"
