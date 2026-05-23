@@ -1,39 +1,103 @@
-;; (setq inhibit-startup-message t)
+;; ===UI modifications===
 
-;; disable different bars
+;; Window Graphics
+(setq inhibit-startup-message t)
 (scroll-bar-mode -1) 
-(tool-bar-mode 1)
+(tool-bar-mode -1)
 (tooltip-mode 1)
 (set-fringe-mode 10)
 (menu-bar-mode 1)
-
-;; ui preferences
 (column-number-mode 1)
 (global-display-line-numbers-mode 1)
 (blink-cursor-mode -1)
-
-;; set text
-(set-face-attribute 'default nil :font "Berkeley Mono" :height 140)
-
-;; theme
+(set-face-attribute 'default nil :font "Berkeley Mono" :height 145)
 (load-theme 'modus-vivendi)
 
-;; initialise package
-(require 'package)
+;; Buffer Settings
+(setq initial-major-mode 'org-mode
+      initial-scratch-message ""
+      initial-buffer-choice t)
 
-(setq package-archives '(("melpa", "https://melpa.org/packages/")
-			 ("org", "https://orgmode.org/elpa/")
-			 ("elpa", "https://elpa.gnu.org/packages/")))
+;; Line Settings
+(setq-default tab-width 4)
+(setq-default fill-column 80)
+(setq sentence-end-double-space nil)
 
-(package-initialize)
-(unless package-archive-contents
-  (package-refresh-contents))
+;; Sound
+(setq ring-bell-function 'ignore)
 
-;; use-package on non linux
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
+;; Symlink
+(setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
 
-(require 'use-package)
-(setq use-package-always-ensure t)
+;; ==============================================
 
 
+;; ======= Basic Utilities ======
+
+;; Sync clipboard with emacs kill ring
+(setq select-enable-clipboard t)
+
+;; Bootstrap code for straight.elp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+;; ======= Package Installation and Configuration
+
+;; Install packages
+(straight-use-package 'use-package)
+(straight-use-package 'vertico)
+(straight-use-package 'consult)
+(straight-use-package 'marginalia)
+(straight-use-package 'orderless)
+
+;; Whichkey
+(use-package which-key
+  :diminish which-key-mode ;; Hides minor mode from status bar
+  :init
+  (which-key-mode)
+  (which-key-setup-minibuffer)
+  :config
+  (setq which-key-prefix-prefix "◉ "))
+
+;; Minibuffer Utilities
+(use-package orderless ;; No more prefix-only matching
+  :config
+  (setq completion-styles '(orderless basic)))
+
+(use-package vertico ;; Displays minibuffers in a nicer window
+  :init
+  (vertico-mode))
+
+(use-package marginalia ;; Gives rich info on files selected in minibuffer
+  :init
+  (marginalia-mode))
+
+(use-package consult
+  :bind
+  ("C-x b" . consult-buffer)
+  ("C-s" . consult-line)
+  ("C-c r" . consult-ripgrep)
+  ("C-c f" . consult-find)
+  ("C-c e" . consult-bookmark)) ;; C-x r to see register info, bookmarks are stored in registers
+
+(use-package paren
+  :config
+  (setq show-paren-delay 0.1
+		show-paren-highlight-openparen t
+		show-paren-when-point-inside-paren t
+		show-paren-when-point-in-periphery t)
+  :init
+  (show-paren-mode 1))
