@@ -85,7 +85,7 @@
   :init
   (marginalia-mode))
 
-(use-package consult
+(use-package consult ;; Better commands for minibuffers
   :bind
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
@@ -93,7 +93,7 @@
   ("C-c f" . consult-find)
   ("C-c e" . consult-bookmark)) ;; C-x r to see register info, bookmarks are stored in registers
 
-(use-package paren
+(use-package paren ;; Supposed to help with paren highlights
   :config
   (setq show-paren-delay 0.1
 		show-paren-highlight-openparen t
@@ -101,3 +101,14 @@
 		show-paren-when-point-in-periphery t)
   :init
   (show-paren-mode 1))
+
+;; ====== Keybinds ======
+
+(defun match-paren(arg)
+  "Go to the matching paren if on a paren; otherwise insert %."
+  (interactive "p")
+  (cond ((looking-at "\\s(") (forward-list 1) (backward-char 1))
+		((looking-at "\\s)") (forward-char 1) (backward-list 1))
+		(t (self-insert-command (or arg 1)))))
+
+(global-set-key "%" 'match-paren)
