@@ -22,6 +22,7 @@
 (setq-default tab-width 4)
 (setq-default fill-column 80)
 (setq sentence-end-double-space nil)
+(setq-default indent-tabs-mode nil)
 
 ;; Sound
 (setq ring-bell-function 'ignore)
@@ -29,7 +30,7 @@
 ;; Symlink
 (setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
 
-;; ==============================================
+;; =============================================
 
 
 ;; ======= Basic Utilities ======
@@ -57,11 +58,16 @@
 ;; ======= Package Installation and Configuration
 
 ;; Install packages
+
+;; Core
 (straight-use-package 'use-package)
 (straight-use-package 'vertico)
 (straight-use-package 'consult)
 (straight-use-package 'marginalia)
 (straight-use-package 'orderless)
+
+;; Programming
+(straight-use-package 'nix-mode)
 
 ;; Whichkey
 (use-package which-key
@@ -112,3 +118,7 @@
 		(t (self-insert-command (or arg 1)))))
 
 (global-set-key "%" 'match-paren)
+
+;; ====== Modes ======
+(use-package nix-mode
+  :mode "\\.nix\\'")
