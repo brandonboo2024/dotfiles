@@ -30,6 +30,7 @@ vim.pack.add({
 })
 -- builtin nvim plugins
 vim.cmd("packadd nvim.undotree")
+require('vim._core.ui2').enable()
 
 require("nvim-highlight-colors").setup {}
 require("bufferline").setup {}
