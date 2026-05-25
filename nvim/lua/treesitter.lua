@@ -1,20 +1,21 @@
 local ensure_installed = {
-	"java",
-	"cpp",
-	"json",
-	"python",
-	"javascript",
-	"typescript",
-	"tsx",
-	"rust",
-	"zig",
-	"yaml",
-	"html",
-	"css",
-	"bash",
-	"dockerfile",
-	"gitignore",
-	"typst",
+  "nix",
+  "java",
+  "cpp",
+  "json",
+  "python",
+  "javascript",
+  "typescript",
+  "tsx",
+  "rust",
+  "zig",
+  "yaml",
+  "html",
+  "css",
+  "bash",
+  "dockerfile",
+  "gitignore",
+  "typst",
 }
 
 
@@ -24,9 +25,9 @@ local filetypes = vim.iter(ensure_installed):map(vim.treesitter.language.get_fil
 
 -- enable indentation and highlighting
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = filetypes,
-	callback = function(ev)
-		vim.treesitter.start(ev.buf)
-		require 'nvim-treesitter'.indentexpr()
-	end,
+  pattern = filetypes,
+  callback = function(ev)
+    vim.treesitter.start(ev.buf)
+    require 'nvim-treesitter'.indentexpr()
+  end,
 })
