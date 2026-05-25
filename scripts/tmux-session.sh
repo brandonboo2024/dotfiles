@@ -12,10 +12,11 @@ if [[ $# -eq 1 ]]; then
 	selected=$1
 else
 	selected=$(fd . "${DIRS[@]}" --type=dir --max-depth=1 --full-path --base-directory $HOME \
-		| sed "s|^$HOME/||" \
-		| sk --margin 10% --color="bw")
+    | sed "s#^$HOME/Personal/\|^$HOME/##" \
+    | sk --tmux center,80% )
+		# | sk --margin 10% --color="bw")
 
-	[[ $selected ]] && selected="$HOME/$selected"
+	[[ $selected ]] && selected="$HOME/Personal/$selected"
 fi
 
 [[ ! $selected ]] && exit 0
