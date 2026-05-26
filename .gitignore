@@ -4,4 +4,6 @@ mango/config.conf
 **/.#*
 straight/
 eln-cache/
-
+tramp
+eshell/
+elpa
