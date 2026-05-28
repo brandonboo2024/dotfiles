@@ -9,6 +9,7 @@
 (menu-bar-mode 1)
 (column-number-mode 1)
 (global-display-line-numbers-mode 1)
+(menu-bar--display-line-numbers-mode-relative)
 (blink-cursor-mode -1)
 (set-face-attribute 'default nil :font "Berkeley Mono" :height 145)
 (load-theme 'modus-vivendi)
@@ -23,15 +24,18 @@
 (setq-default fill-column 80)
 (setq sentence-end-double-space nil)
 (setq-default indent-tabs-mode nil)
+(setq-default tab-always-indent 'complete)
+(dolist (mode '(term-mode-hook
+                vterm-mode-hook
+                eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
 
 ;; Sound
 (setq ring-bell-function 'ignore)
 
 ;; Symlink
 (setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
-
-;; =============================================
-
 
 ;; ======= Basic Utilities ======
 
@@ -55,40 +59,30 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;; ======= Package Installation and Configuration
+(setq straight-use-package-by-default 1) ;; use-package integration by default
 
-;; Install packages
-
-;; Core
-(straight-use-package 'use-package)
-(straight-use-package 'vertico)
-(straight-use-package 'consult)
-(straight-use-package 'marginalia)
-(straight-use-package 'orderless)
-
-;; Programming
-(straight-use-package 'nix-mode)
+;; ======= Core =======
 
 ;; Whichkey
 (use-package which-key
   :diminish which-key-mode ;; Hides minor mode from status bar
-  :init
+  :custom
+  (which-key-prefix-prefix "◉ ")
+  (which-key-idle-delay 0.3))
+  :config
   (which-key-mode)
   (which-key-setup-minibuffer)
-  :config
-  (setq which-key-prefix-prefix "◉ "))
-
 ;; Minibuffer Utilities
 (use-package orderless ;; No more prefix-only matching
-  :config
-  (setq completion-styles '(orderless basic)))
+  :custom
+  (completion-styles '(orderless basic)))
 
 (use-package vertico ;; Displays minibuffers in a nicer window
-  :init
+  :config
   (vertico-mode))
 
 (use-package marginalia ;; Gives rich info on files selected in minibuffer
-  :init
+  :config
   (marginalia-mode))
 
 (use-package consult ;; Better commands for minibuffers
@@ -96,16 +90,16 @@
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
   ("C-c r" . consult-ripgrep)
-  ("C-c f" . consult-find)
+  ("C-x C-f" . consult-find)
   ("C-c e" . consult-bookmark)) ;; C-x r to see register info, bookmarks are stored in registers
 
 (use-package paren ;; Supposed to help with paren highlights
+  :custom
+  (show-paren-delay 0.1)
+  (show-paren-highlight-openparen t)
+  (show-paren-when-point-in-periphery t)
+  (show-paren-when-point-inside-paren t)
   :config
-  (setq show-paren-delay 0.1
-		show-paren-highlight-openparen t
-		show-paren-when-point-inside-paren t
-		show-paren-when-point-in-periphery t)
-  :init
   (show-paren-mode 1))
 
 ;; ====== Keybinds ======
@@ -119,6 +113,43 @@
 
 (global-set-key "%" 'match-paren)
 
-;; ====== Modes ======
+;; Programming Languages
 (use-package nix-mode
   :mode "\\.nix\\'")
+
+;; Terminal
+(use-package vterm)
+
+;; QOL
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is the base mode for all modes
+  
+(use-package helpful
+  :bind
+  ([remap describe-function] . helpful-callable)
+  ([remap describe-command] . helpful-command)
+  ([remap describe-variable] . helpful-variable)
+  ([remap describe-key] . helpful-key)
+  ([remap describe-symbol]. helpful-symbol))
+
+;; Autocomplete
+(use-package corfu
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 3)
+  (corfu-auto-delay 0.3)
+  (corfu-popupinfo-delay '(0.5 . 0.2))
+  :config
+  (corfu-popupinfo-mode +1)
+  (global-corfu-mode))
+
+(use-package cape
+  :defer 10 ;; Loads function lazily
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-file) 
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev))
+
+;; TODO:
+;; - org-mode -> eglot -> magit -> embark -> vterm -> eshell -> latex -> terminal-emacs

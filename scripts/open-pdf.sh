@@ -2,7 +2,7 @@
 
 
 select="$(
-  fd -a -e pdf -e epub . "$PWD" |
+  fd -a -I -e pdf -e epub . "$PWD" |
   sed "s|$HOME/||" |
   sk --tmux center,80%
   )" || exit 0
