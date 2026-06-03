@@ -68,10 +68,10 @@
   :diminish which-key-mode ;; Hides minor mode from status bar
   :custom
   (which-key-prefix-prefix "◉ ")
-  (which-key-idle-delay 0.3))
+  (which-key-idle-delay 0.3)
   :config
   (which-key-mode)
-  (which-key-setup-minibuffer)
+  (which-key-setup-minibuffer))
 ;; Minibuffer Utilities
 (use-package orderless ;; No more prefix-only matching
   :custom
@@ -151,5 +151,33 @@
   (add-to-list 'completion-at-point-functions #'cape-file) 
   (add-to-list 'completion-at-point-functions #'cape-dabbrev))
 
+;; ====== LSP (Eglot) ======
+
+(use-package eglot
+  :hook ((c-mode c++-mode rust-mode python-mode nix-mode) . eglot-ensure)
+  :bind (:map eglot-mode-map
+              ("C-c a" . eglot-code-actions)
+              ("C-c r" . eglot-rename)
+              ("C-c f" . eglot-format)
+              ("C-c d" . eldoc))
+  :custom
+  (eglot-autoshutdown t)
+  (eglot-confirm-server-initiated-edits nil))
+
+;; ====== Tree-sitter ======
+
+(use-package treesit
+  :straight nil
+  :custom
+  (treesit-font-lock-level 4)
+  :config
+  ;; Auto-enable treesitter major modes when grammar is available
+  (setq major-mode-remap-alist
+        '((c-mode . c-ts-mode)
+          (c++-mode . c-ts-mode)
+          (rust-mode . rust-ts-mode)
+          (python-mode . python-ts-mode)
+          (nix-mode . nix-ts-mode))))
+
 ;; TODO:
-;; - org-mode -> eglot -> magit -> embark -> vterm -> eshell -> latex -> terminal-emacs
+;; - org-mode -> magit -> embark -> eshell -> latex -> terminal-emacs
