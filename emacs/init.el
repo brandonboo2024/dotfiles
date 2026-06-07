@@ -40,6 +40,13 @@
 ;; ======= Basic Utilities ======
 
 ;; Sync clipboard with emacs kill ring
+(unless (display-graphic-p)
+  (setq interprogram-cut-function
+        (lambda (text)
+          (start-process "wl-copy" nil "wl-copy" text)))
+  (setq interprogram-paste-function
+        (lambda ()
+          (shell-command-to-string "wl-paste --no-newline"))))
 (setq select-enable-clipboard t)
 
 ;; Bootstrap code for straight.elp
@@ -61,7 +68,7 @@
 
 (setq straight-use-package-by-default 1) ;; use-package integration by default
 
-;; ======= Core =======
+;; ======= Copre =======
 
 ;; Whichkey
 (use-package which-key
@@ -86,11 +93,18 @@
   (marginalia-mode))
 
 (use-package consult ;; Better commands for minibuffers
+  :custom
+  (consult-fd-args "fd --no-ignore --full-path --color=never")
+  (consult-ripgrep-args
+   (concat "rg --null --line-buffered --color=never "
+           "--max-columns=1000 --path-separator / "
+           "--smart-case --no-heading --with-filename --line-number "
+           "--search-zip"))
   :bind
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
   ("C-c r" . consult-ripgrep)
-  ("C-x C-f" . consult-find)
+  ("C-x C-f" . consult-fd)
   ("C-c e" . consult-bookmark)) ;; C-x r to see register info, bookmarks are stored in registers
 
 (use-package paren ;; Supposed to help with paren highlights
@@ -108,8 +122,8 @@
   "Go to the matching paren if on a paren; otherwise insert %."
   (interactive "p")
   (cond ((looking-at "\\s(") (forward-list 1) (backward-char 1))
-		((looking-at "\\s)") (forward-char 1) (backward-list 1))
-		(t (self-insert-command (or arg 1)))))
+        ((looking-at "\\s)") (forward-char 1) (backward-list 1))
+        (t (self-insert-command (or arg 1)))))
 
 (global-set-key "%" 'match-paren)
 
@@ -118,13 +132,20 @@
   :mode "\\.nix\\'")
 
 ;; Terminal
-(use-package vterm)
-
+(use-package vterm
+  :config
+  (defun vterm-send-Ctrl-c ()
+    (interactive) (vterm-send-key "c" nil nil t))
+  (defun vterm-send-Ctrl-d ()
+    (interactive) (vterm-send-key "d" nil nil t))
+  :bind(:map vterm-mode-map
+             ("C-c ESC" . vterm-send-escape)
+             ("C-c C-c" . vterm-send-Ctrl-c)
+             ("C-c C-d" . vterm-send-Ctrl-d)))
 ;; QOL
-
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is the base mode for all modes
-  
+
 (use-package helpful
   :bind
   ([remap describe-function] . helpful-callable)
@@ -154,7 +175,12 @@
 ;; ====== LSP (Eglot) ======
 
 (use-package eglot
-  :hook ((c-mode c++-mode rust-mode python-mode nix-mode) . eglot-ensure)
+  :hook
+  ((c-ts-mode
+    c++-ts-mode
+    rust-ts-mode
+    python-ts-mode
+    nix-ts-mode) . eglot-ensure)
   :bind (:map eglot-mode-map
               ("C-c a" . eglot-code-actions)
               ("C-c r" . eglot-rename)
@@ -169,7 +195,7 @@
 (use-package treesit
   :straight nil
   :custom
-  (treesit-font-lock-level 4)
+  (treesit-font-lock-level 2)
   :config
   ;; Auto-enable treesitter major modes when grammar is available
   (setq major-mode-remap-alist
@@ -177,7 +203,10 @@
           (c++-mode . c-ts-mode)
           (rust-mode . rust-ts-mode)
           (python-mode . python-ts-mode)
-          (nix-mode . nix-ts-mode))))
+          (bash-mode . bash-ts-mode)
+          (json-mode . json-ts-mode)
+          (yaml-mode . yaml-ts-mode)
+          (dockerfile-mode . dockerfile-ts-mode))))
 
 ;; TODO:
-;; - org-mode -> magit -> embark -> eshell -> latex -> terminal-emacs
+;; - project.el/projectile.el -> org-mode -> magit -> embark -> eshell -> latex -> terminal-emacs

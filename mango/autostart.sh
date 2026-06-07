@@ -6,6 +6,8 @@ eval "$(gnome-keyring-daemon --start --components=secrets)"
 export SSH_AUTH_SOCK
 dbus-update-activation-environment --systemd SSH_AUTH_SOCK
 
+emacs --daemon
+
 # desktop-session-start >/dev/null 2>&1 &
 dms run -d
 
