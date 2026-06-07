@@ -68,7 +68,7 @@
 
 (setq straight-use-package-by-default 1) ;; use-package integration by default
 
-;; ======= Copre =======
+;; ======= Core =======
 
 ;; Whichkey
 (use-package which-key
