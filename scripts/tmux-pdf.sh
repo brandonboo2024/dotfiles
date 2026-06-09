@@ -1,0 +1,17 @@
+#!/bin/sh
+
+
+select="$(
+  fd -a -I -e pdf -e epub --strip-cwd-prefix . |
+  sk --tmux center,80%
+  )" || exit 0
+
+[ -n "$select" ] || exit 0
+
+filepath="$HOME/$select"
+
+# setsid -f env QT_QPA_PLATFORM=xcb sioyek "$file" >/tmp/sioyek.log 2>&1 </dev/null 
+setsid -f env sioyek-x11 "$filepath" >/tmp/sioyek.log 2>&1 </dev/null 
+
+# exec env QT_QPA_PLATFORM=xcb sioyek "$file"
+
