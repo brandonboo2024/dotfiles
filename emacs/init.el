@@ -1,53 +1,4 @@
-;; ===UI modifications===
-
-;; Window Graphics
-(setq inhibit-startup-message t)
-(scroll-bar-mode -1) 
-(tool-bar-mode -1)
-(tooltip-mode 1)
-(set-fringe-mode 10)
-(menu-bar-mode 1)
-(column-number-mode 1)
-(global-display-line-numbers-mode 1)
-(menu-bar--display-line-numbers-mode-relative)
-(blink-cursor-mode -1)
-(set-face-attribute 'default nil :font "Berkeley Mono" :height 145)
-(load-theme 'modus-vivendi)
-
-;; Buffer Settings
-(setq initial-major-mode 'org-mode
-      initial-scratch-message ""
-      initial-buffer-choice t)
-
-;; Line Settings
-(setq-default tab-width 4)
-(setq-default fill-column 80)
-(setq sentence-end-double-space nil)
-(setq-default indent-tabs-mode nil)
-(setq-default tab-always-indent 'complete)
-(dolist (mode '(term-mode-hook
-                vterm-mode-hook
-                eshell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-
-;; Sound
-(setq ring-bell-function 'ignore)
-
-;; Symlink
-(setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
-
-;; ======= Basic Utilities ======
-
-;; Sync clipboard with emacs kill ring
-(unless (display-graphic-p)
-  (setq interprogram-cut-function
-        (lambda (text)
-          (start-process "wl-copy" nil "wl-copy" text)))
-  (setq interprogram-paste-function
-        (lambda ()
-          (shell-command-to-string "wl-paste --no-newline"))))
-(setq select-enable-clipboard t)
+;; ===UI modifications===  -*- lexical-binding: t; -*-
 
 ;; Bootstrap code for straight.elp
 (defvar bootstrap-version)
@@ -68,7 +19,63 @@
 
 (setq straight-use-package-by-default 1) ;; use-package integration by default
 
+;; Window Graphics
+(setq inhibit-startup-message t)
+(scroll-bar-mode -1) 
+(tool-bar-mode -1)
+(tooltip-mode -1)
+(set-fringe-mode 10)
+(menu-bar-mode -1)
+(column-number-mode 1)
+(global-display-line-numbers-mode 1)
+(menu-bar--display-line-numbers-mode-relative)
+(blink-cursor-mode -1)
+(pixel-scroll-precision-mode 1)
+(set-face-attribute 'default nil :font "Berkeley Mono" :height 150)
+(load-theme 'modus-vivendi-tinted)
+
+;; Buffer Settings
+(setq initial-major-mode 'org-mode
+      initial-scratch-message ""
+      initial-buffer-choice t)
+
+;; Line Settings
+(setq-default tab-width 4)
+(setq-default fill-column 80)
+(setq sentence-end-double-space nil)
+(setq-default indent-tabs-mode nil)
+(setq-default tab-always-indent 'complete)
+(dolist (mode '(term-mode-hook
+                vterm-mode-hook
+                eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+(setq scroll-margin 20)
+(setq scroll-conservatively 101)
+(setq scroll-preserve-screen-position t)
+
+;; Sound
+(setq ring-bell-function 'ignore)
+
+;; Symlink
+(setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
+
+;; ======= Basic Utilities ======
+
+;; Sync clipboard with emacs kill ring
+(unless (display-graphic-p)
+  (setq interprogram-cut-function
+        (lambda (text)
+          (start-process "wl-copy" nil "wl-copy" text)))
+  (setq interprogram-paste-function
+        (lambda ()
+          (shell-command-to-string "wl-paste --no-newline"))))
+(setq select-enable-clipboard t)
+
 ;; ======= Core =======
+(use-package kkp
+  :if (not (display-graphic-p))
+  :config
+  (global-kkp-mode +1))
 
 ;; Whichkey
 (use-package which-key
@@ -79,6 +86,7 @@
   :config
   (which-key-mode)
   (which-key-setup-minibuffer))
+
 ;; Minibuffer Utilities
 (use-package orderless ;; No more prefix-only matching
   :custom
@@ -94,7 +102,7 @@
 
 (use-package consult ;; Better commands for minibuffers
   :custom
-  (consult-fd-args "fd --no-ignore --full-path --color=never")
+  (consult-fd-args '("fd" "--no-ignore" "--full-path" "--color=never"))
   (consult-ripgrep-args
    (concat "rg --null --line-buffered --color=never "
            "--max-columns=1000 --path-separator / "
@@ -104,8 +112,13 @@
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
   ("C-c r" . consult-ripgrep)
-  ("C-x C-f" . consult-fd)
+  ("C-c f" . consult-fd)
   ("C-c e" . consult-bookmark)) ;; C-x r to see register info, bookmarks are stored in registers
+
+(use-package dired-subtree
+  :after dired
+  :bind (:map dired-mode-map
+              ("<backtab>" . dired-subtree-cycle)))
 
 (use-package paren ;; Supposed to help with paren highlights
   :custom
@@ -154,6 +167,37 @@
   ([remap describe-key] . helpful-key)
   ([remap describe-symbol]. helpful-symbol))
 
+(use-package nerd-icons
+  :custom
+  (nerd-icons-scale-factor 1.0)
+  (nerd-icons-default-adjust 0.0)
+  :config
+  (setq nerd-icons-font-family "Symbols Nerd Font Mono"))
+
+(use-package nerd-icons-completion
+  :after marginalia
+  :config
+  (nerd-icons-completion-marginalia-setup))
+
+
+(use-package nerd-icons-dired
+  :custom
+  (nerd-icons-dired-lazy t)
+  (nerd-icons-cache-icons t)
+  :hook (dired-mode . nerd-icons-dired-mode))
+
+(use-package nerd-icons-ibuffer
+  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+
+(use-package ibuffer
+  :ensure nil
+  :bind
+  ([remap list-buffers] . ibuffer))
+
+(use-package nerd-icons-corfu
+  :after corfu
+  :config (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
 ;; Autocomplete
 (use-package corfu
   :custom
@@ -180,7 +224,7 @@
     c++-ts-mode
     rust-ts-mode
     python-ts-mode
-    nix-ts-mode) . eglot-ensure)
+    nix-mode) . eglot-ensure)
   :bind (:map eglot-mode-map
               ("C-c a" . eglot-code-actions)
               ("C-c r" . eglot-rename)
@@ -207,6 +251,30 @@
           (json-mode . json-ts-mode)
           (yaml-mode . yaml-ts-mode)
           (dockerfile-mode . dockerfile-ts-mode))))
+
+(use-package embark
+  :bind
+  (("C-." . embark-act)
+   ("C-;" . embark-dwim)
+   ("C-h B" . embark-bindings))
+  :custom
+  (prefix-help-command #'embark-prefix-help-command)
+  (embark-indicator-bars nil))
+
+(use-package embark-consult
+  :after  (embark consult))
+
+(use-package magit
+  :bind
+  ("C-x g" . magit-status)
+  :custom
+  (magit-display-buffer-function
+   #'magit-display-buffer-same-window-except-diff-v1))
+
+(use-package org
+  :straight nil
+  :custom
+  (org-directory "~/org"))
 
 ;; TODO:
 ;; - project.el/projectile.el -> org-mode -> magit -> embark -> eshell -> latex -> terminal-emacs
