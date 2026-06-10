@@ -268,10 +268,7 @@
    ("C-;" . embark-dwim)
    ("C-h B" . embark-bindings))
   :custom
-  (prefix-help-command #'embark-prefix-help-command)
-  (embark-indicators '(embark-minimal-indicator
-                       embark-highlight-indicator
-                       embark-isearch-highlight-indicator)))
+  (prefix-help-command #'embark-prefix-help-command))
 
 (use-package embark-consult
   :after  (embark consult)
