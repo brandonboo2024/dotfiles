@@ -1,7 +1,7 @@
 #!/bin/sh
 
 select="$(
-    fd -a -I -e pdf -e epub --full-path . '/home/Prometheus/Personal/002_Books/' |
+    fd -a -I -e pdf -e epub --full-path . $HOME'/Personal/002_Books/' |
     sed "s|^${HOME}/Personal/002_Books/||" |
     bemenu -i \
     -l '10 down' \
