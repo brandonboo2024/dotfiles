@@ -181,10 +181,6 @@
   :config
   (nerd-icons-completion-marginalia-setup))
 
-<<<<<<< HEAD
-
-=======
->>>>>>> main
 (use-package nerd-icons-dired
   :custom
   (nerd-icons-dired-lazy t)
@@ -263,33 +259,21 @@
    ("C-;" . embark-dwim)
    ("C-h B" . embark-bindings))
   :custom
-<<<<<<< HEAD
-  (prefix-help-command #'embark-prefix-help-command)
-  (embark-indicator-bars nil))
-
-(use-package embark-consult
-  :after  (embark consult))
-=======
   (prefix-help-command #'embark-prefix-help-command))
 
 (use-package embark-consult
   :after  (embark consult)
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
->>>>>>> main
 
 (use-package magit
   :bind
   ("C-x g" . magit-status)
   :custom
   (magit-display-buffer-function
-<<<<<<< HEAD
-   #'magit-display-buffer-same-window-except-diff-v1))
-=======
    #'magit-display-buffer-same-window-except-diff-v1)
   :hook
   (git-commit-setup . git-commit-turn-on-flyspell))
->>>>>>> main
 
 (use-package org
   :straight nil
@@ -306,17 +290,3 @@
 
 ;; TODO:
 ;; org-mode -> pdf integration -> latex -> terminal-emacs
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("871b064b53235facde040f6bdfa28d03d9f4b966d8ce28fb1725313731a2bcc8"
-     "7b8f5bbdc7c316ee62f271acf6bcd0e0b8a272fdffe908f8c920b0ba34871d98" default)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
