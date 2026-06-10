@@ -8,3 +8,5 @@ tramp
 eshell/
 elpa
 projects
+var/
+etc/
