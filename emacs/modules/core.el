@@ -45,7 +45,6 @@
 
 (use-package consult
   :custom
-  (consult-fd-args '("fd" "--no-ignore" "--full-path" "--color=never"))
   (consult-ripgrep-args
    (concat "rg --null --line-buffered --color=never "
            "--max-columns=1000 --path-separator / "
@@ -55,8 +54,10 @@
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
   ("C-c r" . consult-ripgrep)
-  ("C-c f" . consult-fd)
-  ("C-c e" . consult-bookmark)) ;; C-x r to see register info, bookmarks are stored in registers
+  ("C-c f" . my/global-fd)
+  ("C-c e" . consult-bookmark)
+  ("C-c p b" . consult-project-buffer)
+  ("C-c p f" . consult-fd)) ;; C-x r to see register info, bookmarks are stored in registers
 
 (use-package embark
   :bind

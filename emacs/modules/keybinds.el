@@ -20,7 +20,13 @@
   (if unsaved
       (message "Unsaved %s"
                (mapconcat #'buffer-name unsaved ", "))
-  (message "No unsaved file buffers."))))
+    (message "No unsaved file buffers."))))
+
+(defun my/global-fd ()
+  "Find ALL files, including ignored ones"
+  (interactive)
+  (let ((consult-fd-args '("fd" "--no-ignore" "--full-path" "--color=never")))
+    (call-interactively #'consult-fd)))
 
 (global-set-key (kbd "C-c u") #'my/list-unsaved-buffers)
 (global-set-key "%" 'match-paren)

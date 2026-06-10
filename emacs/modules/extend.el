@@ -22,4 +22,10 @@
   :config
   (pdf-loader-install))
 
+(use-package no-littering
+  ;; Available via straight/elpa. Straight will install it.
+  :custom
+  (no-littering-etc-directory (expand-file-name "etc/" user-emacs-directory))
+  (no-littering-var-directory (expand-file-name "var/" user-emacs-directory)))
+
 (provide 'extend)
