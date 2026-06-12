@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
+(defvar consult-fd-args)
+
 (defun match-paren(arg)
   "Go to the matching paren if on a paren; otherwise insert %."
   (interactive "p")

@@ -38,6 +38,15 @@
 (setq initial-major-mode 'org-mode
       initial-scratch-message ""
       initial-buffer-choice t)
+(auto-save-visited-mode 1)
+(setq auto-save-visited-interval 60)
+(use-package savehist
+  :straight nil
+  :hook (after-init . savehist-mode))
+
+(use-package recentf
+  :straight nil
+  :hook (after-init . recentf-mode))
 
 ;; Line Settings
 (setq-default tab-width 4)
@@ -75,13 +84,11 @@
   (global-kkp-mode +1))
 
 (add-to-list 'load-path (expand-file-name "modules" user-emacs-directory))
+(require 'keybinds)
 (require 'core)
 (require 'qol)
 (require 'extend)
 (require 'dev)
-(require 'keybinds)
-
-(use-package gruvbox-theme)
 
 ;; TODO:
 ;; org-mode -> pdf integration -> latex -> terminal-emacs

@@ -28,4 +28,13 @@
   (no-littering-etc-directory (expand-file-name "etc/" user-emacs-directory))
   (no-littering-var-directory (expand-file-name "var/" user-emacs-directory)))
 
+(use-package eat
+  :custom
+  (eat-term-name "xterm-256color"))
+
+(use-package golden-ratio
+  :diminish golden-ratio-mode
+  :hook (after-init . golden-ratio-mode))
+
+
 (provide 'extend)

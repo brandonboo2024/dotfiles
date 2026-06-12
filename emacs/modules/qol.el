@@ -6,9 +6,6 @@
 ;; Theme remains in init.el
 
 (use-package nerd-icons
-  :custom
-  (nerd-icons-scale-factor 1.0)
-  (nerd-icons-default-adjust 0.0)
   :config
   (setq nerd-icons-font-family "Symbols Nerd Font Mono"))
 
