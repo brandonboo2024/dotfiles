@@ -21,6 +21,7 @@
 
 ;; Window Graphics
 (setq inhibit-startup-message t)
+(setq use-dialog-box nil)
 (scroll-bar-mode -1) 
 (tool-bar-mode -1)
 (tooltip-mode -1)
@@ -32,13 +33,15 @@
 (blink-cursor-mode -1)
 (pixel-scroll-precision-mode 1)
 (set-face-attribute 'default nil :font "Berkeley Mono" :height 150)
-(load-theme 'modus-vivendi-tinted)
+(load-theme 'leuven)
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode
       initial-scratch-message ""
       initial-buffer-choice t)
 (auto-save-visited-mode 1)
+(global-auto-revert-mode 1)
+(setq global-auto-revert-non-file-buffers t)
 (setq auto-save-visited-interval 60)
 (use-package savehist
   :straight nil
@@ -56,7 +59,8 @@
 (setq-default tab-always-indent 'complete)
 (dolist (mode '(term-mode-hook
                 vterm-mode-hook
-                eshell-mode-hook))
+                eshell-mode-hook
+                eat-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 (setq scroll-margin 20)
 (setq scroll-conservatively 101)
@@ -69,13 +73,13 @@
 (setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
 
 ;; Sync clipboard with emacs kill ring
-(unless (display-graphic-p)
-  (setq interprogram-cut-function
-        (lambda (text)
-          (start-process "wl-copy" nil "wl-copy" text)))
-  (setq interprogram-paste-function
-        (lambda ()
-          (shell-command-to-string "wl-paste --no-newline"))))
+(setq interprogram-cut-function
+      (lambda (text)
+        (start-process "wl-copy" nil "wl-copy" text)))
+(setq interprogram-paste-function
+      (lambda ()
+        (shell-command-to-string "wl-paste --no-newline")))
+(setq select-enable-primary t)          
 (setq select-enable-clipboard t)
 
 (use-package kkp
@@ -88,6 +92,7 @@
 (require 'core)
 (require 'qol)
 (require 'extend)
+(require 'notes)
 (require 'dev)
 
 ;; TODO:

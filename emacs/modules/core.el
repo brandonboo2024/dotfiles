@@ -68,9 +68,7 @@
   (prefix-help-command #'embark-prefix-help-command))
 
 (use-package embark-consult
-  :after  (embark consult)
-  :hook
-  (embark-collect-mode . consult-preview-at-point-mode))
+  :after  (embark consult))
 
 (use-package orderless ;; No more prefix-only matching
   :custom
@@ -87,10 +85,5 @@
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key)
   ([remap describe-symbol]. helpful-symbol))
-
-(use-package org
-  :straight nil
-  :custom
-  (org-directory "~/org"))
 
 (provide 'core)
