@@ -67,7 +67,7 @@
         :if-new
         (file+head
          "${slug}.org"
-         "#+title: ${title}\n#+filetags: :\n\n")
+         "#+title: ${title}\n#+filetags: \n\n") 
         :unnarrowed t)
 
        ("l" "literate note" plain
@@ -87,7 +87,7 @@
         (file+head
          "%<%d-%m-%Y>.org"
          "#+title: %<%d-%m-%Y>\n#+filetags: :daily:\n\n"))))
-    
+  :config
   (org-roam-db-autosync-mode)
   :bind
   (("C-c o f" . org-roam-node-find)

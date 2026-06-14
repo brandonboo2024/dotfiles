@@ -1,22 +1,21 @@
 #!/bin/sh
 
 DIRS=(
-	"$HOME/Personal/001_Code/"
-	"$HOME/Personal/002_Books/"
-	"$HOME/Personal/003_School/"
-	"$HOME/Personal/005_Trading/"
-	"$HOME/nixos-dotfiles/"
+	"$HOME/100_projects/"
+	"$HOME/101_school/"
+	"$HOME/nixos/"
+    "$HOME/nixos/config/"
 )
 
 if [[ $# -eq 1 ]]; then
 	selected=$1
 else
 	selected=$(fd . "${DIRS[@]}" --type=dir --max-depth=1 --full-path --base-directory $HOME \
-    | sed "s#^$HOME/Personal/\|^$HOME/##" \
+    | sed "s#^$HOME/\|^$HOME/##" \
     | sk --tmux center,80% )
 		# | sk --margin 10% --color="bw")
 
-	[[ $selected ]] && selected="$HOME/Personal/$selected"
+	[[ $selected ]] && selected="$HOME/$selected"
 fi
 
 [[ ! $selected ]] && exit 0

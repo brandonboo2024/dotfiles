@@ -1,8 +1,8 @@
 #!/bin/sh
 
 select="$(
-    fd -a -I -e pdf -e epub --full-path . $HOME'/Personal/002_Books/' |
-    sed "s|^${HOME}/Personal/002_Books/||" |
+    fd -a -I -e pdf -e epub --full-path . $HOME'/200_reading/' |
+    sed "s|^${HOME}/200_reading/||" |
     bemenu -i \
     -l '10 down' \
     -p 'Open' \
@@ -15,6 +15,6 @@ select="$(
 
 [ -n "$select" ] || exit 0
 
-filepath="$HOME/Personal/002_Books/$select"
+filepath="$HOME/200_reading/$select"
 
 setsid -f env sioyek-x11 "$filepath" >/tmp/sioyek.log 2>&1 </dev/null 
