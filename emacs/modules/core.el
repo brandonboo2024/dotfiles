@@ -54,6 +54,7 @@
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
   ("C-c r" . consult-ripgrep)
+  ("C-c p r" . consult-ripgrep)
   ("C-c f" . my/global-fd)
   ("C-c e" . consult-bookmark)
   ("C-c p b" . consult-project-buffer)

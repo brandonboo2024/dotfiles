@@ -33,7 +33,10 @@
 (blink-cursor-mode -1)
 (pixel-scroll-precision-mode 1)
 (set-face-attribute 'default nil :font "Berkeley Mono" :height 150)
-(load-theme 'leuven)
+(setq custom-safe-themes t)
+(use-package doric-themes
+  :config
+  (load-theme 'doric-beach))
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode
@@ -41,6 +44,7 @@
       initial-buffer-choice t)
 (auto-save-visited-mode 1)
 (global-auto-revert-mode 1)
+(repeat-mode 1)
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-save-visited-interval 60)
 (use-package savehist
@@ -97,3 +101,15 @@
 
 ;; TODO:
 ;; org-mode -> pdf integration -> latex -> terminal-emacs
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(eglot-confirm-server-edits nil nil nil "Customized with use-package eglot"))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

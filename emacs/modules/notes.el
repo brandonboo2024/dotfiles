@@ -13,6 +13,7 @@
   (org-startup-indented t)
   (org-startup-folded 'content)
   (org-src-content-indentation 0)
+  (org-log-into-drawer t)
   (org-preview-latex-default-process 'dvisvgm)
   (org-agenda-files
    (list (my/org-file "inbox.org")
@@ -29,7 +30,8 @@
    '(("dsa")
      ("computer-networks")
      ("c++")
-     ("zig")))
+     ("zig")
+     ("FOSS")))
   
   :config
   (plist-put org-format-latex-options :scale 1.5)
