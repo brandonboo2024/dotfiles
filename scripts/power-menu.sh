@@ -8,7 +8,7 @@ echo $choice
 
 case "$choice" in
     Lock)
-        swaylock
+        ~/nixos/config/scripts/swaylock.sh
         ;;
     Shutdown)
         systemctl poweroff
