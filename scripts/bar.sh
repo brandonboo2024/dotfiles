@@ -136,6 +136,24 @@ bluetooth_module() {
     fi
 }
 
+# ─── Battery Module ──────────────────────────────────
+battery_module() {
+    for bat in /sys/class/power_supply/BAT*; do
+        [ -r "$bat/capacity" ] || continue
+        cap=$(cat "$bat/capacity")
+        status=$(cat "$bat/status" 2>/dev/null)
+        case "$status" in
+            Charging*)    icon="+" ;;
+            Discharging*) icon="-" ;;
+            Full | Not\ charging)  icon="=" ;;
+            *)            icon="?" ;;
+        esac
+        printf '%s%s%%' "$icon" "$cap"
+        return
+    done
+    printf 'N/A'
+}
+
 # ─── Main Loop ──────────────────────────────────────
 while true; do
     cpu=$(cpu_module)
@@ -145,9 +163,10 @@ while true; do
     datetime=$(datetime_module)
     wifi=$(wifi_module)
     bt=$(bluetooth_module)
+    bat=$(battery_module)
 
-    printf 'CPU: %s | RAM: %s | VOL: %s | WiFi: %s | BT: %s | %s\n' \
-        "$cpu" "$ram" "$sound" "$wifi" "$bt" "$datetime"
+    printf 'CPU: %s | RAM: %s | BAT: %s | VOL: %s | WiFi: %s | BT: %s | %s\n' \
+        "$cpu" "$ram" "$bat" "$sound" "$wifi" "$bt" "$datetime"
 
     sleep 2
 done
