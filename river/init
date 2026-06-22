@@ -38,6 +38,7 @@ riverctl map normal None F10 spawn ~/nixos/config/scripts/power-menu.sh
 riverctl map normal None F12 spawn ~/nixos/config/scripts/screenshot.sh
 riverctl map normal Super+Shift S spawn ~/nixos/config/scripts/snapshot.sh
 riverctl map normal Super V spawn cliphist-fuzzel-img
+riverctl map normal Super Escape spawn networkmanager_dmenu
 
 # Super+J and Super+K to focus the next/previous view in the layout stack
 riverctl map normal Super J focus-view next
@@ -184,7 +185,8 @@ riverctl rule-add ssd
 
 # Auto start
 riverctl spawn "foot --server"
-riverctl spawn "( while date; do sleep 1; done ) | creek -fn 'Berkeley Mono':size=30 -hg 40"
+riverctl spawn "emacs --daemon"
+riverctl spawn "~/nixos/config/scripts/bar.sh | creek -fn 'Berkeley Mono':size=30 -hg 48"
 riverctl spawn "swaybg -i ~/nixos/walls/vague.png &"
 riverctl spawn "wl-paste --type text --watch cliphist store"
 riverctl spawn "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river"
