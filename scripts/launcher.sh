@@ -4,7 +4,7 @@
 cmd="bemenu -i \
   -l '10 down' \
   -p 'Run' \
-  -c -W 0.25 \
+  -c -W 0.5 \
   --fixed-height \
   --fn 'Berkeley Mono 14' \
   --tf '#778e8bff' \

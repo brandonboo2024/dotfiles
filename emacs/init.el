@@ -20,6 +20,7 @@
 (setq straight-use-package-by-default 1) ;; use-package integration by default
 
 ;; Window Graphics
+(setq default-frame-alist '((undecorated . t)))
 (setq inhibit-startup-message t)
 (setq use-dialog-box nil)
 (scroll-bar-mode -1) 
@@ -32,7 +33,7 @@
 (menu-bar--display-line-numbers-mode-relative)
 (blink-cursor-mode -1)
 (pixel-scroll-precision-mode 1)
-(set-face-attribute 'default nil :font "Berkeley Mono" :height 150)
+(set-face-attribute 'default nil :font "Berkeley Mono" :height 230)
 (setq custom-safe-themes t)
 (use-package doric-themes
   :config
@@ -106,7 +107,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(eglot-confirm-server-edits nil nil nil "Customized with use-package eglot"))
+ '(eglot-confirm-server-edits nil nil nil "Customized with use-package eglot")
+ '(send-mail-function 'mailclient-send-it))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

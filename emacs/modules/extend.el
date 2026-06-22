@@ -36,13 +36,46 @@
   :commands (notmuch-hello)
   :custom
   (notmuch-database-path "~/mail")
-  (notmuch-poll-script "notmuch new")
   (sendmail-program "msmtp")
   :config
   (setq user-full-name "Brandon Boo")
   (setq user-mail-address "jwboo@posteo.com")
   (setq message-sendmail-extra-arguments '("-a" "posteo"))
-  (setq message-send-mail-function 'message-send-mail-with-sendmail))
+  (setq message-send-mail-function 'message-send-mail-with-sendmail)
+  (setq notmuch-saved-searches
+        '((:name "inbox"  :query "tag:inbox"  :key "i")
+          (:name "unread" :query "tag:unread" :key "u")
+          (:name "emacs"  :query "tag:emacs"  :key "e")
+          (:name "linux"  :query "tag:linux"  :key "l")
+          (:name "nix"    :query "tag:nix"    :key "n")
+          (:name "sent"   :query "tag:sent"   :key "s")))
+  :bind
+  ("C-c e g" . notmuch)
+  ("C-c e c" . notmuch-mua-mail))
 
+(use-package elfeed
+  :config
+  (setq elfeed-feeds
+    '(;; zig
+      ("https://ziglang.org/news/index.xml"    zig)
+      ("https://ziglang.org/devlog/index.xml"  zig dev)
+
+      ;; c / c++
+      ("https://isocpp.org/blog/rss/rss.xml"   cpp)
+      ("https://herbsutter.com/feed/"           cpp)
+
+      ;; systems / low-level — these are essential for you
+      ("https://nullprogram.com/feed/"          systems c emacs)
+      ("https://drewdevault.com/blog/index.xml" systems)
+
+      ;; linux
+      ("https://lwn.net/headlines/rss"          linux)
+
+      ;; emacs
+      ("https://planet.emacslife.com/atom.xml"  emacs)))
+
+  (setq elfeed-search-filter "@2-weeks-ago +unread")
+  :bind
+  ("C-c e f" . elfeed))
 
 (provide 'extend)

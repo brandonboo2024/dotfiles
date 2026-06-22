@@ -56,7 +56,6 @@
   ("C-c r" . consult-ripgrep)
   ("C-c p r" . consult-ripgrep)
   ("C-c f" . my/global-fd)
-  ("C-c e" . consult-bookmark)
   ("C-c p b" . consult-project-buffer)
   ("C-c p f" . consult-fd)) ;; C-x r to see register info, bookmarks are stored in registers
 

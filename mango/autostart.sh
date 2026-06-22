@@ -1,8 +1,4 @@
 #!/bin/sh
-
-pkill -f gnome-keyring 2>/dev/null || true
-
-eval "$(gnome-keyring-daemon --start --components=secrets)"
 export SSH_AUTH_SOCK
 dbus-update-activation-environment --systemd SSH_AUTH_SOCK
 

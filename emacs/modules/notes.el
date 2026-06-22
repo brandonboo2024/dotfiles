@@ -42,7 +42,8 @@
    '((emacs-lisp . t)
      (python . t)
      (C . t)
-     (shell . t)))
+     (shell . t)
+     (scheme . t)))
   
   (setq org-capture-templates `(("i" "Inbox"
                                  entry

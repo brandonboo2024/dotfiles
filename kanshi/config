@@ -1,0 +1,7 @@
+profile solo {
+        output eDP-1 {
+               mode 3200x2000@165
+               position 0,0
+               scale 1
+        }
+}
