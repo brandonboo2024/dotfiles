@@ -32,6 +32,7 @@
      ("c++")
      ("zig")
      ("FOSS")))
+  (org-babel-C-compiler "clang")
   
   :config
   (plist-put org-format-latex-options :scale 1.5)

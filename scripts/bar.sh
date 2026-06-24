@@ -98,7 +98,7 @@ brightness_module() {
 
 # ─── Date/Time Module ───────────────────────────────
 datetime_module() {
-    date '+%a %b %d %H:%M:%S'
+    date '+%a %b %d %H:%M'
 }
 
 # ─── WiFi Module ────────────────────────────────────
@@ -106,13 +106,10 @@ wifi_module() {
     if command -v nmcli >/dev/null 2>&1; then
         wifi=$(nmcli -t -f active,ssid dev wifi 2>/dev/null | grep '^yes' | cut -d':' -f2)
         [ -z "$wifi" ] && wifi="disconnected"
-    elif command -v iw >/dev/null 2>&1; then
-        wifi=$(iw dev 2>/dev/null | awk '/ssid/ {print $2}')
-        [ -z "$wifi" ] && wifi="disconnected"
     else
         wifi="N/A"
     fi
-    printf '%s' "$wifi"
+    printf '%s' "on" # Or use $wifi if you want the name
 }
 
 # ─── Bluetooth Module ───────────────────────────────
@@ -165,7 +162,7 @@ while true; do
     bt=$(bluetooth_module)
     bat=$(battery_module)
 
-    printf 'CPU: %s | RAM: %s | BAT: %s | VOL: %s | WiFi: %s | BT: %s | %s\n' \
+    printf 'CPU:%s | RAM:%s | BAT:%s | VOL:%s | WiFi:%s | BT:%s | %s\n' \
         "$cpu" "$ram" "$bat" "$sound" "$wifi" "$bt" "$datetime"
 
     sleep 2
