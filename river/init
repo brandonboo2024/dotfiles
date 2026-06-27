@@ -53,8 +53,8 @@ riverctl map normal Super H send-layout-cmd rivertile "main-ratio -0.05"
 riverctl map normal Super L send-layout-cmd rivertile "main-ratio +0.05"
 
 # Super+Shift+H and Super+Shift+L to increment/decrement the main count of rivertile(1)
-riverctl map normal Super+Shift H send-layout-cmd rivertile "main-count +1"
-riverctl map normal Super+Shift L send-layout-cmd rivertile "main-count -1"
+riverctl map normal Super I send-layout-cmd rivertile "main-count +1"
+riverctl map normal Super+Shift I send-layout-cmd rivertile "main-count -1"
 
 # Super+Alt+{H,J,K,L} to move views
 riverctl map normal Super+Alt H move left 100
@@ -166,7 +166,7 @@ riverctl rule-add -app-id 'float*' -title 'foo' float
 # Make all views with app-id "bar" and any title use client-side decorations
 riverctl rule-add -app-id "bar" csd
 riverctl rule-add -app-id "firefox" tags $((1 << 1))
-riverctl rule-add -app-id "emacs" tags $((1))
+riverctl rule-add -app-id "emacsclient" tags $((1))
 
 # Consistent decorations
 riverctl rule-add ssd
@@ -177,8 +177,8 @@ riverctl spawn "emacs --daemon"
 riverctl spawn "swayidle -w"
 riverctl spawn "mako"
 riverctl spawn "~/nixos/config/scripts/bar.sh | creek -fn 'Berkeley Mono':size=30 -hg 48"
-riverctl spawn "swaybg -i ~/nixos/walls/vague.png"
-riverctl spawn "wl-paste --type text --watch cliphist store"
+riverctl spawn "swaybg -i ~/nixos/walls/town.png"
+riverctl spawn "wl-paste --watch cliphist store"
 riverctl spawn "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river XDG_SESSION_TYPE=wayland"
 
 # Set the default layout generator to be rivertile and start it.

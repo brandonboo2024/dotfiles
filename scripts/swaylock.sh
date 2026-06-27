@@ -1,1 +1,1 @@
-swaylock -s fill -i ~/nixos/walls/vague.png
+swaylock -s fill -i ~/nixos/walls/town.png
