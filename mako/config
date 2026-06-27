@@ -1,0 +1,5 @@
+actions=true
+font=monospace 30
+height=250
+width=650
+default-timeout=5000

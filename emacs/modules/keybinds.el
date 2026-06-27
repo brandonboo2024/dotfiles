@@ -30,6 +30,22 @@
   (let ((consult-fd-args '("fd" "--no-ignore" "--full-path" "--color=never")))
     (call-interactively #'consult-fd)))
 
+(defun simple-scroll-down ()
+  "Move half a screen below."
+  (interactive)
+  (forward-line (floor (window-height) 2))
+  (setq this-command 'scroll-up-command))
+
+(defun simple-scroll-up ()
+  "Move half a screen above."
+  (interactive)
+  (forward-line (- (floor (window-height) 2)))
+  (setq this-command 'scroll-down-command))
+
+
+(global-set-key (kbd "C-v") #'simple-scroll-down)
+(global-set-key (kbd "M-v") #'simple-scroll-up)
+
 (global-set-key (kbd "C-c u") #'my/list-unsaved-buffers)
 (global-set-key "%" 'match-paren)
 

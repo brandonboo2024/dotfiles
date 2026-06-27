@@ -3,5 +3,27 @@ profile solo {
                mode 3200x2000@165
                position 0,0
                scale 1
-        }
+}
+}
+
+profile desktop_duo {
+        output HDMI-A-2{
+               mode 1920x1080@180
+               position 2560,0
+               scale 1
+               }
+
+        output DP-5 {
+               mode 2560x1440@165
+               position 0,0
+               scale 1
+               }
+}
+
+profile desktop_single {
+        output HDMI-A-2{
+               mode 1920x1080@180
+               position 2560,0
+               scale 1
+               }
 }

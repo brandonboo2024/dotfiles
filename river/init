@@ -2,7 +2,6 @@
 
 # A useful link for reference is:
 # https://mylinux.work/guides/river-compositor-setup/
-# Core QOL
 
 kanshi &
 
@@ -16,8 +15,6 @@ riverctl input "pointer-*" tap enabled
 riverctl set-cursor-warp on-focus-change
 riverctl xcursor-theme Bibata-Modern-Ice 48
 riverctl focus-follows-cursor normal
-# This is the example configuration file for river.
-# Note: the "Super" modifier is also known as Logo, GUI, Windows, Mod4, etc.
 
 # Core keybinds
 riverctl map normal Super Return spawn "footclient -e emacsclient -nw"
@@ -177,10 +174,12 @@ riverctl rule-add ssd
 # Auto start
 riverctl spawn "foot --server"
 riverctl spawn "emacs --daemon"
+riverctl spawn "swayidle -w"
+riverctl spawn "mako"
 riverctl spawn "~/nixos/config/scripts/bar.sh | creek -fn 'Berkeley Mono':size=30 -hg 48"
-riverctl spawn "swaybg -i ~/nixos/walls/vague.png &"
+riverctl spawn "swaybg -i ~/nixos/walls/vague.png"
 riverctl spawn "wl-paste --type text --watch cliphist store"
-riverctl spawn "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river"
+riverctl spawn "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river XDG_SESSION_TYPE=wayland"
 
 # Set the default layout generator to be rivertile and start it.
 # River will send the process group of the init executable SIGTERM on exit.

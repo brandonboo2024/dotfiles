@@ -1,0 +1,3 @@
+timeout 300 "notify-send 'Locking in 10 seconds...'"
+timeout 310 "$HOME/nixos/config/scripts/swaylock.sh"
+timeout 900 "systemctl suspend"

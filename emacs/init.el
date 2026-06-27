@@ -32,6 +32,7 @@
 (global-display-line-numbers-mode 1)
 (menu-bar--display-line-numbers-mode-relative)
 (blink-cursor-mode -1)
+(setq visible-cursor (display-graphic-p))
 (pixel-scroll-precision-mode 1)
 (set-face-attribute 'default nil :font "Berkeley Mono" :height 230)
 (setq custom-safe-themes t)
