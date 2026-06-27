@@ -13,7 +13,7 @@ riverctl input "pointer-*" pointer-accel 1.0
 riverctl input "pointer-*" drag enabled
 riverctl input "pointer-*" tap enabled
 riverctl set-cursor-warp on-focus-change
-riverctl xcursor-theme Bibata-Modern-Ice 48
+riverctl xcursor-theme Bibata-Modern-Ice 36
 riverctl focus-follows-cursor normal
 
 # Core keybinds
@@ -176,7 +176,7 @@ riverctl spawn "foot --server"
 riverctl spawn "emacs --daemon"
 riverctl spawn "swayidle -w"
 riverctl spawn "mako"
-riverctl spawn "~/nixos/config/scripts/bar.sh | creek -fn 'Berkeley Mono':size=30 -hg 48"
+riverctl spawn "~/nixos/config/scripts/bar.sh | creek -fn 'Berkeley Mono':size=25 -hg 48"
 riverctl spawn "swaybg -i ~/nixos/walls/vague.png"
 riverctl spawn "wl-paste --type text --watch cliphist store"
 riverctl spawn "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river XDG_SESSION_TYPE=wayland"
