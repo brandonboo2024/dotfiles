@@ -3,19 +3,6 @@
 ;; Contains extensions/functionalities to further extend emacs
 ;; Are all useful/cannot be replaced, but I would not consider them important enough to be part of core.el in a major cleanse
 
-;; (use-package vterm
-;;   :custom
-;;   (display-line-numbers-mode 0)
-;;   :config
-;;   (defun vterm-send-Ctrl-c ()
-;;     (interactive) (vterm-send-key "c" nil nil t))
-;;   (defun vterm-send-Ctrl-d ()
-;;     (interactive) (vterm-send-key "d" nil nil t))
-;;   :bind(:map vterm-mode-map
-;;              ("C-c ESC" . vterm-send-escape)
-;;              ("C-c C-c" . vterm-send-Ctrl-c)
-;;              ("C-c C-d" . vterm-send-Ctrl-d)))
-
 (use-package pdf-tools
   :straight nil
   :magic ("%PDF" . pdf-view-mode)
@@ -64,7 +51,7 @@
       ("https://isocpp.org/blog/rss/rss.xml"   cpp)
       ("https://herbsutter.com/feed/"           cpp)
 
-      ;; systems / low-level — these are essential for you
+      ;; systems / low-level
       ("https://nullprogram.com/feed/"          systems c emacs)
       ("https://drewdevault.com/blog/index.xml" systems)
 
@@ -77,5 +64,24 @@
   (setq elfeed-search-filter "@2-weeks-ago +unread")
   :bind
   ("C-c e f" . elfeed))
+
+(use-package undo-fu
+  :bind
+  ([remap undo] . undo-fu-only-undo)
+  ([remap undo-redo] . undo-fu-only-redo))
+
+(use-package gptel
+  :config
+  (setq gptel-model 'north-mini-code:free
+        gptel-backend
+        (gptel-make-openai "OpenRouter"
+          :host "openrouter.ai"
+          :endpoint "/api/v1/chat/completions"
+          :stream t
+          :key #'gptel-api-key
+          :models '(cohere/north-mini-code:free
+                    openrouter/owl-alpha
+                    poolside/laguna-m.1:free))))
+
 
 (provide 'extend)

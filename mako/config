@@ -3,3 +3,8 @@ font=monospace 30
 height=250
 width=650
 default-timeout=5000
+
+[app-name="Telegram Desktop"]
+ignore-timeout=1
+[app-name="whatsapp-electron"]
+ignore-timeout=1

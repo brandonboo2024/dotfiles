@@ -45,6 +45,7 @@
 
 (global-set-key (kbd "C-v") #'simple-scroll-down)
 (global-set-key (kbd "M-v") #'simple-scroll-up)
+(global-set-key (kbd "M-o") #'other-window)
 
 (global-set-key (kbd "C-c u") #'my/list-unsaved-buffers)
 (global-set-key "%" 'match-paren)
