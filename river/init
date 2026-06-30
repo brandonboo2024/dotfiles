@@ -244,7 +244,7 @@ riverctl rule-add ssd
 # Auto start
 riverctl spawn "foot --server"
 riverctl spawn "emacs --daemon"
-riverctl spawn "swayidle -w"
+riverctl spawn "swayidle"
 riverctl spawn "mako"
 
 riverctl spawn "status-bar | creek -fn 'Berkeley Mono':size=$BAR_FONT_SIZE -hg $BAR_HEIGHT"
