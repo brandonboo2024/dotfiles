@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# Pick an agent session with fuzzel: attach one that is already running, or
+# start a new one in a project.
+#
+# Sessions are tmux sessions, so an agent keeps running when the window is
+# closed and can be picked up again from here. The terminal is given the
+# app-id "agent" so River can place it by rule rather than by where it
+# happened to be launched.
+#
+# Running sessions are listed first, and a project that already has a session
+# is not offered a second time.
+
+. "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
+
+running=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
+
+session_name() {
+    basename "$1" | tr . _
+}
+
+menu=$(
+    printf '%s\n' "$running" | sed '/^$/d; s/^/attach: /'
+
+    project_list |
+        while read -r dir; do
+            name=$(session_name "$dir")
+            printf '%s\n' "$running" | grep -qx "$name" || printf 'new: %s\n' "$dir"
+        done
+)
+
+[ -n "$menu" ] || exit 0
+
+choice=$(printf '%s\n' "$menu" | fuzzel --dmenu -w 60 --prompt 'agent> ') || exit 0
+[ -n "$choice" ] || exit 0
+
+target=${choice#*: }
+
+case "$choice" in
+    attach:*)
+        # -A so a session that died between listing and choosing is recreated
+        # rather than erroring.
+        exec footclient --app-id=agent -e tmux new-session -A -s "$target"
+        ;;
+    new:*)
+        exec footclient --app-id=agent -e tmux new-session -A \
+             -s "$(session_name "$target")" -c "$target"
+        ;;
+esac

@@ -10,4 +10,4 @@ select="$(
 
 filepath="$HOME/200_reading/$select"
 
-setsid -f env sioyek-x11 "$filepath" >/tmp/sioyek.log 2>&1 </dev/null 
+setsid -f env sioyek "$filepath" >/tmp/sioyek.log 2>&1 </dev/null 

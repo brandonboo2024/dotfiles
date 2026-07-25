@@ -1,31 +1,30 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-DIRS=(
-	"$HOME/100_projects/"
-	"$HOME/101_school/"
-	"$HOME/nixos/"
-    "$HOME/nixos/config/"
-)
+# Switch the current tmux client to a project's session, creating it if it
+# does not exist yet. With one argument, uses that directory directly, which
+# is how the tmux.conf bindings jump straight to a fixed place.
+#
+# Shares its idea of what a project is with agent-session, through
+# projects.sh, so the two pickers cannot drift apart. No bash needed now that
+# the directory list lives there.
 
-if [[ $# -eq 1 ]]; then
-	selected=$1
+. "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
+
+if [ "$#" -eq 1 ]; then
+    selected=$1
 else
-	selected=$(fd . "${DIRS[@]}" --type=dir --max-depth=1 --full-path --base-directory $HOME \
-    | sed "s#^$HOME/\|^$HOME/##" \
-    | sk --tmux center,80% )
-		# | sk --margin 10% --color="bw")
-
-	[[ $selected ]] && selected="$HOME/$selected"
+    selected=$(project_list | sed "s#^$HOME/##" | sk --tmux center,80%) || exit 0
+    [ -n "$selected" ] || exit 0
+    selected="$HOME/$selected"
 fi
 
-[[ ! $selected ]] && exit 0
+[ -n "$selected" ] || exit 0
 
 selected_name=$(basename "$selected" | tr . _)
 
 if ! tmux has-session -t "$selected_name" 2>/dev/null; then
-		tmux new-session -ds "$selected_name" -c "$selected"
-		tmux select-window -t "$selected_name:1"
+    tmux new-session -ds "$selected_name" -c "$selected"
+    tmux select-window -t "$selected_name:1"
 fi
 
 tmux switch-client -t "$selected_name"
-
