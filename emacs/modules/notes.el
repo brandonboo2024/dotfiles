@@ -1,5 +1,9 @@
 ;; -*- lexical-binding: t; -*-
 
+;; org-roam is the notes system. The Obsidian vault is frozen: it stays
+;; readable as an archive, but nothing new goes into it, and notes are not
+;; being migrated across. Look there for anything older than the switch.
+
 (defvar my/org-directory (file-truename "~/org/"))
 (defvar my/org-roam-directory (expand-file-name "roam/" my/org-directory))
 

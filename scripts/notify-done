@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Run a command and send a notification when it finishes.
+#
+# For autonomous agent runs: dispatch one, go back to what you were doing, and
+# let mako tell you when to look, instead of watching the terminal for a
+# change. Wired up as shell aliases for claude, codex and pi in the parent
+# repository's home/modules/bash.nix.
+#
+# Quick invocations are not worth a notification, so nothing is sent for
+# anything that finished in under $NOTIFY_DONE_MIN_SECONDS. A failure is sent
+# as urgent, which means mako leaves it on screen until dismissed rather than
+# expiring it after five seconds.
+
+: "${NOTIFY_DONE_MIN_SECONDS:=10}"
+
+[ "$#" -gt 0 ] || {
+    printf 'usage: notify-done COMMAND [ARGS...]\n' >&2
+    exit 2
+}
+
+start=$(date +%s)
+"$@"
+status=$?
+elapsed=$(($(date +%s) - start))
+
+if [ "$elapsed" -ge "$NOTIFY_DONE_MIN_SECONDS" ] && command -v notify-send >/dev/null 2>&1; then
+    # mm:ss reads better than a raw second count for anything long.
+    duration=$(printf '%dm%02ds' $((elapsed / 60)) $((elapsed % 60)))
+    project=${PWD##*/}
+
+    if [ "$status" -eq 0 ]; then
+        notify-send "$1 finished" "$project, $duration"
+    else
+        notify-send -u critical "$1 failed (exit $status)" "$project, $duration"
+    fi
+fi
+
+exit "$status"
