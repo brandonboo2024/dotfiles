@@ -1,4 +1,8 @@
-profile solo {
+# Profiles for every machine live in this one file: kanshi selects a profile
+# by matching the outputs that are actually connected, so profiles belonging
+# to different machines cannot collide. Named after the machine they serve.
+
+profile prometheus-internal {
         output eDP-1 {
                mode 3200x2000@165
                position 0,0
@@ -6,21 +10,21 @@ profile solo {
                }
 }
 
-profile desktop_duo {
-        output HDMI-A-2 {
-               mode 1920x1080@180
-               position 2560,0
-               scale 1
-               }
-
+profile hephaestus-dual {
         output DP-5 {
                mode 2560x1440@165
                position 0,0
                scale 1
                }
+
+        output HDMI-A-2 {
+               mode 1920x1080@180
+               position 2560,0
+               scale 1
+               }
 }
 
-profile desktop_single {
+profile hephaestus-single {
         output DP-5 {
                mode 2560x1440@165
                position 0,0

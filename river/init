@@ -3,6 +3,18 @@
 # A useful link for reference is:
 # https://mylinux.work/guides/river-compositor-setup/
 
+# Appearance values that differ per machine. Creek and the cursor theme take
+# raw pixels and are not scale-aware, so a HiDPI panel needs its own numbers
+# rather than relying on output scaling. Defaults below suit an ordinary
+# ~110 DPI monitor; a machine that needs different ones puts them in
+# river/hosts/<hostname>.sh, which is sourced over the top.
+CURSOR_SIZE=36
+BAR_FONT_SIZE=20
+BAR_HEIGHT=40
+
+host_config="${XDG_CONFIG_HOME:-$HOME/.config}/river/hosts/$(uname -n).sh"
+[ -r "$host_config" ] && . "$host_config"
+
 kanshi &
 
 # Touchpad
@@ -13,7 +25,7 @@ riverctl input "pointer-*" pointer-accel 1.0
 riverctl input "pointer-*" drag enabled
 riverctl input "pointer-*" tap enabled
 riverctl set-cursor-warp on-focus-change
-riverctl xcursor-theme Bibata-Modern-Ice 36
+riverctl xcursor-theme Bibata-Modern-Ice "$CURSOR_SIZE"
 riverctl focus-follows-cursor normal
 
 # Core keybinds
@@ -177,7 +189,7 @@ riverctl spawn "emacs --daemon"
 riverctl spawn "swayidle -w"
 riverctl spawn "mako"
 
-riverctl spawn "~/nixos/config/scripts/bar.sh | creek -fn 'Berkeley Mono':size=20 -hg 40"
+riverctl spawn "~/nixos/config/scripts/bar.sh | creek -fn 'Berkeley Mono':size=$BAR_FONT_SIZE -hg $BAR_HEIGHT"
 riverctl spawn "swaybg -i ~/nixos/walls/vague.png"
 riverctl spawn "wl-paste --type text --watch cliphist store"
 riverctl spawn "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river XDG_SESSION_TYPE=wayland"
