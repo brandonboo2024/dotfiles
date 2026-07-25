@@ -13,6 +13,11 @@ riverctl input "$POINTER_PATTERN" accel-profile flat
 riverctl input "$POINTER_PATTERN" pointer-accel 1.0
 riverctl input "$POINTER_PATTERN" drag enabled
 riverctl input "$POINTER_PATTERN" tap enabled
+
+if [ -n "${NATURAL_SCROLL_DISABLED_PATTERN:-}" ]; then
+    riverctl input "$NATURAL_SCROLL_DISABLED_PATTERN" natural-scroll disabled
+fi
+
 riverctl set-cursor-warp on-focus-change
 riverctl xcursor-theme Bibata-Modern-Ice "$CURSOR_SIZE"
 riverctl focus-follows-cursor normal

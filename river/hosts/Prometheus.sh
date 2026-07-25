@@ -9,6 +9,10 @@ CURSOR_SIZE=48
 BAR_FONT_SIZE=30
 BAR_HEIGHT=48
 
+# The physical mouse feels correct with conventional wheel direction. It
+# retains the shared acceleration and pointer settings.
+NATURAL_SCROLL_DISABLED_PATTERN="pointer-7847-100-2.4G_Mouse"
+
 # Border colours sit against the wallpaper, so set them together. The
 # wallpaper itself is owned by Nix: override xdg.configFile."wallpaper" in
 # home/Prometheus.nix rather than pointing WALLPAPER at a path here.

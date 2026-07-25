@@ -86,28 +86,47 @@ either may be customised into the other form, so handle both."
          (my/append-args consult-ripgrep-args my/global-search-args)))
     (consult-ripgrep my/global-search-root)))
 
+(defun my/forge-url-from-remote (remote)
+  "Return the web URL for a supported Git REMOTE."
+  (let (host path)
+    (cond
+     ((string-match
+       "\\`\\(?:https?\\|ssh\\)://\\(?:[^/@]+@\\)?\\([^/]+\\)/\\(.+\\)\\'"
+       remote)
+      (setq host (match-string 1 remote)
+            path (match-string 2 remote)))
+     ((string-match
+       "\\`\\(?:[^@/:]+@\\)?\\([^/:]+\\):\\(.+\\)\\'"
+       remote)
+      (setq host (match-string 1 remote)
+            path (match-string 2 remote)))
+     (t
+      (user-error "Unsupported origin URL: %s" remote)))
+    (unless (member host '("github.com" "codeberg.org" "git.sr.ht"))
+      (user-error "Unsupported forge host: %s" host))
+    (setq path (string-remove-suffix
+                ".git"
+                (string-remove-suffix "/" path)))
+    (when (string-empty-p path)
+      (user-error "Malformed origin URL: %s" remote))
+    (format "https://%s/%s" host path)))
+
 (defun my/open-project-forge ()
-  "Open the current project's forge page in the default browser."
+  "Open the current Git repository's forge page in the default browser."
   (interactive)
-  (require 'project)
-  (let* ((project (project-current))
-         (directory
-          (if project
-              (project-root project)
-            default-directory))
-         (output (generate-new-buffer " *open-project-forge*"))
-         status)
-    (unwind-protect
-        (progn
-          (setq status
-                (call-process "open-github" nil output nil directory))
-          (if (and (integerp status) (zerop status))
-              (message "Opened forge page for %s" directory)
-            (user-error
-             "%s"
-             (string-trim
-              (with-current-buffer output (buffer-string))))))
-      (kill-buffer output))))
+  (require 'browse-url)
+  (require 'vc-git)
+  (let ((root (vc-git-root default-directory)))
+    (unless root
+      (user-error "Current directory is not in a Git repository"))
+    (let ((remote
+           (condition-case nil
+               (vc-git-repository-url root "origin")
+             (error nil))))
+      (unless remote
+        (user-error "Git repository has no origin remote"))
+      (browse-url
+       (my/forge-url-from-remote (string-trim remote))))))
 
 (defun simple-scroll-down ()
   "Move half a screen below."

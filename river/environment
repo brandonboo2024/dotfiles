@@ -16,8 +16,8 @@ BACKGROUND_COLOR=0x002b36
 BORDER_FOCUSED=0x93a1a1
 BORDER_UNFOCUSED=0x586e75
 
-# Apply the same input behavior to touchpads, compatibility pointers, and
-# external mice on every host.
+# Apply the base input behavior to touchpads, compatibility pointers, and
+# external mice. Host files may override individual properties afterward.
 POINTER_PATTERN="pointer-*"
 
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
