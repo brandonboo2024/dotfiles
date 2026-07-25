@@ -33,6 +33,14 @@
   :bind
   ([remap list-buffers] . ibuffer))
 
+(use-package ibuffer-project
+  :after ibuffer
+  :hook
+  (ibuffer . (lambda ()
+               (setq ibuffer-filter-groups (ibuffer-project-generate-filter-groups))
+               (unless (eq ibuffer-sorting-mode 'project-file-relative)
+                 (ibuffer-do-sort-by-project-file-relative)))))
+
 (use-package paren ;; Supposed to help with paren highlights
   :custom
   (show-paren-delay 0.1)
