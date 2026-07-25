@@ -51,4 +51,31 @@
   :bind (:map dired-mode-map
               ("<backtab>" . dired-subtree-cycle)))
 
+;;; Buffer hygiene
+;;
+;; The daemon runs for weeks, so buffers accumulate until the buffer list is
+;; useless. midnight kills off the ones that have not been displayed in three
+;; days. It is careful about what it takes: buffers with a live process (so
+;; shells and agent terminals survive), modified file buffers, visible
+;; buffers, *scratch* and *Messages* are all skipped.
+(use-package midnight
+  :custom
+  (clean-buffer-list-delay-general 3) ; days
+  :config
+  (midnight-mode 1))
+
+;; Project-scoped equivalents of the buffer list and of killing buffers.
+;; project-list-buffers is the ibuffer view restricted to one project;
+;; project-kill-buffers closes a whole project in one go, which is what stops
+;; the accumulation at source. Both are built in and already on C-x p C-b and
+;; C-x p k; these bindings just put them next to the other C-c p commands.
+;;
+;; uniquify needs no configuration here: post-forward-angle-brackets has been
+;; the default since well before this Emacs, so same-named files across
+;; projects are already distinguishable.
+(use-package project
+  :bind
+  ("C-c p B" . project-list-buffers)
+  ("C-c p k" . project-kill-buffers))
+
 (provide 'qol)

@@ -1,169 +1,177 @@
 #!/bin/sh
 
-# POSIX-compliant creek status bar with modular functions
+# Status line for creek: one line per tick on stdout.
+#
+# Which modules appear, and in what order, is $BAR_MODULES. River exports it
+# from river/hosts/<hostname>.sh, so a machine takes only what it has -- there
+# is no point printing a battery on the desktop.
+#
+# Everything available from /proc or /sys is read with shell builtins and no
+# subprocesses. The two modules that genuinely need a helper program, network
+# name and bluetooth, describe things that change on the timescale of minutes,
+# so they refresh every $BAR_SLOW_EVERY ticks and are cached in between. An
+# ordinary tick costs two forks, pamixer and date; the previous version
+# measured at roughly forty.
+#
+# Each module assigns to $out rather than printing. That is deliberate: a
+# command substitution would run the module in a subshell, and the CPU and
+# cache variables would not survive between ticks.
 
-# ─── CPU Module ─────────────────────────────────────
+: "${BAR_MODULES:=cpu ram bat vol net bt clock}"
+: "${BAR_INTERVAL:=2}"
+: "${BAR_SLOW_EVERY:=30}"
+
+# ─── CPU ────────────────────────────────────────────
+# Usage is the delta between ticks, so the module holds no sleep of its own
+# and the loop period really is $BAR_INTERVAL. The priming call before the
+# loop gives the first real tick something to compare against.
+prev_idle=0
+prev_total=0
+
 cpu_module() {
-    cpu_line=$(sed -n '1p' /proc/stat)
-    cpu_idle1=$(printf '%s\n' "$cpu_line" | awk '{print $5}')
-    cpu_total1=$(printf '%s\n' "$cpu_line" | awk '{sum=$2+$3+$4+$5+$6+$7+$8} END {print sum}')
+    read -r _ user nice sys idle iowait irq softirq _ < /proc/stat
+    total=$((user + nice + sys + idle + iowait + irq + softirq))
 
-    sleep 1
+    d_total=$((total - prev_total))
+    d_idle=$((idle - prev_idle))
+    prev_total=$total
+    prev_idle=$idle
 
-    cpu_line=$(sed -n '1p' /proc/stat)
-    cpu_idle2=$(printf '%s\n' "$cpu_line" | awk '{print $5}')
-    cpu_total2=$(printf '%s\n' "$cpu_line" | awk '{sum=$2+$3+$4+$5+$6+$7+$8} END {print sum}')
-
-    cpu_idle_diff=$((cpu_idle2 - cpu_idle1))
-    cpu_total_diff=$((cpu_total2 - cpu_total1))
-    if [ "$cpu_total_diff" -ne 0 ]; then
-        cpu_usage=$((100 * (cpu_total_diff - cpu_idle_diff) / cpu_total_diff))
+    if [ "$d_total" -gt 0 ]; then
+        out="CPU:$(((100 * (d_total - d_idle)) / d_total))%"
     else
-        cpu_usage=0
+        out="CPU:0%"
     fi
-    printf '%s%%' "$cpu_usage"
 }
 
-# ─── RAM Module ─────────────────────────────────────
+# ─── Memory ─────────────────────────────────────────
+# Used is total minus available, which is what "how much is left for me"
+# actually means. Integer arithmetic only, so the decimal is done by hand.
 ram_module() {
-    free -h | awk '/^Mem:/ {print $3}'
+    mem_total=0
+    mem_avail=0
+    while read -r key value _; do
+        case "$key" in
+            MemTotal:)     mem_total=$value ;;
+            MemAvailable:) mem_avail=$value; break ;;
+        esac
+    done < /proc/meminfo
+
+    used_mib=$(((mem_total - mem_avail) / 1024))
+    out="RAM:$((used_mib / 1024)).$(((used_mib % 1024) * 10 / 1024))G"
 }
 
-# ─── Sound Module ───────────────────────────────────
-sound_module() {
-    if command -v pamixer >/dev/null 2>&1; then
-        if [ "$(pamixer --get-mute 2>/dev/null)" = "true" ]; then
-            printf 'MUTE'
-        else
-            vol=$(pamixer --get-volume 2>/dev/null)
-            printf '%s%%' "$vol"
-        fi
-    elif command -v pactl >/dev/null 2>&1; then
-        sink=$(pactl info 2>/dev/null | awk '/Default Sink:/ {print $3}')
-        if [ -n "$sink" ]; then
-            mute=$(pactl list sinks 2>/dev/null | awk -v sink="$sink" '
-                /Name:/ {name=$2}
-                name == sink {found=1}
-                found && /Mute:/ {print $2; exit}
-            ')
-            vol=$(pactl list sinks 2>/dev/null | awk -v sink="$sink" '
-                /Name:/ {name=$2}
-                name == sink {found=1}
-                found && /Volume:/ {print $5; exit}
-            ')
-            if [ "$mute" = "yes" ]; then
-                printf 'MUTE'
-            else
-                printf '%s' "$vol"
-            fi
-        else
-            printf 'N/A'
-        fi
-    elif command -v amixer >/dev/null 2>&1; then
-        amixer get Master 2>/dev/null | awk '
-            /\[on\]/ {gsub(/[\[\]]/, "", $4); print $4; exit}
-            /\[off\]/ {print "MUTE"; exit}
-        '
-    else
-        printf 'N/A'
-    fi
-}
-
-# ─── Brightness Module ──────────────────────────────
-brightness_module() {
-    if [ -r /sys/class/backlight/intel_backlight/brightness ] && [ -r /sys/class/backlight/intel_backlight/max_brightness ]; then
-        cur=$(cat /sys/class/backlight/intel_backlight/brightness)
-        max=$(cat /sys/class/backlight/intel_backlight/max_brightness)
-        printf '%s%%' $((100 * cur / max))
-    elif [ -r /sys/class/backlight/amdgpu_bl0/brightness ] && [ -r /sys/class/backlight/amdgpu_bl0/max_brightness ]; then
-        cur=$(cat /sys/class/backlight/amdgpu_bl0/brightness)
-        max=$(cat /sys/class/backlight/amdgpu_bl0/max_brightness)
-        printf '%s%%' $((100 * cur / max))
-    elif [ -r /sys/class/backlight/nvidia_0/brightness ] && [ -r /sys/class/backlight/nvidia_0/max_brightness ]; then
-        cur=$(cat /sys/class/backlight/nvidia_0/brightness)
-        max=$(cat /sys/class/backlight/nvidia_0/max_brightness)
-        printf '%s%%' $((100 * cur / max))
-    else
-        for bl in /sys/class/backlight/*; do
-            if [ -r "$bl/brightness" ] && [ -r "$bl/max_brightness" ]; then
-                cur=$(cat "$bl/brightness")
-                max=$(cat "$bl/max_brightness")
-                printf '%s%%' $((100 * cur / max))
-                return
-            fi
-        done
-        printf 'N/A'
-    fi
-}
-
-# ─── Date/Time Module ───────────────────────────────
-datetime_module() {
-    date '+%a %b %d %H:%M'
-}
-
-# ─── WiFi Module ────────────────────────────────────
-wifi_module() {
-    if command -v nmcli >/dev/null 2>&1; then
-        wifi=$(nmcli -t -f active,ssid dev wifi 2>/dev/null | grep '^yes' | cut -d':' -f2)
-        [ -z "$wifi" ] && wifi="disconnected"
-    else
-        wifi="N/A"
-    fi
-    printf '%s' "on" # Or use $wifi if you want the name
-}
-
-# ─── Bluetooth Module ───────────────────────────────
-bluetooth_module() {
-    if ! command -v bluetoothctl >/dev/null 2>&1; then
-        printf 'N/A'
-        return
-    fi
-
-    powered=$(bluetoothctl show 2>/dev/null | awk '/Powered:/ {print $2}')
-    if [ "$powered" != "yes" ]; then
-        printf 'off'
-        return
-    fi
-
-    connected=$(bluetoothctl devices Connected 2>/dev/null | head -n 1)
-    if [ -n "$connected" ]; then
-        printf '%s' "$connected" | cut -d' ' -f3-
-    else
-        printf 'on'
-    fi
-}
-
-# ─── Battery Module ──────────────────────────────────
+# ─── Battery ────────────────────────────────────────
+# Produces nothing when there is no battery, so a machine that lists this
+# module but has none simply omits the field instead of showing "N/A".
 battery_module() {
+    out=""
     for bat in /sys/class/power_supply/BAT*; do
         [ -r "$bat/capacity" ] || continue
-        cap=$(cat "$bat/capacity")
-        status=$(cat "$bat/status" 2>/dev/null)
+        read -r capacity < "$bat/capacity"
+        status=""
+        [ -r "$bat/status" ] && read -r status < "$bat/status"
         case "$status" in
-            Charging*)    icon="+" ;;
-            Discharging*) icon="-" ;;
-            Full | Not\ charging)  icon="=" ;;
-            *)            icon="?" ;;
+            Charging*)            icon="+" ;;
+            Discharging*)         icon="-" ;;
+            Full*|"Not charging") icon="=" ;;
+            *)                    icon="?" ;;
         esac
-        printf '%s%s%%' "$icon" "$cap"
+        out="BAT:$icon$capacity%"
         return
     done
-    printf 'N/A'
 }
 
-# ─── Main Loop ──────────────────────────────────────
+bat_module() { battery_module; }
+
+# ─── Volume ─────────────────────────────────────────
+vol_module() {
+    if [ "$(pamixer --get-mute 2>/dev/null)" = "true" ]; then
+        out="VOL:MUTE"
+    else
+        out="VOL:$(pamixer --get-volume 2>/dev/null)%"
+    fi
+}
+
+# ─── Network (slow) ─────────────────────────────────
+# Link state comes from sysfs, but the network's name needs nmcli, so the
+# whole module is refreshed only on a slow tick.
+net_cache="NET:off"
+
+net_refresh() {
+    for dev in /sys/class/net/*; do
+        name=${dev##*/}
+        [ "$name" = "lo" ] && continue
+        [ -r "$dev/operstate" ] || continue
+        read -r state < "$dev/operstate"
+        [ "$state" = "up" ] || continue
+
+        if [ -d "$dev/wireless" ]; then
+            ssid=$(nmcli -t -f active,ssid dev wifi 2>/dev/null |
+                       sed -n 's/^yes://p' | head -n 1)
+            net_cache="NET:${ssid:-wifi}"
+        else
+            net_cache="NET:eth"
+        fi
+        return
+    done
+    net_cache="NET:off"
+}
+
+net_module() { out="$net_cache"; }
+
+# ─── Bluetooth (slow) ───────────────────────────────
+bt_cache="BT:off"
+
+bt_refresh() {
+    if ! command -v bluetoothctl >/dev/null 2>&1; then
+        bt_cache="BT:N/A"
+        return
+    fi
+
+    powered=$(bluetoothctl show 2>/dev/null | awk '/Powered:/ {print $2; exit}')
+    if [ "$powered" != "yes" ]; then
+        bt_cache="BT:off"
+        return
+    fi
+
+    connected=$(bluetoothctl devices Connected 2>/dev/null | head -n 1 | cut -d' ' -f3-)
+    bt_cache="BT:${connected:-on}"
+}
+
+bt_module() { out="$bt_cache"; }
+
+# ─── Clock ──────────────────────────────────────────
+clock_module() {
+    out=$(date '+%a %b %d %H:%M')
+}
+
+# ─── Main loop ──────────────────────────────────────
+cpu_module          # prime the CPU delta
+net_refresh
+bt_refresh
+tick=0
+
 while true; do
-    cpu=$(cpu_module)
-    ram=$(ram_module)
-    sound=$(sound_module)
-    # brightness=$(brightness_module)
-    datetime=$(datetime_module)
-    wifi=$(wifi_module)
-    bt=$(bluetooth_module)
-    bat=$(battery_module)
+    if [ "$((tick % BAR_SLOW_EVERY))" -eq 0 ]; then
+        case " $BAR_MODULES " in *" net "*) net_refresh ;; esac
+        case " $BAR_MODULES " in *" bt "*)  bt_refresh  ;; esac
+    fi
+    tick=$((tick + 1))
 
-    printf 'CPU:%s | RAM:%s | BAT:%s | VOL:%s | WiFi:%s | BT:%s | %s\n' \
-        "$cpu" "$ram" "$bat" "$sound" "$wifi" "$bt" "$datetime"
+    line=""
+    for module in $BAR_MODULES; do
+        command -v "${module}_module" >/dev/null 2>&1 || continue
+        out=""
+        "${module}_module"
+        [ -n "$out" ] || continue
+        if [ -n "$line" ]; then
+            line="$line | $out"
+        else
+            line="$out"
+        fi
+    done
 
-    sleep 2
+    printf '%s\n' "$line"
+    sleep "$BAR_INTERVAL"
 done

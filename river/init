@@ -12,10 +12,25 @@ CURSOR_SIZE=36
 BAR_FONT_SIZE=20
 BAR_HEIGHT=40
 
+# Which status modules this machine shows, in order. Anything without a
+# module of that name is skipped, and the battery prints nothing where there
+# is no battery, so this is about intent rather than avoiding errors.
+BAR_MODULES="cpu ram bat vol net bt clock"
+BAR_INTERVAL=2
+
+# Borders are the one bit of theming kept adjustable, because the wallpaper
+# differs per machine and the border colour has to sit against it.
+BORDER_WIDTH=3
+BACKGROUND_COLOR=0x002b36
+BORDER_FOCUSED=0x93a1a1
+BORDER_UNFOCUSED=0x586e75
+
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 host_config="$config_home/river/hosts/$(uname -n).sh"
 [ -r "$host_config" ] && . "$host_config"
+
+export BAR_MODULES BAR_INTERVAL
 
 # Put the helper scripts on PATH so everything below, and everything River
 # spawns, can call them by name instead of by absolute path.
@@ -175,10 +190,10 @@ do
 done
 
 # Set background and border color
-riverctl border-width 3
-riverctl background-color 0x002b36
-riverctl border-color-focused 0x93a1a1
-riverctl border-color-unfocused 0x586e75
+riverctl border-width "$BORDER_WIDTH"
+riverctl background-color "$BACKGROUND_COLOR"
+riverctl border-color-focused "$BORDER_FOCUSED"
+riverctl border-color-unfocused "$BORDER_UNFOCUSED"
 
 # Set keyboard repeat rate
 riverctl set-repeat 35 300

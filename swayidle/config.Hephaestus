@@ -1,0 +1,10 @@
+# Hephaestus (desktop). As the shared config, but it does not suspend: the
+# machine is mains-powered and suspending it after fifteen idle minutes would
+# interrupt long builds and agent runs. Linked over config by
+# home/Hephaestus.nix.
+
+timeout 300 "notify-send 'Locking in 10 seconds...'"
+timeout 310 lock-screen
+
+before-sleep lock-screen
+lock lock-screen

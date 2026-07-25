@@ -1,3 +1,15 @@
+# Read from ~/.config/swayidle/config by swayidle itself. Note that config
+# entries and command-line arguments are additive rather than exclusive, so
+# River passes no events on the command line.
+#
+# This is the battery-powered default. Hephaestus links config.Hephaestus over
+# it, which is the same minus the suspend.
+
 timeout 300 "notify-send 'Locking in 10 seconds...'"
 timeout 310 "lock-screen"
 timeout 900 "systemctl suspend"
+
+# Without these, locking only ever happens on idle: closing the lid or running
+# `systemctl suspend` by hand would resume to an unlocked session.
+before-sleep "lock-screen"
+lock "lock-screen"
