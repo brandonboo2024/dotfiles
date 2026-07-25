@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 cd $(tmux run "echo #{pane_current_path}")
 

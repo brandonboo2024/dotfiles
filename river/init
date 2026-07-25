@@ -12,8 +12,19 @@ CURSOR_SIZE=36
 BAR_FONT_SIZE=20
 BAR_HEIGHT=40
 
-host_config="${XDG_CONFIG_HOME:-$HOME/.config}/river/hosts/$(uname -n).sh"
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+host_config="$config_home/river/hosts/$(uname -n).sh"
 [ -r "$host_config" ] && . "$host_config"
+
+# Put the helper scripts on PATH so everything below, and everything River
+# spawns, can call them by name instead of by absolute path.
+PATH="$config_home/scripts:$PATH"
+export PATH
+
+# Read by lock-screen, and by swaybg below.
+WALLPAPER="${WALLPAPER:-$HOME/nixos/walls/vague.png}"
+export WALLPAPER
 
 kanshi &
 
@@ -35,11 +46,11 @@ riverctl map normal Super B spawn firefox
 riverctl map normal Super Space spawn fuzzel
 riverctl map normal Super Q close
 riverctl map normal Super+Shift E exit
-riverctl map normal Super+Shift R spawn ~/nixos/config/river/init
-riverctl map normal Super P spawn ~/nixos/config/scripts/open-pdf.sh
-riverctl map normal None F10 spawn ~/nixos/config/scripts/power-menu.sh
-riverctl map normal None F12 spawn ~/nixos/config/scripts/screenshot.sh
-riverctl map normal Super+Shift S spawn ~/nixos/config/scripts/snapshot.sh
+riverctl map normal Super+Shift R spawn "$config_home/river/init"
+riverctl map normal Super P spawn open-pdf
+riverctl map normal None F10 spawn power-menu
+riverctl map normal None F12 spawn screenshot-full
+riverctl map normal Super+Shift S spawn screenshot-region
 riverctl map normal Super V spawn cliphist-fuzzel-img
 riverctl map normal Super Escape spawn networkmanager_dmenu
 
@@ -189,8 +200,8 @@ riverctl spawn "emacs --daemon"
 riverctl spawn "swayidle -w"
 riverctl spawn "mako"
 
-riverctl spawn "~/nixos/config/scripts/bar.sh | creek -fn 'Berkeley Mono':size=$BAR_FONT_SIZE -hg $BAR_HEIGHT"
-riverctl spawn "swaybg -i ~/nixos/walls/vague.png"
+riverctl spawn "status-bar | creek -fn 'Berkeley Mono':size=$BAR_FONT_SIZE -hg $BAR_HEIGHT"
+riverctl spawn "swaybg -i $WALLPAPER"
 riverctl spawn "wl-paste --type text --watch cliphist store"
 riverctl spawn "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river XDG_SESSION_TYPE=wayland"
 
