@@ -4,7 +4,15 @@ height=250
 width=650
 default-timeout=5000
 
+# Telegram and WhatsApp send their own expire timeouts, which is why their
+# notifications behave differently from everything else. ignore-timeout makes
+# mako disregard what the application asks for and apply default-timeout above,
+# so they expire on the same five seconds as the rest.
+#
+# The app-name must match exactly or the section silently does nothing; check
+# with `makoctl list` while a notification is up if either stops behaving.
 [app-name="Telegram Desktop"]
 ignore-timeout=1
+
 [app-name="whatsapp-electron"]
 ignore-timeout=1
