@@ -37,8 +37,9 @@ export BAR_MODULES BAR_INTERVAL
 PATH="$config_home/scripts:$PATH"
 export PATH
 
-# Read by lock-screen, and by swaybg below.
-WALLPAPER="${WALLPAPER:-$HOME/nixos/walls/vague.png}"
+# Read by lock-screen, and by swaybg below. Home Manager puts the image at
+# this path, so nothing here needs to know where the nixos repository lives.
+WALLPAPER="${WALLPAPER:-$config_home/wallpaper}"
 export WALLPAPER
 
 kanshi &

@@ -2,4 +2,4 @@
 # WALLPAPER is exported by river/init; the fallback keeps this usable when
 # run outside a River session.
 
-swaylock -s fill -i "${WALLPAPER:-$HOME/nixos/walls/vague.png}"
+swaylock -s fill -i "${WALLPAPER:-${XDG_CONFIG_HOME:-$HOME/.config}/wallpaper}"

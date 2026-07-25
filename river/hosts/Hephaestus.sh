@@ -4,7 +4,8 @@
 # No battery to report on.
 BAR_MODULES="cpu ram vol net bt clock"
 
-# Wallpaper and border colours go together; set both if you change one.
-# WALLPAPER="$HOME/nixos/walls/mountain.png"
+# Border colours sit against the wallpaper, so set them together. The
+# wallpaper itself is owned by Nix: override xdg.configFile."wallpaper" in
+# home/Hephaestus.nix rather than pointing WALLPAPER at a path here.
 # BORDER_FOCUSED=0x93a1a1
 # BORDER_UNFOCUSED=0x586e75
