@@ -53,11 +53,13 @@
   :bind
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
-  ("C-c r" . consult-ripgrep)
-  ("C-c p r" . consult-ripgrep)
+  ;; C-c <key> searches globally, C-c p <key> searches the project.
+  ;; Both pairs are defined in keybinds.el.
+  ("C-c r" . my/global-rg)
+  ("C-c p r" . my/project-rg)
   ("C-c f" . my/global-fd)
-  ("C-c p b" . consult-project-buffer)
-  ("C-c p f" . consult-fd)) ;; C-x r to see register info, bookmarks are stored in registers
+  ("C-c p f" . my/project-fd)
+  ("C-c p b" . consult-project-buffer)) ;; C-x r to see register info, bookmarks are stored in registers
 
 (use-package embark
   :bind
