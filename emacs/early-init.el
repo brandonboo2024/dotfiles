@@ -19,6 +19,13 @@
 (setq straight-base-dir my/emacs-data-directory
       custom-file (expand-file-name "custom.el" my/emacs-state-directory))
 
+;; native-comp writes to user-emacs-directory/eln-cache unless told otherwise,
+;; and user-emacs-directory is this Git repository. straight-base-dir and
+;; no-littering do not cover it, so it quietly grew to 283M inside the
+;; worktree. Must be done here: the cache path is fixed before init.el runs.
+(startup-redirect-eln-cache
+ (expand-file-name "eln-cache/" my/emacs-data-directory))
+
 ;; Backups/Lockfiles
 (setq make-backup-files nil)
 (setq auto-save-default nil)
