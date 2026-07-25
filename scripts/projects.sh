@@ -18,3 +18,18 @@ project_list() {
     # shellcheck disable=SC2086
     printf '%s\n' $PROJECT_DIRS
 }
+
+# Session name for a project directory. Names are relative to $HOME and keep
+# the last two components, so ~/100_projects/notes and ~/101_school/notes do
+# not collapse onto one tmux session while ~/nixos stays plain "nixos". Dots
+# become underscores because tmux treats them specially in target names.
+session_name() {
+    printf '%s\n' "$1" |
+        sed "s:/*$::; s:^$HOME/*::" |
+        awk -F/ '{
+            if (NF == 0 || $0 == "") printf "home";
+            else if (NF > 1) printf "%s_%s", $(NF-1), $NF;
+            else printf "%s", $NF
+        }' |
+        tr . _
+}

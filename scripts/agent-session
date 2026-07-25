@@ -15,10 +15,6 @@
 
 running=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
 
-session_name() {
-    basename "$1" | tr . _
-}
-
 menu=$(
     printf '%s\n' "$running" | sed '/^$/d; s/^/attach: /'
 

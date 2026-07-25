@@ -20,11 +20,10 @@ fi
 
 [ -n "$selected" ] || exit 0
 
-selected_name=$(basename "$selected" | tr . _)
+selected_name=$(session_name "$selected")
 
-if ! tmux has-session -t "$selected_name" 2>/dev/null; then
-    tmux new-session -ds "$selected_name" -c "$selected"
-    tmux select-window -t "$selected_name:1"
-fi
-
+# -A creates the session or does nothing if it already exists, in one atomic
+# step. Testing with has-session first left a window where two invocations
+# could both decide to create it and one would fail.
+tmux new-session -d -A -s "$selected_name" -c "$selected"
 tmux switch-client -t "$selected_name"

@@ -147,9 +147,11 @@ clock_module() {
 }
 
 # ─── Main loop ──────────────────────────────────────
-cpu_module          # prime the CPU delta
-net_refresh
-bt_refresh
+# Prime only the modules this host shows: priming a module that is not in
+# BAR_MODULES pays its startup cost for output nobody reads.
+case " $BAR_MODULES " in *" cpu "*) cpu_module ;; esac
+case " $BAR_MODULES " in *" net "*) net_refresh ;; esac
+case " $BAR_MODULES " in *" bt "*)  bt_refresh  ;; esac
 tick=0
 
 while true; do

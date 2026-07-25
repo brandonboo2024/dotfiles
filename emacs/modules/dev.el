@@ -15,14 +15,17 @@
     rust-mode
     python-mode
     nix-mode) . eglot-ensure)
+  ;; Under C-c l, not C-c r / C-c f. eglot-mode-map is a minor-mode map and
+  ;; therefore wins over the global bindings, so the old keys silently took
+  ;; over global ripgrep and fd in every buffer with a language server -- which
+  ;; is to say, in every buffer where code is actually written.
   :bind (:map eglot-mode-map
-              ("C-c a" . eglot-code-actions)
-              ("C-c r" . eglot-rename)
-              ("C-c f" . eglot-format)
-              ("C-c d" . eldoc))
+              ("C-c l a" . eglot-code-actions)
+              ("C-c l r" . eglot-rename)
+              ("C-c l f" . eglot-format)
+              ("C-c l d" . eldoc))
   :custom
-  (eglot-autoshutdown t)
-  (eglot-confirm-server-initiated-edits nil))
+  (eglot-autoshutdown t))
 
 ;; (use-package treesit
 ;;   :straight nil

@@ -7,6 +7,12 @@
 (defvar my/org-directory (file-truename "~/org/"))
 (defvar my/org-roam-directory (expand-file-name "roam/" my/org-directory))
 
+(defun my/org-confirm-babel-evaluate (_lang _body)
+  "Return nil (no prompt) only for Org files under `my/org-directory'."
+  (not (and buffer-file-name
+            (string-prefix-p (file-name-as-directory my/org-directory)
+                             (file-truename buffer-file-name)))))
+
 (defun my/org-file(path)
   (expand-file-name path my/org-directory))
 
@@ -26,7 +32,10 @@
   (org-log-done 'time)
   (org-outline-path-complete-in-steps nil)
   (org-id-link-to-org-use-id 'create-if-interactive)
-  (org-confirm-babel-evaluate nil)
+  ;; Only skip the prompt inside my own notes. Anything else -- a downloaded
+  ;; org file, or one an agent has written -- still asks before running elisp,
+  ;; python, C or shell.
+  (org-confirm-babel-evaluate #'my/org-confirm-babel-evaluate)
   (org-archive-location (concat
                          (file-name-as-directory (my/org-file "archive"))
                          "%s_archive::"))
