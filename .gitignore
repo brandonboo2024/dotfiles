@@ -12,3 +12,4 @@ var/
 etc/
 history
 recentf.eld
+*.elc
