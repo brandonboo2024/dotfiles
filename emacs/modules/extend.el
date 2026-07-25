@@ -9,15 +9,11 @@
   :config
   (pdf-loader-install))
 
-(use-package no-littering
-  ;; Available via straight/elpa. Straight will install it.
-  :custom
-  (no-littering-etc-directory (expand-file-name "etc/" user-emacs-directory))
-  (no-littering-var-directory (expand-file-name "var/" user-emacs-directory)))
-
 (use-package eat
   :custom
   (eat-term-name "xterm-256color"))
+
+(setq send-mail-function 'mailclient-send-it)
 
 (use-package notmuch
   :commands (notmuch-hello)

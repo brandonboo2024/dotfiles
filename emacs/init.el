@@ -19,11 +19,19 @@
 
 (setq straight-use-package-by-default 1) ;; use-package integration by default
 
+(setq no-littering-etc-directory
+      (expand-file-name "etc/" my/emacs-data-directory)
+      no-littering-var-directory
+      (expand-file-name "var/" my/emacs-state-directory))
+
+(use-package no-littering
+  :demand t)
+
 ;; Window Graphics
 (setq default-frame-alist '((undecorated . t)))
 (setq inhibit-startup-message t)
 (setq use-dialog-box nil)
-(scroll-bar-mode -1) 
+(scroll-bar-mode -1)
 (tool-bar-mode -1)
 (tooltip-mode -1)
 (set-fringe-mode 10)
@@ -32,7 +40,9 @@
 (global-display-line-numbers-mode 1)
 (menu-bar--display-line-numbers-mode-relative)
 (blink-cursor-mode -1)
-(setq visible-cursor (display-graphic-p))
+;; This variable affects text terminals only. It must not be decided while a
+;; daemon has no frames, because GUI and terminal frames can share one daemon.
+(setq visible-cursor t)
 (pixel-scroll-precision-mode 1)
 (set-face-attribute 'default nil :font "Berkeley Mono" :height 220)
 (setq custom-safe-themes t)
@@ -78,28 +88,33 @@
 ;; Symlink
 (setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
 
-;; Clipboard: in GUI mode Emacs handles clipboard natively via GTK/Wayland.
-;; In terminal (-nw) mode, fall back to wl-clipboard synchronously via stdin.
-(if (display-graphic-p)
-    ;; GUI Emacs — native GTK clipboard just works, no extra config needed.
-    (progn
-      (setq select-enable-primary t)
-      (setq select-enable-clipboard t))
-  ;; Terminal mode — use wl-clipboard synchronously via stdin
-  (setq interprogram-cut-function
-        (lambda (text)
-          (with-temp-buffer
-            (insert text)
-            (call-process-region (point-min) (point-max) "wl-copy"))))
-  (setq interprogram-paste-function
-        (lambda ()
-          (shell-command-to-string "wl-paste --no-newline")))
-  (setq select-enable-primary t)
-  (setq select-enable-clipboard t))
+;; GUI and terminal frames can coexist under the daemon. Choose the clipboard
+;; backend when the operation happens, not while init.el is loading.
+(defun my/interprogram-cut (text)
+  "Put TEXT on the clipboard for the selected frame."
+  (if (display-graphic-p (selected-frame))
+      (gui-select-text text)
+    (with-temp-buffer
+      (insert text)
+      (call-process-region
+       (point-min) (point-max) "wl-copy" nil nil nil "--type" "text/plain"))))
+
+(defun my/interprogram-paste ()
+  "Read the clipboard using the backend for the selected frame."
+  (if (display-graphic-p (selected-frame))
+      (gui-selection-value)
+    (with-temp-buffer
+      (when (zerop (call-process "wl-paste" nil t nil "--no-newline"))
+        (buffer-string)))))
+
+(setq interprogram-cut-function #'my/interprogram-cut
+      interprogram-paste-function #'my/interprogram-paste
+      select-enable-primary t
+      select-enable-clipboard t)
 
 (use-package kkp
-  :if (not (display-graphic-p))
   :config
+  ;; The global mode installs terminal-specific hooks and ignores GUI frames.
   (global-kkp-mode +1))
 
 (add-to-list 'load-path (expand-file-name "modules" user-emacs-directory))
@@ -110,17 +125,8 @@
 (require 'notes)
 (require 'dev)
 
+(when (file-exists-p custom-file)
+  (load custom-file nil 'nomessage))
+
 ;; TODO:
 ;; org-mode -> pdf integration -> latex -> terminal-emacs
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(send-mail-function 'mailclient-send-it))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

@@ -11,6 +11,7 @@
 # Running sessions are listed first, and a project that already has a session
 # is not offered a second time.
 
+# shellcheck source=/dev/null
 . "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
 
 running=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)

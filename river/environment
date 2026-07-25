@@ -1,0 +1,31 @@
+#!/bin/sh
+# shellcheck disable=SC2034
+
+# Shared values for River startup and reload. Defaults suit an ordinary
+# monitor; host files override only the values that differ.
+
+CURSOR_SIZE=36
+BAR_FONT_SIZE=20
+BAR_HEIGHT=40
+
+BAR_MODULES="cpu ram bat vol net bt clock"
+BAR_INTERVAL=2
+
+BORDER_WIDTH=3
+BACKGROUND_COLOR=0x002b36
+BORDER_FOCUSED=0x93a1a1
+BORDER_UNFOCUSED=0x586e75
+
+# Apply the same input behavior to touchpads, compatibility pointers, and
+# external mice on every host.
+POINTER_PATTERN="pointer-*"
+
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+host_config="$config_home/river/hosts/$(uname -n).sh"
+# shellcheck source=/dev/null
+[ -r "$host_config" ] && . "$host_config"
+
+PATH="$config_home/scripts:$PATH"
+WALLPAPER="${WALLPAPER:-$config_home/wallpaper}"
+
+export BAR_MODULES BAR_INTERVAL PATH WALLPAPER

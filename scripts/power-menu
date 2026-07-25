@@ -1,10 +1,9 @@
 #!/bin/sh
 
-opts="Lock Reboot Shutdown"
-
-choice=$(printf '%s\n' $opts | fuzzel --dmenu --minimal-lines)
-
-echo $choice
+choice=$(
+    printf '%s\n' "Lock" "Reboot" "Shutdown" |
+        fuzzel --dmenu --minimal-lines
+)
 
 case "$choice" in
     Lock)
@@ -17,7 +16,3 @@ case "$choice" in
         reboot
         ;;
 esac
-
-    
-
-

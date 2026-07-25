@@ -4,4 +4,8 @@
 dir="${SCREENSHOT_DIR:-$HOME/screenshots}"
 mkdir -p "$dir"
 
-grim -g "$(slurp)" "$dir/$(date +%Y%m%d_%H%M%S).png"
+geometry=$(slurp) || exit 0
+file="$dir/$(date +%Y%m%d_%H%M%S).png"
+
+grim -g "$geometry" "$file" &&
+    wl-copy --type image/png < "$file"

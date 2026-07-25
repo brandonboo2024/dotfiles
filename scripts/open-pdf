@@ -1,7 +1,7 @@
 #!/bin/sh
 
 select="$(
-    fd -a -I -e pdf -e epub --full-path . $HOME'/200_reading/' |
+    fd -a -I -e pdf -e epub --full-path . "$HOME/200_reading/" |
     sed "s|^${HOME}/200_reading/||" |
     fuzzel --dmenu -w 50
 )" || exit 0
@@ -10,4 +10,4 @@ select="$(
 
 filepath="$HOME/200_reading/$select"
 
-setsid -f env sioyek "$filepath" >/tmp/sioyek.log 2>&1 </dev/null 
+setsid -f env sioyek "$filepath" >/tmp/sioyek.log 2>&1 </dev/null

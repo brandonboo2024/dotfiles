@@ -1,3 +1,5 @@
+# shellcheck shell=sh disable=SC2034
+
 # Prometheus (Yoga): 3200x2000 internal panel driven at scale 1.
 #
 # Creek takes its font size and bar height in raw pixels and is not

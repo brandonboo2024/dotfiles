@@ -86,6 +86,29 @@ either may be customised into the other form, so handle both."
          (my/append-args consult-ripgrep-args my/global-search-args)))
     (consult-ripgrep my/global-search-root)))
 
+(defun my/open-project-forge ()
+  "Open the current project's forge page in the default browser."
+  (interactive)
+  (require 'project)
+  (let* ((project (project-current))
+         (directory
+          (if project
+              (project-root project)
+            default-directory))
+         (output (generate-new-buffer " *open-project-forge*"))
+         status)
+    (unwind-protect
+        (progn
+          (setq status
+                (call-process "open-github" nil output nil directory))
+          (if (and (integerp status) (zerop status))
+              (message "Opened forge page for %s" directory)
+            (user-error
+             "%s"
+             (string-trim
+              (with-current-buffer output (buffer-string))))))
+      (kill-buffer output))))
+
 (defun simple-scroll-down ()
   "Move half a screen below."
   (interactive)
@@ -105,5 +128,9 @@ either may be customised into the other form, so handle both."
 
 (global-set-key (kbd "C-c u") #'my/list-unsaved-buffers)
 (global-set-key "%" 'match-paren)
+
+(define-prefix-command 'my/git-prefix-map)
+(global-set-key (kbd "C-c g") 'my/git-prefix-map)
+(define-key my/git-prefix-map (kbd "o") #'my/open-project-forge)
 
 (provide 'keybinds)

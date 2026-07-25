@@ -1,3 +1,5 @@
+# shellcheck shell=sh
+
 # Sourced, not executed. Where the session scripts look for projects, kept in
 # one place so they cannot drift apart.
 #
