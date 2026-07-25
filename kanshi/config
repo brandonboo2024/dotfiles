@@ -21,9 +21,9 @@ profile desktop_duo {
 }
 
 profile desktop_single {
-        output HDMI-A-2 {
-               mode 1920x1080@180
-               position 2560,0
+        output DP-5 {
+               mode 2560x1440@165
+               position 0,0
                scale 1
                }
 }
