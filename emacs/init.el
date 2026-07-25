@@ -78,15 +78,24 @@
 ;; Symlink
 (setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
 
-;; Sync clipboard with emacs kill ring
-(setq interprogram-cut-function
-      (lambda (text)
-        (start-process "wl-copy" nil "wl-copy" text)))
-(setq interprogram-paste-function
-      (lambda ()
-        (shell-command-to-string "wl-paste --no-newline")))
-(setq select-enable-primary t)          
-(setq select-enable-clipboard t)
+;; Clipboard: in GUI mode Emacs handles clipboard natively via GTK/Wayland.
+;; In terminal (-nw) mode, fall back to wl-clipboard synchronously via stdin.
+(if (display-graphic-p)
+    ;; GUI Emacs — native GTK clipboard just works, no extra config needed.
+    (progn
+      (setq select-enable-primary t)
+      (setq select-enable-clipboard t))
+  ;; Terminal mode — use wl-clipboard synchronously via stdin
+  (setq interprogram-cut-function
+        (lambda (text)
+          (with-temp-buffer
+            (insert text)
+            (call-process-region (point-min) (point-max) "wl-copy"))))
+  (setq interprogram-paste-function
+        (lambda ()
+          (shell-command-to-string "wl-paste --no-newline")))
+  (setq select-enable-primary t)
+  (setq select-enable-clipboard t))
 
 (use-package kkp
   :if (not (display-graphic-p))
