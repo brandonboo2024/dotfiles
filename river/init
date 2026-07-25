@@ -55,8 +55,14 @@ riverctl xcursor-theme Bibata-Modern-Ice "$CURSOR_SIZE"
 riverctl focus-follows-cursor normal
 
 # Core keybinds
-riverctl map normal Super Return spawn "footclient -e emacsclient -nw"
-riverctl map normal Super+Shift Return spawn footclient
+# Three ways in, deliberately distinct:
+#   Super+E             a GUI Emacs frame, for org, images and PDFs
+#   Super+Return        a plain terminal
+#   Super+Shift+Return  Emacs in a terminal, for a quick edit
+# All three share one daemon, so they are views onto the same buffers.
+riverctl map normal Super E spawn "emacsclient -c"
+riverctl map normal Super Return spawn footclient
+riverctl map normal Super+Shift Return spawn "footclient -e emacsclient -nw"
 riverctl map normal Super B spawn firefox
 riverctl map normal Super Space spawn fuzzel
 riverctl map normal Super Q close
