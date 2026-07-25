@@ -12,4 +12,5 @@ var/
 etc/
 history
 recentf.eld
+emacs/games/
 *.elc

@@ -34,7 +34,7 @@
 (blink-cursor-mode -1)
 (setq visible-cursor (display-graphic-p))
 (pixel-scroll-precision-mode 1)
-(set-face-attribute 'default nil :font "Berkeley Mono" :height 180)
+(set-face-attribute 'default nil :font "Berkeley Mono" :height 220)
 (setq custom-safe-themes t)
 (use-package doric-themes
   :config
