@@ -52,15 +52,9 @@
               ("<backtab>" . dired-subtree-cycle)))
 
 ;;; Buffer hygiene
-;;
-;; The daemon runs for weeks, so buffers accumulate until the buffer list is
-;; useless. midnight kills off the ones that have not been displayed in three
-;; days. It is careful about what it takes: buffers with a live process (so
-;; shells and agent terminals survive), modified file buffers, visible
-;; buffers, *scratch* and *Messages* are all skipped.
 (use-package midnight
   :custom
-  (clean-buffer-list-delay-general 3) ; days
+  (clean-buffer-list-delay-general 1) ; days
   :config
   (midnight-mode 1))
 
