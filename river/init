@@ -210,8 +210,32 @@ riverctl rule-add -app-id 'float*' -title 'foo' float
 
 # Make all views with app-id "bar" and any title use client-side decorations
 riverctl rule-add -app-id "bar" csd
-riverctl rule-add -app-id "firefox" tags $((1 << 1))
-riverctl rule-add -app-id "emacsclient" tags $((1))
+
+# Tag layout. Rules place a window on its tag on its own, so the tag you are
+# on is a statement about what you are doing rather than where a window
+# happened to open. Tags 6-9 are deliberately left unruled and free.
+#
+#   1  Emacs and the main working environment
+#   2  tmux and agent sessions
+#   3  browser
+#   4  reading
+#   5  music and messaging
+#
+# Agent terminals carry app-id "agent", set by agent-session; without that
+# every foot window would be indistinguishable from every other.
+riverctl rule-add -app-id "emacs" tags $((1 << 0))
+riverctl rule-add -app-id "agent" tags $((1 << 1))
+riverctl rule-add -app-id "firefox" tags $((1 << 2))
+riverctl rule-add -app-id "sioyek" tags $((1 << 3))
+
+# Several candidates per application because the app-id differs between the
+# Wayland and XWayland builds, and a rule whose app-id does not match is
+# silently inert rather than an error. Confirm with `lswt` and prune.
+for app in spotify org.telegram.desktop telegram-desktop \
+           whatsapp-electron whatsapp-for-linux vesktop
+do
+    riverctl rule-add -app-id "$app" tags $((1 << 4))
+done
 
 # Consistent decorations
 riverctl rule-add ssd
