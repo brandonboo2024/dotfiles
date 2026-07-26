@@ -27,6 +27,24 @@
   :after corfu
   :config (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
+;; Modeline. The reason for a package here is meow: modal state is the single
+;; most-consulted piece of state in this config, and the default modeline
+;; renders it as unstyled text in a bar there is otherwise no reason to read.
+;;
+;; Left stock on purpose. Segment trimming (`mood-line-defformat') and any face
+;; work against doric belong in a later pass, once there is something to react
+;; to rather than a guess.
+(use-package mood-line
+  :config
+  ;; Unicode rather than the nerd-font glyph set. This daemon serves pgtk GUI
+  ;; frames and real tty frames from one process, and these render the same in
+  ;; both. `mood-line-glyphs-ascii' is the fallback if anything boxes in foot.
+  ;;
+  ;; setq in :config, not :custom: the value is a variable defined by the
+  ;; package, so it cannot be read before the package loads.
+  (setq mood-line-glyph-alist mood-line-glyphs-unicode)
+  (mood-line-mode))
+
 ;; Better buffer but more detailed, built-in
 (use-package ibuffer
   :ensure nil
