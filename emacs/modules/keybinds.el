@@ -56,15 +56,11 @@ either may be customised into the other form, so handle both."
   "Find files in the current project."
   (interactive)
   (require 'consult)
-  ;; `consult-async-min-input' defaults to 3, so consult will not spawn fd
-  ;; until three characters are typed and the minibuffer opens empty. A
-  ;; project is small and already ignore-filtered, so list it all immediately
-  ;; and let the preview work from the first keystroke.
-  ;;
-  ;; Deliberately not done for `my/global-fd' below, which runs fd with
-  ;; --no-ignore --hidden from `my/global-search-root', nor for either ripgrep
-  ;; command, where an empty pattern matches every line of every file. The
-  ;; threshold is load-bearing there rather than an annoyance.
+  ;; Default 3 means the minibuffer opens empty and nothing previews until
+  ;; three characters are typed. A project is small and already
+  ;; ignore-filtered, so list it all immediately. Not done for my/global-fd
+  ;; (fd --no-ignore --hidden from ~/) or either ripgrep command, where an
+  ;; empty pattern matches every line of every file.
   (let ((consult-async-min-input 0))
     (consult-fd nil)))
 
