@@ -59,22 +59,6 @@
   :bind (:map dired-mode-map
               ("<backtab>" . dired-subtree-cycle)))
 
-;;; Buffer hygiene
-(use-package midnight
-  :custom
-  (clean-buffer-list-delay-general 1) ; days
-  :config
-  (midnight-mode 1))
-
-;; Project-scoped equivalents of the buffer list and of killing buffers.
-;; project-list-buffers is the ibuffer view restricted to one project;
-;; project-kill-buffers closes a whole project in one go, which is what stops
-;; the accumulation at source. Both are built in and already on C-x p C-b and
-;; C-x p k; these bindings just put them next to the other C-c p commands.
-;;
-;; uniquify needs no configuration here: post-forward-angle-brackets has been
-;; the default since well before this Emacs, so same-named files across
-;; projects are already distinguishable.
 (use-package project
   :bind
   ("C-c p B" . project-list-buffers)

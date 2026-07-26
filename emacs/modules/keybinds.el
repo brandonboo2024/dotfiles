@@ -3,15 +3,7 @@
 ;; These two are defcustoms in consult, which is loaded lazily. Declaring them
 ;; special HERE, before anything below binds them, is what makes the `let's in
 ;; the search commands dynamic rather than lexical.
-;;
-;; Both failure modes this avoids are quiet ones. Without a declaration, `let'
-;; creates a lexical binding that consult never reads, so the extra arguments
-;; are silently ignored. And if consult happens to load after a lexical
-;; binding has already been established for the symbol, its defcustom errors
-;; with "Defining as dynamic an already lexical var" -- which is why such a
-;; command can appear to start working only after some other consult command
-;; has been run first.
-;;
+
 ;; Keep these at the top of the file, above every use.
 (defvar consult-fd-args)
 (defvar consult-ripgrep-args)
@@ -146,7 +138,11 @@ either may be customised into the other form, so handle both."
 (global-set-key (kbd "M-o") #'other-window)
 
 (global-set-key (kbd "C-c u") #'my/list-unsaved-buffers)
-(global-set-key "%" 'match-paren)
+;; match-paren is bound in meow-config.el, not here. meow builds its normal
+;; state keymap with (suppress-keymap map t), which rebinds every
+;; self-inserting character to `undefined' -- so a global binding on "%" is
+;; shadowed the moment meow-global-mode is on. Modified keys such as the C-v
+;; and M-v above are unaffected.
 
 (define-prefix-command 'my/git-prefix-map)
 (global-set-key (kbd "C-c g") 'my/git-prefix-map)

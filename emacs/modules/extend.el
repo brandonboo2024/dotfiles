@@ -3,9 +3,17 @@
 ;; Contains extensions/functionalities to further extend emacs
 ;; Are all useful/cannot be replaced, but I would not consider them important enough to be part of core.el in a major cleanse
 
+;; Zoom keys in pdf-view-mode: + / = enlarge, - shrink, 0 reset to
+;; `pdf-view-display-size', W fit width, H fit height, P fit page. `s b' crops
+;; to the text bounding box, which is the real fix for a scanned page with
+;; wide margins; `s r' undoes it.
 (use-package pdf-tools
   :straight nil
   :magic ("%PDF" . pdf-view-mode)
+  :custom
+  (pdf-view-display-size 'fit-page)
+  ;; Default 1.25 is a coarse step at this DPI.
+  (pdf-view-resize-factor 1.1)
   :config
   (pdf-loader-install))
 
@@ -16,6 +24,7 @@
 (setq send-mail-function 'mailclient-send-it)
 
 (use-package notmuch
+  :straight nil
   :commands (notmuch-hello)
   :custom
   (notmuch-database-path "~/mail")
@@ -68,7 +77,7 @@
 
 (use-package gptel
   :config
-  (setq gptel-model 'north-mini-code:free
+  (setq gptel-model 'cohere/north-mini-code:free
         gptel-backend
         (gptel-make-openai "OpenRouter"
           :host "openrouter.ai"
@@ -79,5 +88,7 @@
                     openrouter/owl-alpha
                     poolside/laguna-m.1:free))))
 
+;; meow lives in meow-config.el, which owns both its key tables and the
+;; package declaration.
 
 (provide 'extend)

@@ -17,6 +17,7 @@
   (expand-file-name path my/org-directory))
 
 (use-package org
+  :straight nil
   :custom
   (org-directory my/org-directory)
   (org-default-notes-file (my/org-file "inbox.org"))
@@ -27,14 +28,18 @@
   (org-preview-latex-default-process 'dvisvgm)
   (org-agenda-files
    (list (my/org-file "inbox.org")
-         (my/org-file "projects.org")
-         (my/org-file "roam/dailies/")))
+         (my/org-file "projects.org")))
   (org-log-done 'time)
+  (org-todo-keywords '((sequence "TODO(t)" "|" "DONE(d)" "CANCELLED(c@)")))
+  ;; Refile is what gives inbox.org an exit. Without it capture is just
+  ;; appending to a text file and the inbox becomes a junk drawer.
+  ;; Both variables are needed: -in-steps nil alone (as this file had it) does
+  ;; nothing unless -use-outline-path is also set.
+  (org-refile-targets `((,(my/org-file "projects.org") :maxlevel . 2)))
+  (org-refile-use-outline-path 'file)
   (org-outline-path-complete-in-steps nil)
+  (org-refile-allow-creating-parent-nodes 'confirm)
   (org-id-link-to-org-use-id 'create-if-interactive)
-  ;; Only skip the prompt inside my own notes. Anything else -- a downloaded
-  ;; org file, or one an agent has written -- still asks before running elisp,
-  ;; python, C or shell.
   (org-confirm-babel-evaluate #'my/org-confirm-babel-evaluate)
   (org-archive-location (concat
                          (file-name-as-directory (my/org-file "archive"))
@@ -59,14 +64,42 @@
      (shell . t)
      (scheme . t)))
   
-  (setq org-capture-templates `(("i" "Inbox"
-                                 entry
-                                 (file ,org-default-notes-file)
-                                 "* TODO %?\n%U\n")))
-  
+  ;; Capture is the bottleneck, not the agenda. One dateless template meant
+  ;; every task arrived undated, so the agenda had nothing to show and the
+  ;; inbox stayed a flat list. These add the two shapes that actually produce
+  ;; agenda entries -- scheduled and deadlined -- at one keystroke each.
+  ;; Everything still lands in inbox.org; org-refile (C-c C-w) moves it into
+  ;; projects.org afterwards. Capturing straight into a project heading was
+  ;; considered and rejected: it hardcodes an outline path that changes.
+  (setq org-capture-templates
+        `(("i" "Inbox task" entry
+           (file ,(my/org-file "inbox.org"))
+           "* TODO %?\n%U\n")
+
+          ("t" "Scheduled task" entry
+           (file ,(my/org-file "inbox.org"))
+           "* TODO %?\nSCHEDULED: %^t\n%U\n")
+
+          ("d" "Task with deadline" entry
+           (file ,(my/org-file "inbox.org"))
+           "* TODO %?\nDEADLINE: %^t\n%U\n")
+
+          ("n" "Note" entry
+           (file ,(my/org-file "inbox.org"))
+           "* %?\n%U\n")))
+
+  ;; One view, not a suite. Today's dated items on top, everything still open
+  ;; below, so a single key answers both "what is due" and "what exists".
+  (setq org-agenda-custom-commands
+        '(("d" "Day and open tasks"
+           ((agenda "" ((org-agenda-span 'day)))
+            (todo "TODO"
+                  ((org-agenda-overriding-header "All open tasks")))))))
+
   :bind
   (("C-c o c" . org-capture)
   ("C-c o a" . org-agenda)
+  ("C-c o w" . org-refile)
   ("C-c o x" . org-archive-subtree)))
   
 (use-package org-roam

@@ -19,6 +19,21 @@
 
 (setq straight-use-package-by-default 1) ;; use-package integration by default
 
+;; Packages that ship with Emacs but that straight will happily clone from
+;; ELPA if something names them as a dependency. The clone then shadows the
+;; built-in, and the ELPA copy is frequently OLDER than what this Emacs ships:
+;; seq was pinned at 2.24 (July 2024) against an Emacs 32 built in 2026.
+;; Listing them here makes straight skip them outright.
+;;
+;; org is here for the same reason and one more: org-roam depends on org, so
+;; without this straight pulls org even though `use-package org' below says
+;; :straight nil. The clone tracked org's `main' branch -- a 10.0 pre-release
+;; -- while this Emacs ships a tagged 9.8.7. org-roam's database and org-cite
+;; both parse through org-element, which is exactly where pre-release churn
+;; lands.
+(dolist (pkg '(seq eldoc xref flymake external-completion org))
+  (add-to-list 'straight-built-in-pseudo-packages pkg))
+
 (setq no-littering-etc-directory
       (expand-file-name "etc/" my/emacs-data-directory)
       no-littering-var-directory
@@ -37,8 +52,8 @@
 (set-fringe-mode 10)
 (menu-bar-mode -1)
 (column-number-mode 1)
+(setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode 1)
-(menu-bar--display-line-numbers-mode-relative)
 (blink-cursor-mode -1)
 ;; This variable affects text terminals only. It must not be decided while a
 ;; daemon has no frames, because GUI and terminal frames can share one daemon.
@@ -59,6 +74,7 @@
 (repeat-mode 1)
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-save-visited-interval 60)
+(setq auto-revert-avoid-polling t) ;; revert based on events, rather than time
 (use-package savehist
   :straight nil
   :hook (after-init . savehist-mode))
@@ -124,9 +140,11 @@
 (require 'extend)
 (require 'notes)
 (require 'dev)
+(require 'meow-config)
 
 (when (file-exists-p custom-file)
   (load custom-file nil 'nomessage))
 
 ;; TODO:
-;; org-mode -> pdf integration -> latex -> terminal-emacs
+;; latex / pdf / citation workflow
+

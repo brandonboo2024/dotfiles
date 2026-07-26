@@ -11,6 +11,26 @@
 (use-package zig-mode
   :mode "\\.zig\\'")
 
+(use-package rust-mode
+  :mode "\\.rs\\'")
+
+(use-package markdown-mode
+  :mode (("\\.markdown\\'" . markdown-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("README\\.md\\'" . gfm-mode))
+  :custom
+  (markdown-fontify-code-blocks-natively t)
+  (markdown-enable-math t)
+  (markdown-hide-urls nil))
+
+(setq compilation-scroll-output 'first-error)
+
+(define-prefix-command 'my/build-prefix-map)
+(global-set-key (kbd "C-c b") 'my/build-prefix-map)
+(define-key my/build-prefix-map (kbd "b") #'project-compile)
+(define-key my/build-prefix-map (kbd "r") #'recompile)
+(define-key my/build-prefix-map (kbd "k") #'kill-compilation)
+
 (defconst my/clangd-compilation-database-candidates
   '("compile_commands.json"
     "build/compile_commands.json"
@@ -86,26 +106,31 @@
        (list (concat "--compile-commands-dir=" database-directory))))))
 
 (use-package eglot
+  :straight nil
   :hook
   ((c-mode
     c++-mode
     rust-mode
     python-mode
+    zig-mode
     nix-mode) . eglot-ensure)
-  ;; Under C-c l, not C-c r / C-c f. eglot-mode-map is a minor-mode map and
-  ;; therefore wins over the global bindings, so the old keys silently took
-  ;; over global ripgrep and fd in every buffer with a language server -- which
-  ;; is to say, in every buffer where code is actually written.
+  ;; ((typescript-mode tsx-mode js-mode) . eglot-ensure)
   :bind (:map eglot-mode-map
               ("C-c l a" . eglot-code-actions)
               ("C-c l r" . eglot-rename)
               ("C-c l f" . eglot-format)
-              ("C-c l d" . eldoc))
+              ("C-c l d" . eldoc)
+              ("C-c l n" . flymake-goto-next-error)
+              ("C-c l p" . flymake-goto-prev-error)
+              ("C-c l l" . flymake-show-buffer-diagnostics))
   :custom
   (eglot-autoshutdown t)
   :config
   (add-to-list 'eglot-server-programs
-               '((c-mode c++-mode) . my/eglot-clangd-contact)))
+               '((c-mode c++-mode) . my/eglot-clangd-contact))
+  (with-eval-after-load 'which-key
+    (which-key-add-keymap-based-replacements eglot-mode-map
+      "C-c l" "lsp")))
 
 ;; (use-package treesit
 ;;   :straight nil
