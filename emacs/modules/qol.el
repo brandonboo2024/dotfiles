@@ -71,7 +71,11 @@
    ;; project file tree belongs there. which-key already labels C-c p.
    ("C-c p d" . dirvish-side)
    :map dirvish-mode-map
-   ("<tab>" . dirvish-subtree-toggle))
+   ("<tab>" . dirvish-subtree-toggle)
+   ;; dirvish-override-dired-mode only gives dired the attributes above. The
+   ;; parent column and preview pane live in the full-frame layout, which
+   ;; nothing enters on its own -- without this, C-x d never previews.
+   ("<backtab>" . dirvish-layout-toggle))
   :config
   (dirvish-override-dired-mode))
 
