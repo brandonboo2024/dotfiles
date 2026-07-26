@@ -16,6 +16,41 @@
   :config
   (vertico-mode))
 
+;; Where candidates are displayed is vertico's concern, not consult's --
+;; consult only supplies the candidates, and shows previews through ordinary
+;; `display-buffer'. multiform lets the display be chosen per command, so the
+;; commands worth a window get one and the rest stay in the fast bottom
+;; minibuffer.
+;;
+;; :straight nil because MELPA's vertico recipe ships extensions/ alongside
+;; vertico itself. These are already built; nothing new is cloned.
+(use-package vertico-multiform
+  :straight nil
+  :after vertico
+  :custom
+  ;; Candidates in a narrow window on the left, preview on the right in the
+  ;; window that was already selected. Both constants are single values on
+  ;; purpose -- they are meant to be revised after looking at them on the
+  ;; panel, not predicted.
+  (vertico-buffer-display-action
+   '(display-buffer-in-direction
+     (direction . left)
+     (window-width . 0.3)))
+  (vertico-multiform-commands
+   ;; Only the four search wrappers from keybinds.el. M-x, consult-buffer and
+   ;; the rest keep the bottom minibuffer, where a two-keystroke command
+   ;; should not be rearranging windows.
+   ;;
+   ;; consult-line is deliberately absent: it previews by scrolling the
+   ;; current buffer, so giving it a window would displace the very thing it
+   ;; is previewing.
+   '((my/project-fd buffer)
+     (my/global-fd buffer)
+     (my/project-rg buffer)
+     (my/global-rg buffer)))
+  :config
+  (vertico-multiform-mode))
+
 (use-package corfu
   :custom
   (corfu-cycle t)
@@ -50,6 +85,12 @@
            "--max-columns=1000 --path-separator / "
            "--smart-case --no-heading --with-filename --line-number "
            "--search-zip"))
+  ;; my/project-fd now opens with the full file list already live, so these
+  ;; govern how the list feels while typing rather than how long it takes to
+  ;; appear at all. Upstream defaults are 0.2 / 0.5 / 0.2.
+  (consult-async-input-debounce 0.1)
+  (consult-async-input-throttle 0.3)
+  (consult-async-refresh-delay 0.1)
   :bind
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)

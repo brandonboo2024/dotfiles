@@ -1,12 +1,13 @@
 ;; -*- lexical-binding: t; -*-
 
-;; These two are defcustoms in consult, which is loaded lazily. Declaring them
-;; special HERE, before anything below binds them, is what makes the `let's in
-;; the search commands dynamic rather than lexical.
+;; These three are defcustoms in consult, which is loaded lazily. Declaring
+;; them special HERE, before anything below binds them, is what makes the
+;; `let's in the search commands dynamic rather than lexical.
 
 ;; Keep these at the top of the file, above every use.
 (defvar consult-fd-args)
 (defvar consult-ripgrep-args)
+(defvar consult-async-min-input)
 
 (defun match-paren(arg)
   "Go to the matching paren if on a paren; otherwise insert %."
@@ -55,7 +56,17 @@ either may be customised into the other form, so handle both."
   "Find files in the current project."
   (interactive)
   (require 'consult)
-  (consult-fd nil))
+  ;; `consult-async-min-input' defaults to 3, so consult will not spawn fd
+  ;; until three characters are typed and the minibuffer opens empty. A
+  ;; project is small and already ignore-filtered, so list it all immediately
+  ;; and let the preview work from the first keystroke.
+  ;;
+  ;; Deliberately not done for `my/global-fd' below, which runs fd with
+  ;; --no-ignore --hidden from `my/global-search-root', nor for either ripgrep
+  ;; command, where an empty pattern matches every line of every file. The
+  ;; threshold is load-bearing there rather than an annoyance.
+  (let ((consult-async-min-input 0))
+    (consult-fd nil)))
 
 (defun my/global-fd ()
   "Find files under `my/global-search-root', including ignored ones."
