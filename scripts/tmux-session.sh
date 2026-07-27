@@ -1,16 +1,14 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 DIRS=(
-	"$HOME/100_projects/"
-	"$HOME/101_school/"
-	"$HOME/nixos/"
-    "$HOME/nixos/config/"
+    "$HOME/Projects"
+    "$HOME/Papers"
 )
 
 if [[ $# -eq 1 ]]; then
 	selected=$1
 else
-	selected=$(fd . "${DIRS[@]}" --type=dir --max-depth=1 --full-path --base-directory $HOME \
+	selected=$(fd . "${DIRS[@]}" --type=directory --max-depth=1 --full-path --base-directory $HOME \
     | sed "s#^$HOME/\|^$HOME/##" \
     | sk --tmux center,80% )
 		# | sk --margin 10% --color="bw")

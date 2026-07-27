@@ -1,6 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
 (defvar consult-fd-args)
+(defvar consult-async-min-input)
 
 (defun match-paren(arg)
   "Go to the matching paren if on a paren; otherwise insert %."
@@ -29,6 +30,12 @@
   (interactive)
   (let ((consult-fd-args '("fd" "--no-ignore" "--full-path" "--color=never")))
     (call-interactively #'consult-fd)))
+
+(defun my/project-fd ()
+  "Find Files in Project, with no min-input"
+  (interactive)
+  (let ((consult-async-min-input -1))
+    (consult-fd (project-root (project-current t)))))
 
 (global-set-key (kbd "C-c u") #'my/list-unsaved-buffers)
 (global-set-key "%" 'match-paren)

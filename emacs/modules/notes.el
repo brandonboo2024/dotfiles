@@ -32,7 +32,7 @@
      ("zig")))
   
   :config
-  (plist-put org-format-latex-options :scale 1.5)
+  (plist-put org-format-latex-options :scale 0.9)
   (require 'org-tempo)
   
   (org-babel-do-load-languages

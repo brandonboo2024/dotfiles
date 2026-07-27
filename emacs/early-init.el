@@ -5,4 +5,7 @@
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
 
+;; Defer GC during startup; gcmh takes over once init finishes (see modules/qol.el)
+(setq gc-cons-threshold most-positive-fixnum)
+
 

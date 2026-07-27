@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/bash
 
-cd $(tmux run "echo #{pane_current_path}")
+cd $(tmux display-message -p "echo #{pane_current_path}")
 
 url=$(git remote get-url origin)
 

@@ -19,6 +19,9 @@
 
 (setq straight-use-package-by-default 1) ;; use-package integration by default
 
+;; Track per-package load time; inspect with M-x use-package-report
+(setq use-package-compute-statistics t)
+
 ;; Window Graphics
 (setq inhibit-startup-message t)
 (setq use-dialog-box nil)
@@ -32,8 +35,10 @@
 (menu-bar--display-line-numbers-mode-relative)
 (blink-cursor-mode -1)
 (pixel-scroll-precision-mode 1)
-(set-face-attribute 'default nil :font "Berkeley Mono" :height 150)
-(load-theme 'leuven)
+(set-face-attribute 'default nil :font "JetBrainsMono" :height 130)
+(use-package doric-themes)
+(use-package kanagawa-themes)
+(load-theme 'kanagawa-wave t)
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode
@@ -41,6 +46,7 @@
       initial-buffer-choice t)
 (auto-save-visited-mode 1)
 (global-auto-revert-mode 1)
+(repeat-mode 1)
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-save-visited-interval 60)
 (use-package savehist
@@ -58,11 +64,10 @@
 (setq-default indent-tabs-mode nil)
 (setq-default tab-always-indent 'complete)
 (dolist (mode '(term-mode-hook
-                vterm-mode-hook
                 eshell-mode-hook
                 eat-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
-(setq scroll-margin 20)
+(setq scroll-margin 30)
 (setq scroll-conservatively 101)
 (setq scroll-preserve-screen-position t)
 
@@ -96,4 +101,20 @@
 (require 'dev)
 
 ;; TODO:
+
 ;; org-mode -> pdf integration -> latex -> terminal-emacs
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("ae3e78dcf686c7b839a826a6735ea7266e94488ec1741096b2af78e4eb8fe185" default))
+ '(eglot-confirm-server-edits nil nil nil "Customized with use-package eglot")
+ '(org-log-into-drawer t))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

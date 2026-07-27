@@ -13,8 +13,15 @@
 
 
 (use-package vertico ;; Displays minibuffers in a nicer window
+  :demand t
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
   :config
-  (vertico-mode))
+  (vertico-mode)
+  (require 'vertico-directory))
 
 (use-package corfu
   :custom
@@ -41,7 +48,11 @@
   (which-key-idle-delay 0.3)
   :config
   (which-key-mode)
-  (which-key-setup-minibuffer))
+  (which-key-setup-minibuffer)
+  (which-key-add-key-based-replacements
+    "C-c o" "org"
+    "C-c p" "project"
+    "C-c l" "eglot"))
 
 (use-package consult
   :custom
@@ -54,10 +65,11 @@
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
   ("C-c r" . consult-ripgrep)
+  ("C-c p r" . consult-ripgrep)
   ("C-c f" . my/global-fd)
   ("C-c e" . consult-bookmark)
   ("C-c p b" . consult-project-buffer)
-  ("C-c p f" . consult-fd)) ;; C-x r to see register info, bookmarks are stored in registers
+  ("C-c p f" . my/project-fd)) ;; C-x r to see register info, bookmarks are stored in registers
 
 (use-package embark
   :bind
@@ -85,5 +97,8 @@
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key)
   ([remap describe-symbol]. helpful-symbol))
+
+(use-package project
+  :bind ("C-c p k" . project-kill-buffers))
 
 (provide 'core)
