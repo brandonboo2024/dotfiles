@@ -49,7 +49,7 @@
 (blink-cursor-mode -1)          ;; graphical frames
 (setq visible-cursor nil)       ;; terminal frames: don't ask for the blinking "very visible" cursor
 (pixel-scroll-precision-mode 1)
-(set-face-attribute 'default nil :font "JetBrainsMono" :height 130)
+(add-to-list 'default-frame-alist '(font . "JetBrains Mono-13"))
 (setq custom-safe-themes t)
 (use-package doric-themes)
 (use-package kanagawa-themes)
@@ -95,14 +95,49 @@
 ;; Symlink
 (setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
 
-;; Sync clipboard with emacs kill ring
-(setq interprogram-cut-function
-      (lambda (text)
-        (start-process "wl-copy" nil "wl-copy" text)))
-(setq interprogram-paste-function
-      (lambda ()
-        (shell-command-to-string "wl-paste --no-newline")))
-(setq select-enable-primary t)          
+;; Sync clipboard with emacs kill ring. Only TTY frames need a helper; GUI
+;; frames use the built-ins, checked per call since a daemon has no frame yet.
+(defvar my/clipboard-copy-command
+  (cond ((executable-find "wl-copy") '("wl-copy"))
+        ((executable-find "xclip")   '("xclip" "-selection" "clipboard" "-in"))
+        ((executable-find "xsel")    '("xsel" "--clipboard" "--input")))
+  "Command setting the system clipboard from stdin, or nil.
+Stdin rather than argv, so a leading dash or a huge kill can't be misread.")
+
+(defvar my/clipboard-paste-command
+  (cond ((executable-find "wl-paste") '("wl-paste" "--no-newline"))
+        ((executable-find "xclip")    '("xclip" "-selection" "clipboard" "-out"))
+        ((executable-find "xsel")     '("xsel" "--clipboard" "--output")))
+  "Command printing the system clipboard to stdout, or nil.")
+
+(defun my/clipboard-cut (text)
+  "Put TEXT on the system clipboard."
+  (if (display-graphic-p)
+      (gui-select-text text)
+    (when my/clipboard-copy-command
+      (let* ((process-connection-type nil)
+             (proc (apply #'start-process "clipboard-copy" nil
+                          my/clipboard-copy-command)))
+        (process-send-string proc text)
+        (process-send-eof proc)))))
+
+(defun my/clipboard-paste ()
+  "Return the system clipboard, or nil if unchanged or unavailable.
+Nil for unchanged is what stops yanks duplicating `kill-ring' entries."
+  (if (display-graphic-p)
+      (gui-selection-value)
+    (when my/clipboard-paste-command
+      (let ((text (with-temp-buffer
+                    (apply #'call-process (car my/clipboard-paste-command)
+                           nil t nil (cdr my/clipboard-paste-command))
+                    (buffer-string))))
+        (unless (or (string-empty-p text)
+                    (string-equal text (car kill-ring)))
+          text)))))
+
+(setq interprogram-cut-function #'my/clipboard-cut)
+(setq interprogram-paste-function #'my/clipboard-paste)
+(setq select-enable-primary t)
 (setq select-enable-clipboard t)
 
 (use-package kkp

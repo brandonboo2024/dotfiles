@@ -72,6 +72,9 @@
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is the base mode for all modes
 
+(use-package hl-todo
+  :hook (prog-mode . hl-todo-mode))
+
 ;; Smooths out GC pauses; pairs with the startup threshold bump in early-init.el
 (use-package gcmh
   :init
@@ -90,6 +93,101 @@
   (mood-line-glyph-alist mood-line-glyphs-fira-code)
   :config
   (mood-line-mode))
+
+;; centaur-tabs = buffers of the current project, on C-<tab>.
+;; tab-bar = workspaces, on the C-c t (SPC t) prefix, tmux-style.
+
+(defun my/centaur-tabs-buffer-groups ()
+  "Group tabs by project.el project; centaur-tabs' default wants projectile."
+  (list (if-let* ((proj (project-current)))
+            (project-name proj)
+          "Common")))
+
+(defvar my/centaur-tabs-extra-modes '(eat-mode dired-mode)
+  "Non-file-visiting modes that still earn a tab (dirvish derives from dired).")
+
+(defun my/centaur-tabs-eligible-p (buffer)
+  "Non-nil if BUFFER earns a tab.
+A whitelist: packages name working buffers whatever they like (dirvish's
+`*dirvish-batch*<random>'), so blacklisting names never ends."
+  (and (not (string-prefix-p " " (buffer-name buffer)))
+       (or (buffer-file-name buffer)
+           (with-current-buffer buffer
+             (apply #'derived-mode-p my/centaur-tabs-extra-modes)))))
+
+(defun my/centaur-tabs-buffer-list ()
+  "Buffers eligible for a tab.
+This, not `centaur-tabs-hide-tab-function', decides membership - that one
+is consulted only for the current buffer, to draw the row or not."
+  (seq-filter #'my/centaur-tabs-eligible-p (buffer-list)))
+
+(defun my/centaur-tabs-hide-tab (buffer)
+  "Non-nil if the tab row should be suppressed in BUFFER's window.
+Membership predicate plus dedicated windows - `dirvish-side' is too narrow."
+  (or (not (my/centaur-tabs-eligible-p buffer))
+      (when-let* ((win (get-buffer-window buffer)))
+        (window-dedicated-p win))))
+
+(use-package centaur-tabs
+  :demand t
+  :custom
+  (centaur-tabs-style "bar")
+  ;; Keep nil: the bar is an XPM built at mode init, which under a daemon has no
+  ;; frame yet, so the tab-line :eval dies and the row draws empty. Icons don't.
+  (centaur-tabs-set-bar nil)
+  (centaur-tabs-set-icons t)
+  (centaur-tabs-icon-type 'nerd-icons)
+  (centaur-tabs-set-modified-marker t)
+  (centaur-tabs-modified-marker "●")
+  (centaur-tabs-cycle-scope 'tabs) ;; C-<tab> stays inside the current group
+  (centaur-tabs-show-navigation-buttons nil)
+  (centaur-tabs-show-new-tab-button nil)
+  :bind (("C-<tab>" . centaur-tabs-forward)
+         ;; One chord, three spellings: GUI sends <iso-lefttab>, kkp <backtab>.
+         ("C-S-<tab>" . centaur-tabs-backward)
+         ("C-S-<iso-lefttab>" . centaur-tabs-backward)
+         ("C-<backtab>" . centaur-tabs-backward)
+         :map my/tabs-map
+         ("g" . centaur-tabs-switch-group)
+         ("[" . centaur-tabs-backward-group)
+         ("]" . centaur-tabs-forward-group)
+         ("<" . centaur-tabs-move-current-tab-to-left)
+         (">" . centaur-tabs-move-current-tab-to-right)
+         ("o" . centaur-tabs-kill-other-buffers-in-current-group))
+  :config
+  (setq centaur-tabs-buffer-groups-function #'my/centaur-tabs-buffer-groups
+        centaur-tabs-buffer-list-function #'my/centaur-tabs-buffer-list
+        centaur-tabs-hide-tab-function #'my/centaur-tabs-hide-tab)
+  (centaur-tabs-mode 1))
+
+(defun my/tab-bar-select-digit ()
+  "Select the tab-bar tab named by the digit that invoked this command."
+  (interactive)
+  (tab-bar-select-tab (- last-command-event ?0)))
+
+;; Must load after centaur-tabs: tab-bar grabs C-<tab> only if nothing else has.
+(use-package tab-bar
+  :straight nil
+  :custom
+  (tab-bar-show 1)              ;; the row appears only once there are 2+ tabs
+  (tab-bar-close-button-show nil)
+  (tab-bar-new-tab-choice "*scratch*")
+  :bind (:map my/tabs-map
+              ("c" . tab-new)
+              ("n" . tab-next)
+              ("p" . tab-previous)
+              ("l" . tab-recent)
+              ("k" . tab-close)
+              ("K" . tab-close-other)
+              ("," . tab-rename)
+              ("w" . tab-switch)
+              ("u" . tab-undo))
+  :config
+  ;; C-c t 1..9 jump to a workspace; one named command beats nine lambdas, which
+  ;; meow's keypad popup would list as nine "?closure" entries.
+  (dotimes (i 9)
+    (define-key my/tabs-map (number-to-string (1+ i)) #'my/tab-bar-select-digit))
+  (tab-bar-mode 1))
 
 (use-package dirvish
   :demand t

@@ -73,17 +73,20 @@ in both editors."
     rust-mode
     python-mode
     nix-mode) . eglot-ensure)
-  :bind (:map eglot-mode-map
-              ("C-c l a" . eglot-code-actions)
-              ("C-c l r" . eglot-rename)
-              ("C-c l f" . eglot-format)
-              ("C-c l d" . eldoc))
   :custom
   (eglot-autoshutdown t)
   (eglot-confirm-server-edits nil)
   ;; Follow xrefs into system headers outside the project (constant in C++)
   (eglot-extend-to-xref t)
   :config
+  ;; Named prefix for the keypad popup (see keybinds.el); not via :bind, which
+  ;; would build an anonymous C-c l map that the rebind below would then drop.
+  (define-prefix-command 'my/eglot-map)
+  (define-key my/eglot-map "a" #'eglot-code-actions)
+  (define-key my/eglot-map "r" #'eglot-rename)
+  (define-key my/eglot-map "f" #'eglot-format)
+  (define-key my/eglot-map "d" #'eldoc)
+  (define-key eglot-mode-map (kbd "C-c l") 'my/eglot-map)
   ;; The event log is a real allocation cost with a server as chatty as clangd.
   ;; eglot >= 1.17 (straight) uses the plist form; the 29.x built-in uses the
   ;; older integer variable.
@@ -93,10 +96,6 @@ in both editors."
   (add-to-list 'eglot-server-programs
                '((c-mode c++-mode objc-mode) . my/clangd-contact)))
 
-;; Linear, vim-like undo: undo never redoes and redo never undoes, so you can't
-;; fall into Emacs's undo-the-undo cycle. Remapping (rather than rebinding) means
-;; every existing route - C-/, M-_, and meow's `u' which dispatches through
-;; `meow--kbd-undo' = "C-/" - lands on undo-fu without further wiring.
 (use-package undo-fu
   :bind (([remap undo] . undo-fu-only-undo)
          ([remap undo-redo] . undo-fu-only-redo)))
@@ -116,9 +115,30 @@ in both editors."
   :hook
   (git-commit-setup . git-commit-turn-on-flyspell))
 
+(use-package diff-hl
+  :custom
+  ;; Bars fill the margin cell; the default "+ - !" reads as punctuation.
+  (diff-hl-margin-symbols-alist '((insert . "┃") (change . "┃") (delete . "▁")
+                                  (unknown . "?") (ignored . "i")
+                                  (reference . " ")))
+  :hook ((after-init . global-diff-hl-mode)
+         ;; magit stages behind vc's back; these keep the gutter honest.
+         (magit-pre-refresh . diff-hl-magit-pre-refresh)
+         (magit-post-refresh . diff-hl-magit-post-refresh))
+  :config
+  (diff-hl-flydiff-mode) ;; diff against the buffer, not just the last save
+  ;; Margin, not fringe: TTY frames have no fringe and one daemon serves both.
+  (diff-hl-margin-mode))
+
 (use-package agent-shell
   :bind (:map agent-shell-mode-map
          ("C-c c" . agent-shell-cycle-session-mode)
          ("C-<tab>" . nil)))
+
+;; Per-project direnv env for eglot and compilers. Kept last: envrc must hook
+;; `change-major-mode-after-body-hook' after everything else, so it runs first.
+(use-package envrc
+  :if (executable-find "direnv")
+  :hook (after-init . envrc-global-mode))
 
 (provide 'dev)

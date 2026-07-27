@@ -6,15 +6,25 @@
 ;; it, so everything bound elsewhere in this config keeps working unchanged:
 ;; C-x, C-s (consult-line), C-. (embark), M-o, C-v/M-v, C-x g (magit).
 ;;
-;; The SPC leader dispatches into `mode-specific-map' (C-c), so the prefixes
-;; set up in core.el come along for free:
-;;   SPC o …  -> C-c o …  (org)
-;;   SPC p …  -> C-c p …  (project)
-;;   SPC l …  -> C-c l …  (eglot)
+;; The SPC leader dispatches to C-c, so every prefix set up elsewhere comes
+;; along for free:
+;;   SPC o ...  -> C-c o ...  (org)
+;;   SPC p ...  -> C-c p ...  (project)
+;;   SPC l ...  -> C-c l ...  (eglot)
+;;   SPC t ...  -> C-c t ...  (tabs / workspaces)
 ;; SPC ? shows the cheatsheet, SPC / describes what a keypad chord resolved to.
 ;;
 ;; NOTE: this file is meow-config.el, not meow.el - a modules/meow.el would
 ;; shadow the package's own meow.el on `load-path'.
+
+(defun my/meow-keypad-title (def)
+  "Render a `my/foo-map' prefix keymap as `+foo' in the keypad popup.
+Uninterned on purpose: an interned `org' may be a command, which prints
+differently."
+  (let ((name (and (symbolp def) (symbol-name def))))
+    (if (and name (string-match "\\`my/\\(.+\\)-map\\'" name))
+        (make-symbol (match-string 1 name))
+      (meow-keypad-get-title def))))
 
 (defun my/meow-redo ()
   "Cancel current selection then redo.
@@ -116,7 +126,15 @@ enough here: `meow--cancel-selection' additionally clears
 
 (use-package meow
   :demand t
+  :custom
+  ;; A string keeps `meow--keypad-base-keymap' nil so lookups go through
+  ;; `key-binding'; with nil, minor-mode C-c maps (eglot's C-c l) are invisible.
+  (meow-keypad-leader-dispatch "C-c")
+  ;; Frees SPC m / SPC g for C-c m / C-c g; default m/g are eaten as M- and C-M-.
+  (meow-keypad-meta-prefix ?M)
+  (meow-keypad-ctrl-meta-prefix ?G)
   :config
+  (setq meow-keypad-get-title-function #'my/meow-keypad-title)
   (meow-setup)
   ;; Terminals must accept raw keys - normal state would eat every keystroke.
   ;; magit/dired/ibuffer and most special-mode derivatives are already covered

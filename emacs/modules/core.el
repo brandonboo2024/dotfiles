@@ -52,7 +52,8 @@
   (which-key-add-key-based-replacements
     "C-c o" "org"
     "C-c p" "project"
-    "C-c l" "eglot"))
+    "C-c l" "eglot"
+    "C-c t" "tabs"))
 
 (use-package consult
   :init
@@ -110,6 +111,9 @@
   ([remap describe-symbol]. helpful-symbol))
 
 (use-package project
-  :bind ("C-c p k" . project-kill-buffers))
+  ;; SPC x p is C-x C-p (`mark-page'), not C-x p - keypad Control-prefixes after
+  ;; a start key. SPC p p instead.
+  :bind (("C-c p p" . project-switch-project)
+         ("C-c p k" . project-kill-buffers)))
 
 (provide 'core)

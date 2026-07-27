@@ -3,6 +3,15 @@
 (defvar consult-fd-args)
 (defvar consult-async-min-input)
 
+;; Named prefix keymaps under C-c (= meow's SPC leader). Symbols, not the
+;; anonymous maps `define-key' implies, so meow's keypad popup can label them.
+(define-prefix-command 'my/org-map)
+(define-prefix-command 'my/project-map)
+(define-prefix-command 'my/tabs-map)
+(define-key mode-specific-map "o" 'my/org-map)
+(define-key mode-specific-map "p" 'my/project-map)
+(define-key mode-specific-map "t" 'my/tabs-map)
+
 (defun match-paren(arg)
   "Go to the matching paren if on a paren; otherwise insert %."
   (interactive "p")
