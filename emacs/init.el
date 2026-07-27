@@ -22,6 +22,19 @@
 ;; Track per-package load time; inspect with M-x use-package-report
 (setq use-package-compute-statistics t)
 
+;; no-littering works by rewriting path variables, so it MUST load before any
+;; package or built-in mode that reads one of those paths. Keep it here, right
+;; after the straight bootstrap and before everything else.
+(use-package no-littering
+  ;; Available via straight/elpa. Straight will install it.
+  :custom
+  (no-littering-etc-directory (expand-file-name "etc/" user-emacs-directory))
+  (no-littering-var-directory (expand-file-name "var/" user-emacs-directory)))
+
+;; Keep Custom's writes out of this file
+(setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+(load custom-file 'noerror 'nomessage)
+
 ;; Window Graphics
 (setq inhibit-startup-message t)
 (setq use-dialog-box nil)
@@ -33,9 +46,11 @@
 (column-number-mode 1)
 (global-display-line-numbers-mode 1)
 (menu-bar--display-line-numbers-mode-relative)
-(blink-cursor-mode -1)
+(blink-cursor-mode -1)          ;; graphical frames
+(setq visible-cursor nil)       ;; terminal frames: don't ask for the blinking "very visible" cursor
 (pixel-scroll-precision-mode 1)
 (set-face-attribute 'default nil :font "JetBrainsMono" :height 130)
+(setq custom-safe-themes t)
 (use-package doric-themes)
 (use-package kanagawa-themes)
 (load-theme 'kanagawa-wave t)
@@ -51,6 +66,9 @@
 (setq auto-save-visited-interval 60)
 (use-package savehist
   :straight nil
+  :custom
+  (history-length 1000)
+  (savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
   :hook (after-init . savehist-mode))
 
 (use-package recentf
@@ -99,22 +117,9 @@
 (require 'extend)
 (require 'notes)
 (require 'dev)
+;; Last, so meow's states sit on top of the final global map
+(require 'meow-config)
 
 ;; TODO:
 
 ;; org-mode -> pdf integration -> latex -> terminal-emacs
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("ae3e78dcf686c7b839a826a6735ea7266e94488ec1741096b2af78e4eb8fe185" default))
- '(eglot-confirm-server-edits nil nil nil "Customized with use-package eglot")
- '(org-log-into-drawer t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

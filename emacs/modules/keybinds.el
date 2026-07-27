@@ -37,7 +37,28 @@
   (let ((consult-async-min-input -1))
     (consult-fd (project-root (project-current t)))))
 
+(defun simple-scroll-down ()
+  "Move half a screen below."
+  (interactive)
+  (forward-line (floor (window-height) 2))
+  (setq this-command 'scroll-up-command))
+
+(defun simple-scroll-up ()
+  "Move half a screen above."
+  (interactive)
+  (forward-line (- (floor (window-height) 2)))
+  (setq this-command 'scroll-down-command))
+
+(global-set-key (kbd "C-v") #'simple-scroll-down)
+(global-set-key (kbd "M-v") #'simple-scroll-up)
+
+;; Built-in linear redo. It already lives on C-? and C-M-_, both awkward over a
+;; TTY; M-_ is unbound and mnemonic. (vundo on C-x u covers the tree case.)
+(global-set-key (kbd "M-_") #'undo-redo)
+
 (global-set-key (kbd "C-c u") #'my/list-unsaved-buffers)
 (global-set-key "%" 'match-paren)
+
+(global-set-key (kbd "M-o") #'other-window)
 
 (provide 'keybinds)

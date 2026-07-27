@@ -3,17 +3,17 @@
 ;; Contains extensions/functionalities to further extend emacs
 ;; Are all useful/cannot be replaced, but I would not consider them important enough to be part of core.el in a major cleanse
 
+;; Comes from the system (nixpkgs on the desktop), not straight. Guarded so the
+;; config is a no-op where epdfinfo isn't installed instead of erroring on the
+;; first PDF opened.
 (use-package pdf-tools
   :straight nil
+  :if (locate-library "pdf-tools")
   :magic ("%PDF" . pdf-view-mode)
   :config
   (pdf-loader-install))
 
-(use-package no-littering
-  ;; Available via straight/elpa. Straight will install it.
-  :custom
-  (no-littering-etc-directory (expand-file-name "etc/" user-emacs-directory))
-  (no-littering-var-directory (expand-file-name "var/" user-emacs-directory)))
+;; no-littering lives in init.el - it has to load before anything reads a path.
 
 (use-package eat
   :custom

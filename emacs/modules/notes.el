@@ -13,6 +13,7 @@
   (org-startup-indented t)
   (org-startup-folded 'content)
   (org-src-content-indentation 0)
+  (org-log-into-drawer t)
   (org-preview-latex-default-process 'dvisvgm)
   (org-agenda-files
    (list (my/org-file "inbox.org")

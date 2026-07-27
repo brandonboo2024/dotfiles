@@ -5,6 +5,18 @@
 ;; to be removed should there be performance/cleanups
 ;; Theme remains in init.el
 
+;; Vanilla behaviour tweaks, no packages involved
+(setq use-short-answers t)              ;; y/n instead of typing out yes/no
+(setq enable-recursive-minibuffers t)   ;; M-x from inside a consult prompt
+(setq read-extended-command-predicate   ;; hide commands irrelevant to the mode
+      #'command-completion-default-include-p)
+(electric-pair-mode 1)
+
+;; Third leg alongside savehist and recentf: reopen a file where you left it
+(use-package saveplace
+  :straight nil
+  :hook (after-init . save-place-mode))
+
 (use-package nerd-icons
   :config
   (setq nerd-icons-font-family "JetBrainsMono Nerd Font"))
@@ -20,6 +32,18 @@
 (use-package nerd-icons-corfu
   :after corfu
   :config (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+;; Corfu's popup is a child frame and does not render in a terminal frame at
+;; all. Since emacs runs as a daemon and is used over a TTY, without this the
+;; completion UI (including corfu-popupinfo) is silently missing there.
+;; Deliberately NOT gated on (display-graphic-p): a daemon has no frame at init,
+;; and one daemon serves both GUI and TTY clients. corfu-terminal-disable-on-gui
+;; (default t) already falls back to corfu's child frame per-frame.
+(use-package corfu-terminal
+  :straight (:host codeberg :repo "akib/emacs-corfu-terminal")
+  :after corfu
+  :config
+  (corfu-terminal-mode +1))
 
 ;; Better buffer but more detailed, built-in
 (use-package ibuffer

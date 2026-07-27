@@ -55,6 +55,11 @@
     "C-c l" "eglot"))
 
 (use-package consult
+  :init
+  ;; Route xref (every eglot find-references / M-.) through the same previewing
+  ;; UI as the rest of navigation; embark can then export results to a buffer.
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
   :custom
   (consult-ripgrep-args
    (concat "rg --null --line-buffered --color=never "
@@ -84,7 +89,13 @@
 
 (use-package orderless ;; No more prefix-only matching
   :custom
-  (completion-styles '(orderless basic)))
+  (completion-styles '(orderless basic))
+  ;; eglot's capf declares its own completion category and LSP servers
+  ;; pre-filter, so orderless does not reach code completion without this.
+  (completion-category-overrides
+   '((eglot (styles orderless))
+     (eglot-capf (styles orderless))
+     (file (styles basic partial-completion)))))
 
 (use-package marginalia ;; Gives rich info on files selected in minibuffer
   :config
