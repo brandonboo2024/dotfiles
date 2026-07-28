@@ -33,12 +33,6 @@
   :after corfu
   :config (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
-;; Corfu's popup is a child frame and does not render in a terminal frame at
-;; all. Since emacs runs as a daemon and is used over a TTY, without this the
-;; completion UI (including corfu-popupinfo) is silently missing there.
-;; Deliberately NOT gated on (display-graphic-p): a daemon has no frame at init,
-;; and one daemon serves both GUI and TTY clients. corfu-terminal-disable-on-gui
-;; (default t) already falls back to corfu's child frame per-frame.
 (use-package corfu-terminal
   :straight (:host codeberg :repo "akib/emacs-corfu-terminal")
   :after corfu
@@ -75,6 +69,30 @@
 (use-package hl-todo
   :hook (prog-mode . hl-todo-mode))
 
+(use-package visual-fill-column
+  :commands (visual-fill-column-mode)
+  :custom
+  (visual-fill-column-center-text t))
+
+(use-package adaptive-wrap
+  :commands (adaptive-wrap-prefix-mode))
+
+(defun my/prose-wrap-setup ()
+  "Soft-wrap at `fill-column', centered, wrapping on word boundaries."
+  (visual-line-mode 1)
+  (visual-fill-column-mode 1))
+
+(defun my/markdown-wrap-setup ()
+  "As `my/prose-wrap-setup', plus the continuation indent that org gets from
+`org-indent-mode' - adaptive-wrap would clobber org's own `wrap-prefix', which
+is heading-aware as well as list-aware, so it is markdown-only."
+  (my/prose-wrap-setup)
+  (adaptive-wrap-prefix-mode 1))
+
+;; gfm-mode derives from markdown-mode, so README.md is covered too.
+(add-hook 'markdown-mode-hook #'my/markdown-wrap-setup)
+(add-hook 'org-mode-hook #'my/prose-wrap-setup)
+
 ;; Smooths out GC pauses; pairs with the startup threshold bump in early-init.el
 (use-package gcmh
   :init
@@ -91,6 +109,12 @@
 (use-package mood-line
   :custom
   (mood-line-glyph-alist mood-line-glyphs-fira-code)
+  (mood-line-segment-modal-meow-state-alist
+   '((normal . (" NORMAL " . (:inherit mood-line-status-neutral :inverse-video t :weight bold)))
+     (insert . (" INSERT " . (:inherit mood-line-status-success :inverse-video t :weight bold)))
+     (keypad . (" KEYPAD " . (:inherit mood-line-status-warning :inverse-video t :weight bold)))
+     (beacon . (" BEACON " . (:inherit mood-line-status-error   :inverse-video t :weight bold)))
+     (motion . (" MOTION " . (:inherit mood-line-status-info    :inverse-video t :weight bold)))))
   :config
   (mood-line-mode))
 
@@ -128,13 +152,24 @@ Membership predicate plus dedicated windows - `dirvish-side' is too narrow."
       (when-let* ((win (get-buffer-window buffer)))
         (window-dedicated-p win))))
 
+(defun my/centaur-tabs-refresh-bar (&optional frame)
+  "Rebuild the active-tab bar and the separators for FRAME.
+centaur-tabs bakes both at load time behind `display-graphic-p', so under
+`emacs --daemon' they are nil/unthemed forever.  `centaur-tabs-set-bar' is
+assigned only here, so it can never be `left' while the image is missing."
+  (with-selected-frame (or frame (selected-frame))
+    (when (display-graphic-p)
+      (setq centaur-tabs-active-bar
+            (centaur-tabs--make-xpm 'centaur-tabs-active-bar-face
+                                    2 centaur-tabs-bar-height)
+            centaur-tabs-set-bar (and centaur-tabs-active-bar 'left))
+      ;; centaur-tabs' only cache invalidator; also picks up `centaur-tabs-style'.
+      (centaur-tabs--after-load-theme))))
+
 (use-package centaur-tabs
   :demand t
   :custom
   (centaur-tabs-style "bar")
-  ;; Keep nil: the bar is an XPM built at mode init, which under a daemon has no
-  ;; frame yet, so the tab-line :eval dies and the row draws empty. Icons don't.
-  (centaur-tabs-set-bar nil)
   (centaur-tabs-set-icons t)
   (centaur-tabs-icon-type 'nerd-icons)
   (centaur-tabs-set-modified-marker t)
@@ -158,7 +193,10 @@ Membership predicate plus dedicated windows - `dirvish-side' is too narrow."
   (setq centaur-tabs-buffer-groups-function #'my/centaur-tabs-buffer-groups
         centaur-tabs-buffer-list-function #'my/centaur-tabs-buffer-list
         centaur-tabs-hide-tab-function #'my/centaur-tabs-hide-tab)
-  (centaur-tabs-mode 1))
+  (centaur-tabs-mode 1)
+  (add-hook 'server-after-make-frame-hook #'my/centaur-tabs-refresh-bar)
+  (add-hook 'after-make-frame-functions #'my/centaur-tabs-refresh-bar)
+  (my/centaur-tabs-refresh-bar))
 
 (defun my/tab-bar-select-digit ()
   "Select the tab-bar tab named by the digit that invoked this command."

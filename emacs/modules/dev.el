@@ -5,6 +5,15 @@
 (use-package nix-mode
   :mode "\\.nix\\'")
 
+(use-package markdown-mode
+  :mode (("\\.markdown\\'" . markdown-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("README\\.md\\'" . gfm-mode))
+  :custom
+  (markdown-fontify-code-blocks-natively t)
+  (markdown-enable-math t)
+  (markdown-hide-urls nil))
+
 (defun my/clangd-compile-commands-dir ()
   "Find the directory holding compile_commands.json for the
 current buffer. clangd only searches upward from the source file

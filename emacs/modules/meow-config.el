@@ -135,6 +135,11 @@ enough here: `meow--cancel-selection' additionally clears
   (meow-keypad-ctrl-meta-prefix ?G)
   :config
   (setq meow-keypad-get-title-function #'my/meow-keypad-title)
+  ;; Box cursor in every state. The state cue moves to the modeline badge set
+  ;; up in `mood-line-segment-modal-meow-state-alist' (modules/qol.el).
+  (setq meow-cursor-type-insert 'box
+        meow-cursor-type-keypad 'box
+        meow-cursor-type-region-cursor 'box)
   (meow-setup)
   ;; Terminals must accept raw keys - normal state would eat every keystroke.
   ;; magit/dired/ibuffer and most special-mode derivatives are already covered
