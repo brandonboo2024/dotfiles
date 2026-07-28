@@ -70,15 +70,13 @@
   :hook (prog-mode . hl-todo-mode))
 
 (use-package visual-fill-column
-  :commands (visual-fill-column-mode)
-  :custom
-  (visual-fill-column-center-text t))
+  :commands (visual-fill-column-mode))
 
 (use-package adaptive-wrap
   :commands (adaptive-wrap-prefix-mode))
 
 (defun my/prose-wrap-setup ()
-  "Soft-wrap at `fill-column', centered, wrapping on word boundaries."
+  "Soft-wrap at `fill-column', flush left, wrapping on word boundaries."
   (visual-line-mode 1)
   (visual-fill-column-mode 1))
 
@@ -88,6 +86,26 @@
 is heading-aware as well as list-aware, so it is markdown-only."
   (my/prose-wrap-setup)
   (adaptive-wrap-prefix-mode 1))
+
+(defun my/prose-wrap-toggle ()
+  "Toggle soft-wrapped prose against truncated lines, for wide tables.
+`visual-fill-column-mode' has to go too, or truncated lines scroll through a
+window artificially narrowed to `fill-column'.  In org, prefer C-c TAB
+\(`org-table-toggle-column-width') - it shrinks the table instead."
+  (interactive)
+  (if visual-line-mode
+      (progn
+        (visual-fill-column-mode -1)
+        (when (bound-and-true-p adaptive-wrap-prefix-mode)
+          (adaptive-wrap-prefix-mode -1))
+        (visual-line-mode -1)
+        (setq truncate-lines t))
+    (setq truncate-lines nil)
+    (if (derived-mode-p 'markdown-mode)
+        (my/markdown-wrap-setup)
+      (my/prose-wrap-setup))))
+
+(define-key mode-specific-map "w" #'my/prose-wrap-toggle)
 
 ;; gfm-mode derives from markdown-mode, so README.md is covered too.
 (add-hook 'markdown-mode-hook #'my/markdown-wrap-setup)

@@ -6,6 +6,7 @@
 ;; Whichkey + Helpful: Self-documentation
 ;; Consult: Better commands
 ;; Embark: Context aware actions
+;; Wgrep: Edit grep results in place
 ;; Orderless: Better matching
 ;; Marginalia: Pretty Info
 ;; Helpful: Nicer info
@@ -70,6 +71,11 @@
   :bind
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
+  ("M-y" . consult-yank-pop)
+  ;; M-g is `goto-map' and meow binds no Meta keys, so these work verbatim in
+  ;; normal state - no keypad detour. f/i are free in the default goto-map.
+  ("M-g f" . consult-flymake)
+  ("M-g i" . consult-imenu)
   ("C-c r" . consult-ripgrep)
   ("C-c p r" . consult-ripgrep)
   ("C-c f" . my/global-fd)
@@ -87,6 +93,15 @@
 
 (use-package embark-consult
   :after  (embark consult))
+
+;; Completes the search-and-replace loop: consult-ripgrep -> embark-export gives
+;; a read-only grep buffer, wgrep makes it editable and writes edits back.
+;; Deferred: the grep-mode entry point is registered from wgrep's autoloads.
+(use-package wgrep
+  :defer t
+  :custom
+  ;; Without this, applying edits leaves every touched file open and modified.
+  (wgrep-auto-save-buffer t))
 
 (use-package orderless ;; No more prefix-only matching
   :custom
