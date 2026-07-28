@@ -31,6 +31,9 @@
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
 
+;; Defer GC during startup; gcmh takes over afterward in modules/qol.el.
+(setq gc-cons-threshold most-positive-fixnum)
+
 ;; auto-save-default is nil, so no auto-save files are written -- but the
 ;; directory is created from this prefix regardless, and the default prefix
 ;; sits inside user-emacs-directory, which is this Git repository. Same class
@@ -38,4 +41,3 @@
 ;; reason: the path is consumed before no-littering can redirect it.
 (setq auto-save-list-file-prefix
       (expand-file-name "auto-save-list/.saves-" my/emacs-state-directory))
-

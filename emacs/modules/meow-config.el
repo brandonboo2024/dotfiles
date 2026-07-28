@@ -162,6 +162,9 @@
   ;; meow-keypad-literal-prefix. Everything else in C-c is fair game.
   (meow-keypad-ctrl-meta-prefix ?G)
   :config
+  (setq meow-cursor-type-insert 'box
+        meow-cursor-type-keypad 'box
+        meow-cursor-type-region-cursor 'box)
   (meow-setup)
   (meow-global-mode 1)
 
@@ -180,10 +183,12 @@
       "C-c p"   "project"
       "C-c e"   "external"
       "C-c g"   "git"
-      "C-c b"   "build")))
+      "C-c b"   "build"
+      "C-c t"   "tabs")))
 
 ;; Use pdf-view-mode in motion mode
-(dolist (entry '((pdf-view-mode . motion)))
+(dolist (entry '((pdf-view-mode . motion)
+                 (eat-mode . insert)))
   (add-to-list 'meow-mode-state-list entry))
 
 ;; Disable meow for notmuch

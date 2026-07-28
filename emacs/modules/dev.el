@@ -11,8 +11,7 @@
 (use-package zig-mode
   :mode "\\.zig\\'")
 
-(use-package rust-mode
-  :mode "\\.rs\\'")
+(add-to-list 'major-mode-remap-alist '(rust-mode . rust-ts-mode))
 
 (use-package markdown-mode
   :mode (("\\.markdown\\'" . markdown-mode)
@@ -31,14 +30,10 @@
 (define-key my/build-prefix-map (kbd "r") #'recompile)
 (define-key my/build-prefix-map (kbd "k") #'kill-compilation)
 
-(defconst my/clangd-compilation-database-candidates
-  '("compile_commands.json"
-    "build/compile_commands.json"
-    "build-debug/compile_commands.json"
-    "build-release/compile_commands.json"
-    "cmake-build-debug/compile_commands.json"
-    "cmake-build-release/compile_commands.json")
-  "Compilation database paths to check at each source ancestor.")
+(defconst my/clangd-build-directories
+  '("" "build" "build-debug" "build-release"
+    "cmake-build-debug" "cmake-build-release")
+  "Directories under the project root that may hold a compilation database.")
 
 (defconst my/make-project-files
   '("Makefile" "makefile" "GNUmakefile")
@@ -60,57 +55,64 @@
 
 (add-hook 'project-find-functions #'my/project-try-makefile)
 
-(defun my/clangd-compilation-database-directory (project)
-  "Return the nearest compilation database directory in PROJECT."
-  (let ((directory
-         (file-name-as-directory
-          (expand-file-name
-           (or (and buffer-file-name (file-name-directory buffer-file-name))
-               default-directory))))
-        (root
-         (file-name-as-directory
-          (expand-file-name (project-root project))))
-        found)
-    (while (and directory (not found))
-      (dolist (relative my/clangd-compilation-database-candidates)
-        (let ((candidate (expand-file-name relative directory)))
-          (when (and (not found) (file-readable-p candidate))
-            (setq found (file-name-directory candidate)))))
-      (setq directory
-            (cond
-             (found nil)
-             ((file-equal-p directory root) nil)
-             (t
-              (let ((parent
-                     (file-name-directory
-                      (directory-file-name directory))))
-                (and (file-in-directory-p parent root) parent))))))
-    found))
+(defun my/clangd-database-directory (project)
+  "Return the directory holding PROJECT's compile_commands.json, or nil.
+clangd only searches upward from the source file, so an out-of-tree
+build directory is never found on its own."
+  (or (locate-dominating-file default-directory "compile_commands.json")
+      (when-let* ((root (project-root project)))
+        (seq-find
+         (lambda (dir)
+           (file-readable-p (expand-file-name "compile_commands.json" dir)))
+         (mapcar (lambda (dir) (expand-file-name dir root))
+                 my/clangd-build-directories)))))
+
+(defvar my/clangd-query-driver
+  (string-join
+   '(;; Debian/Ubuntu system toolchains, including cross compilers
+     "/usr/bin/*gcc*" "/usr/bin/*g++*" "/usr/bin/*clang*"
+     "/usr/bin/c++" "/usr/bin/cc"
+     "/usr/local/bin/*gcc*" "/usr/local/bin/*g++*"
+     ;; Nix profiles
+     "/etc/profiles/per-user/*/bin/*" "/run/current-system/sw/bin/*"
+     "/nix/store/*/bin/*")
+   ",")
+  "Globs of compiler drivers clangd may interrogate for system include paths.
+Without this clangd guesses the libstdc++ location and gets it wrong whenever
+its guess doesn't match the installed GCC, producing spurious
+\"vector file not found\" errors on an otherwise valid translation unit.
+Non-matching globs are simply ignored, so one list covers every machine.")
 
 (defun my/eglot-clangd-contact (_interactive project)
   "Build the clangd command for PROJECT."
   (let ((database-directory
-         (my/clangd-compilation-database-directory project)))
+         (my/clangd-database-directory project)))
     (if database-directory
         (message "clangd: using %scompile_commands.json"
-                 database-directory)
+                 (file-name-as-directory database-directory))
       (message "clangd: no compilation database found under project root"))
     (append
-     '("clangd"
-       "--background-index"
-       "--clang-tidy"
-       "--completion-style=detailed"
-       "--enable-config"
-       "--header-insertion=never")
+     (list "clangd"
+           "--background-index"
+           "--clang-tidy"
+           "--completion-style=detailed"
+           "--enable-config"
+           "--header-insertion=never"
+           (concat "--query-driver=" my/clangd-query-driver)
+           (format "-j=%d" (max 1 (/ (num-processors) 2))))
      (when database-directory
        (list (concat "--compile-commands-dir=" database-directory))))))
+
+(setq-default eglot-workspace-configuration
+              '(:rust-analyzer (:check (:command "clippy")
+                                :procMacro (:enable t))))
 
 (use-package eglot
   :straight nil
   :hook
   ((c-mode
     c++-mode
-    rust-mode
+    rust-ts-mode
     python-mode
     zig-mode
     nix-mode) . eglot-ensure)
@@ -125,7 +127,12 @@
               ("C-c l l" . flymake-show-buffer-diagnostics))
   :custom
   (eglot-autoshutdown t)
+  (eglot-confirm-server-edits nil)
+  (eglot-extend-to-xref t)
   :config
+  (if (boundp 'eglot-events-buffer-config)
+      (setq eglot-events-buffer-config '(:size 0 :format full))
+    (set (intern "eglot-events-buffer-size") 0))
   (add-to-list 'eglot-server-programs
                '((c-mode c++-mode) . my/eglot-clangd-contact))
   (with-eval-after-load 'which-key
@@ -155,6 +162,12 @@
   (magit-display-buffer-function
    #'magit-display-buffer-same-window-except-diff-v1)
   :hook
-  (git-commit-setup . git-commit-turn-on-flyspell))
+  (git-commit-setup . git-commit-setup-flyspell))
+
+;; Per-project direnv environment for Eglot, compilers and subprocesses.
+;; Kept last so envrc's major-mode hook runs before the hooks added above.
+(use-package envrc
+  :if (executable-find "direnv")
+  :hook (after-init . envrc-global-mode))
 
 (provide 'dev)

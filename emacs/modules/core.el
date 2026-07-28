@@ -6,6 +6,7 @@
 ;; Whichkey + Helpful: Self-documentation
 ;; Consult: Better commands
 ;; Embark: Context aware actions
+;; Wgrep: Edit grep results in place
 ;; Orderless: Better matching
 ;; Marginalia: Pretty Info
 ;; Helpful: Nicer info
@@ -13,8 +14,15 @@
 
 
 (use-package vertico ;; Displays minibuffers in a nicer window
+  :demand t
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
   :config
-  (vertico-mode))
+  (vertico-mode)
+  (require 'vertico-directory))
 
 (use-package corfu
   :custom
@@ -44,6 +52,9 @@
   (which-key-setup-minibuffer))
 
 (use-package consult
+  :init
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
   :custom
   (consult-ripgrep-args
    (concat "rg --null --line-buffered --color=never "
@@ -57,6 +68,9 @@
   :bind
   ("C-x b" . consult-buffer)
   ("C-s" . consult-line)
+  ("M-y" . consult-yank-pop)
+  ("M-g f" . consult-flymake)
+  ("M-g i" . consult-imenu)
   ;; C-c <key> searches globally, C-c p <key> searches the project.
   ;; Both pairs are defined in keybinds.el.
   ("C-c r" . my/global-rg)
@@ -76,9 +90,18 @@
 (use-package embark-consult
   :after  (embark consult))
 
+(use-package wgrep
+  :defer t
+  :custom
+  (wgrep-auto-save-buffer t))
+
 (use-package orderless ;; No more prefix-only matching
   :custom
-  (completion-styles '(orderless basic)))
+  (completion-styles '(orderless basic))
+  (completion-category-overrides
+   '((eglot (styles orderless))
+     (eglot-capf (styles orderless))
+     (file (styles basic partial-completion)))))
 
 (use-package marginalia ;; Gives rich info on files selected in minibuffer
   :config

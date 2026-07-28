@@ -9,6 +9,9 @@
 (defvar consult-ripgrep-args)
 (defvar consult-async-min-input)
 
+(define-prefix-command 'my/tabs-map)
+(define-key mode-specific-map "t" 'my/tabs-map)
+
 (defun match-paren(arg)
   "Go to the matching paren if on a paren; otherwise insert %."
   (interactive "p")

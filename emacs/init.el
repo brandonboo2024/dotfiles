@@ -77,6 +77,9 @@
 (setq auto-revert-avoid-polling t) ;; revert based on events, rather than time
 (use-package savehist
   :straight nil
+  :custom
+  (history-length 1000)
+  (savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
   :hook (after-init . savehist-mode))
 
 (use-package recentf
@@ -147,4 +150,3 @@
 
 ;; TODO:
 ;; latex / pdf / citation workflow
-
