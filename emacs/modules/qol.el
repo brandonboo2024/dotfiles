@@ -25,9 +25,6 @@
   :config
   (nerd-icons-completion-marginalia-setup))
 
-;; No nerd-icons-dired here: dirvish draws dired's icons itself via its
-;; `nerd-icons' attribute, and running both double-renders every line.
-
 (use-package nerd-icons-ibuffer
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 
@@ -255,6 +252,7 @@ sessions without them until a graphical frame exists."
 (use-package project
   :bind
   ("C-c p B" . project-list-buffers)
+  ("C-c p p" . project-switch-project)
   ("C-c p k" . project-kill-buffers))
 
 (provide 'qol)
