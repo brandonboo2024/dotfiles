@@ -449,6 +449,7 @@ with properties and does not mutate Org priorities."
      (org-agenda-custom-commands
       . ,(copy-tree org-agenda-custom-commands))
      (org-agenda-prefix-format . ,(copy-tree org-agenda-prefix-format))
+     (org-agenda-hide-tags-regexp . ,org-agenda-hide-tags-regexp)
      (org-clock-persist . ,org-clock-persist)
      (org-clock-persist-file . ,org-clock-persist-file)
      (org-clock-out-when-done . ,org-clock-out-when-done)
@@ -507,6 +508,7 @@ with properties and does not mutate Org priorities."
           org-capture-templates (my/org-trial--capture-templates)
           org-agenda-prefix-format
           (copy-tree my/org-trial--agenda-prefix-format)
+          org-agenda-hide-tags-regexp "focus\\|today\\|dormant"
           org-clock-persist 'history
           org-clock-persist-file my/org-trial-clock-persist-file
           org-clock-out-when-done t
@@ -540,6 +542,7 @@ session."
                org-capture-templates
                org-agenda-custom-commands
                org-agenda-prefix-format
+               org-agenda-hide-tags-regexp
                org-clock-persist
                org-clock-persist-file
                org-clock-out-when-done

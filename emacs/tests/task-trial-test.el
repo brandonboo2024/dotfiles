@@ -34,6 +34,7 @@
              (todo . " %i %-12:c")
              (tags . " %i %-12:c")
              (search . " %i %-12:c")))
+          (org-agenda-hide-tags-regexp nil)
           (org-todo-keywords
            '((sequence "TODO(t)" "|" "DONE(d)" "CANCELLED(c@)")))
           (org-tag-alist '(("existing" . ?e)))
@@ -113,6 +114,8 @@
                    org-priority-default)
              original-priorities))
     (should (equal org-clock-persist 'history))
+    (should (equal org-agenda-hide-tags-regexp
+                   "focus\\|today\\|dormant"))
     (should (equal org-clock-persist-file
                    my/org-trial-clock-persist-file))
     (should org-clock-out-when-done)
