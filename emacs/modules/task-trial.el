@@ -420,14 +420,25 @@ with properties and does not mutate Org priorities."
       (unless (bolp)
         (insert "\n"))
       (insert "* Daily records\n"))
-    (let ((records-end
-           (save-excursion
-             (org-end-of-subtree t t))))
-      (goto-char (point-min))
-      (if (re-search-forward
-           (concat "^" (regexp-quote heading) "[ \t]*$")
-           records-end t)
-          (org-show-entry)
+    (org-back-to-heading t)
+    (let* ((records-start (point))
+           (record-level (1+ (org-current-level)))
+           (records-end
+            (save-excursion
+              (org-end-of-subtree t t)))
+           (record-position
+            (save-excursion
+              (goto-char records-start)
+              (catch 'record
+                (while (re-search-forward
+                        (concat "^" (regexp-quote heading) "[ \t]*$")
+                        records-end t)
+                  (when (= (org-current-level) record-level)
+                    (throw 'record (line-beginning-position))))))))
+      (if record-position
+          (progn
+            (goto-char record-position)
+            (org-show-entry))
         (goto-char records-end)
         (unless (bolp)
           (insert "\n"))

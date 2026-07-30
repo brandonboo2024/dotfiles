@@ -73,7 +73,14 @@
            (with-temp-file my/org-trial-calendar-file
              (insert "* Appointments\n"))
            (with-temp-file my/org-trial-log-file
-             (insert "* Daily records\n"))
+             (insert
+              "* Unrelated dated heading\n"
+              (format "** %s\n" (format-time-string "%Y-%m-%d %a"))
+              "* Daily record format\n"
+              ": ** YYYY-MM-DD Ddd\n"
+              ": - O:[Y/N] | P:[# planned]\n"
+              "* Daily records\n"
+              "* Checkpoints\n"))
            (with-temp-file my/org-trial-protocol-file
              (insert "* Protocol\n"))
            (org-set-regexps-and-options)
@@ -233,6 +240,20 @@
     (with-current-buffer (find-file-noselect my/org-trial-log-file)
       (save-buffer)
       (goto-char (point-min))
+      (re-search-forward "^\\* Daily records$")
+      (org-back-to-heading t)
+      (let ((records-end
+             (save-excursion
+               (org-end-of-subtree t t)))
+            (heading
+             (concat "^\\*\\* "
+                     (regexp-quote (format-time-string "%Y-%m-%d %a"))
+                     "$")))
+        (should (re-search-forward heading records-end t))
+        (should (= (org-current-level) 2))
+        (should (re-search-forward
+                 "V:\\[# false-overdue" records-end t)))
+      (goto-char (point-min))
       (let ((heading
              (concat "^\\*\\* "
                      (regexp-quote (format-time-string "%Y-%m-%d %a"))
@@ -240,8 +261,7 @@
             (count 0))
         (while (re-search-forward heading nil t)
           (setq count (1+ count)))
-        (should (= count 1))
-        (should (re-search-forward "V:\\[# false-overdue" nil t))))))
+        (should (= count 2))))))
 
 (ert-deftest my/org-trial-disable-restores-state ()
   (my/org-trial-test-with-fixture
