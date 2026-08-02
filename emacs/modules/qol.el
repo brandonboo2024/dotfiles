@@ -253,6 +253,7 @@ sessions without them until a graphical frame exists."
   :bind
   ("C-c p B" . project-list-buffers)
   ("C-c p p" . project-switch-project)
+  ("C-c p t" . my/open-project-agent-session)
   ("C-c p k" . project-kill-buffers))
 
 (provide 'qol)

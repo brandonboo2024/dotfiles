@@ -88,6 +88,21 @@ either may be customised into the other form, so handle both."
          (my/append-args consult-ripgrep-args my/global-search-args)))
     (consult-ripgrep my/global-search-root)))
 
+(defun my/open-project-agent-session ()
+  "Open or attach this project's native agent tmux session in Foot."
+  (interactive)
+  (let* ((project (project-current t))
+         (root (project-root project))
+         (config-home (or (getenv "XDG_CONFIG_HOME")
+                          (expand-file-name "~/.config")))
+         (launcher (expand-file-name "scripts/agent-session" config-home)))
+    (when (file-remote-p root)
+      (user-error "Agent sessions require a local project"))
+    (unless (file-executable-p launcher)
+      (user-error "Agent session launcher is not executable: %s" launcher))
+    (let ((process (start-process "agent-session" nil launcher root)))
+      (set-process-query-on-exit-flag process nil))))
+
 (defun my/forge-url-from-remote (remote)
   "Return the web URL for a supported Git REMOTE."
   (let (host path)

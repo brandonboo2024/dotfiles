@@ -14,6 +14,24 @@
 # shellcheck source=/dev/null
 . "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
 
+if [ "$#" -gt 1 ]; then
+    printf 'usage: agent-session [project-directory]\n' >&2
+    exit 2
+fi
+
+# Emacs supplies its current project directly. The no-argument path below
+# remains the interactive River/Fuzzel picker.
+if [ "$#" -eq 1 ]; then
+    target=$1
+    if [ ! -d "$target" ]; then
+        printf 'agent-session: not a directory: %s\n' "$target" >&2
+        exit 1
+    fi
+
+    exec footclient --app-id=agent -e tmux new-session -A \
+         -s "$(session_name "$target")" -c "$target"
+fi
+
 running=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
 
 menu=$(
