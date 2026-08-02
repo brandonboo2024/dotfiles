@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# River runs this once when the compositor starts. Keep long-running session
-# processes here; Super+Shift+R calls river/reload and never reruns this file.
+# River runs this once when the compositor starts. River-owned processes stay
+# here; supervised processes start through river-session.target below.
+# Super+Shift+R calls river/reload and never reruns this file.
 
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 
@@ -9,12 +10,17 @@ config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 . "$config_home/river/environment"
 "$config_home/river/reload"
 
+# D-Bus activation and systemd services must see River's display before the
+# target starts. Stopping first also clears a target left by an interrupted
+# prior session.
+dbus-update-activation-environment --systemd \
+    WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river XDG_SESSION_TYPE=wayland
+systemctl --user stop river-session.target
+systemctl --user start river-session.target
+
 kanshi &
 
 riverctl spawn "foot --server"
-riverctl spawn "emacsclient -e t >/dev/null 2>&1 || emacs --daemon"
-riverctl spawn "swayidle"
-riverctl spawn "mako"
 
 riverctl spawn "status-bar | creek -fn 'Berkeley Mono':size=$BAR_FONT_SIZE -hg $BAR_HEIGHT"
 riverctl spawn "swaybg -i $WALLPAPER"
@@ -23,8 +29,6 @@ riverctl spawn "swaybg -i $WALLPAPER"
 # thumbnails and retain screenshots copied as image/png.
 riverctl spawn "wl-paste --type text --watch cliphist store"
 riverctl spawn "wl-paste --type image --watch cliphist store"
-
-riverctl spawn "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river XDG_SESSION_TYPE=wayland"
 
 # River terminates the init process group when the session exits.
 rivertile -view-padding 6 -outer-padding 6 &
