@@ -90,6 +90,16 @@
   ([remap undo] . undo-fu-only-undo)
   ([remap undo-redo] . undo-fu-only-redo))
 
+(use-package vundo)
+
+(use-package jinx
+  :straight nil
+  :hook (text-mode . jinx-mode)
+  :bind ("M-$" . jinx-correct)
+  :custom
+  (jinx-languages "en_US")
+  (text-mode-ispell-word-completion nil))
+
 (use-package gptel
   :config
   (setq gptel-model 'openai/gpt-oss-20b:free

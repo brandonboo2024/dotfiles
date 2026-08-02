@@ -39,8 +39,8 @@
 (use-package cape
   :defer 10 ;; Loads function lazily
   :init
-  (add-to-list 'completion-at-point-functions #'cape-file) 
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev))
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-dabbrev))
 
 (use-package which-key
   :diminish which-key-mode ;; Hides minor mode from status bar

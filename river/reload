@@ -158,9 +158,9 @@ do
     riverctl map "$mode" None XF86Eject spawn 'eject -T'
 
     # Control pulse audio volume with pamixer (https://github.com/cdemoulins/pamixer)
-    riverctl map "$mode" None XF86AudioRaiseVolume spawn 'pamixer -i 5'
-    riverctl map "$mode" None XF86AudioLowerVolume spawn 'pamixer -d 5'
-    riverctl map "$mode" None XF86AudioMute spawn 'pamixer --toggle-mute'
+    riverctl map "$mode" None XF86AudioRaiseVolume spawn "pamixer -i 5 && pamixer --get-volume > \"\$XDG_RUNTIME_DIR/wob.sock\""
+    riverctl map "$mode" None XF86AudioLowerVolume spawn "pamixer -d 5 && pamixer --get-volume > \"\$XDG_RUNTIME_DIR/wob.sock\""
+    riverctl map "$mode" None XF86AudioMute spawn "pamixer --toggle-mute && if [ \"\$(pamixer --get-mute)\" = true ]; then printf '0\n'; else pamixer --get-volume; fi > \"\$XDG_RUNTIME_DIR/wob.sock\""
 
     # Control MPRIS aware media players with playerctl (https://github.com/altdesktop/playerctl)
     riverctl map "$mode" None XF86AudioMedia spawn 'playerctl play-pause'
@@ -169,8 +169,8 @@ do
     riverctl map "$mode" None XF86AudioNext spawn 'playerctl next'
 
     # Control screen backlight brightness with brightnessctl (https://github.com/Hummer12007/brightnessctl)
-    riverctl map "$mode" None XF86MonBrightnessUp spawn 'brightnessctl set +2.5%'
-    riverctl map "$mode" None XF86MonBrightnessDown spawn 'brightnessctl set 2.5%-'
+    riverctl map "$mode" None XF86MonBrightnessUp spawn "brightnessctl -m set +2.5% | cut -d, -f4 | tr -d '%' > \"\$XDG_RUNTIME_DIR/wob.sock\""
+    riverctl map "$mode" None XF86MonBrightnessDown spawn "brightnessctl -m set 2.5%- | cut -d, -f4 | tr -d '%' > \"\$XDG_RUNTIME_DIR/wob.sock\""
 done
 
 # Set background and border color

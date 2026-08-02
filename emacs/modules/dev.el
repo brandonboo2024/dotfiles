@@ -5,6 +5,8 @@
 (require 'project)
 (require 'seq)
 
+(add-hook 'emacs-lisp-mode-hook #'flymake-mode)
+
 (use-package nix-mode
   :mode "\\.nix\\'")
 
@@ -21,6 +23,14 @@
   (markdown-fontify-code-blocks-natively t)
   (markdown-enable-math t)
   (markdown-hide-urls nil))
+
+(use-package geiser
+  :demand t
+  :custom
+  (geiser-default-implementation 'guile))
+
+(use-package geiser-guile
+  :demand t)
 
 (require 'ansi-color)
 
@@ -143,7 +153,8 @@ Non-matching globs are simply ignored, so one list covers every machine.")
 
 (setq-default eglot-workspace-configuration
               '(:rust-analyzer (:check (:command "clippy")
-                                :procMacro (:enable t))))
+                                :procMacro (:enable t))
+                :nixd (:formatting (:command ["nixfmt"]))))
 
 (use-package eglot
   :straight nil
@@ -198,9 +209,15 @@ Non-matching globs are simply ignored, so one list covers every machine.")
   ("C-x g" . magit-status)
   :custom
   (magit-display-buffer-function
-   #'magit-display-buffer-same-window-except-diff-v1)
-  :hook
-  (git-commit-setup . git-commit-setup-flyspell))
+   #'magit-display-buffer-same-window-except-diff-v1))
+
+(use-package diff-hl
+  :custom
+  (diff-hl-side 'right)
+  :config
+  (global-diff-hl-mode)
+  (diff-hl-flydiff-mode)
+  (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
 ;; Per-project direnv environment for Eglot, compilers and subprocesses.
 ;; Kept last so envrc's major-mode hook runs before the hooks added above.
