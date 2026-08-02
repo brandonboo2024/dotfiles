@@ -19,19 +19,7 @@
 
 (setq straight-use-package-by-default 1) ;; use-package integration by default
 
-;; Packages that ship with Emacs but that straight will happily clone from
-;; ELPA if something names them as a dependency. The clone then shadows the
-;; built-in, and the ELPA copy is frequently OLDER than what this Emacs ships:
-;; seq was pinned at 2.24 (July 2024) against an Emacs 32 built in 2026.
-;; Listing them here makes straight skip them outright.
-;;
-;; org is here for the same reason and one more: org-roam depends on org, so
-;; without this straight pulls org even though `use-package org' below says
-;; :straight nil. The clone tracked org's `main' branch -- a 10.0 pre-release
-;; -- while this Emacs ships a tagged 9.8.7. org-roam's database and org-cite
-;; both parse through org-element, which is exactly where pre-release churn
-;; lands.
-(dolist (pkg '(seq eldoc xref flymake external-completion org))
+(dolist (pkg '(seq eldoc xref flymake external-completion project org))
   (add-to-list 'straight-built-in-pseudo-packages pkg))
 
 (setq no-littering-etc-directory
@@ -55,8 +43,6 @@
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode 1)
 (blink-cursor-mode -1)
-;; This variable affects text terminals only. It must not be decided while a
-;; daemon has no frames, because GUI and terminal frames can share one daemon.
 (setq visible-cursor t)
 (pixel-scroll-precision-mode 1)
 (set-face-attribute 'default nil :font "Berkeley Mono" :height 220)

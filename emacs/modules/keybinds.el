@@ -12,6 +12,11 @@
 (define-prefix-command 'my/tabs-map)
 (define-key mode-specific-map "t" 'my/tabs-map)
 
+;; Shell/terminal prefix. Declared here rather than in extend.el because both
+;; extend.el (eat) and qol.el (popper) bind into it, and this file loads first.
+(define-prefix-command 'my/shell-map)
+(define-key mode-specific-map "s" 'my/shell-map)
+
 (defun match-paren(arg)
   "Go to the matching paren if on a paren; otherwise insert %."
   (interactive "p")
@@ -88,20 +93,47 @@ either may be customised into the other form, so handle both."
          (my/append-args consult-ripgrep-args my/global-search-args)))
     (consult-ripgrep my/global-search-root)))
 
-(defun my/open-project-agent-session ()
-  "Open or attach this project's native agent tmux session in Foot."
+(defun my/eat-project (&optional arg)
+  "Open this project's eat terminal, or a plain one outside a project.
+`eat-project' calls (project-current t), which signals rather than falling
+back, so a terminal could not be opened from a non-project buffer at all.
+ARG is passed through: non-numeric creates a new session, numeric selects
+the session with that number."
+  (interactive "P")
+  (require 'eat)
+  (if (project-current)
+      (eat-project arg)
+    (eat nil arg)))
+
+(defun my/shell-command-root ()
+  "Return the current project's root, or `default-directory' outside one."
+  (if-let* ((project (project-current)))
+      (project-root project)
+    default-directory))
+
+(defun my/async-shell-command (command &optional output-buffer)
+  "Run COMMAND asynchronously from the project root.
+OUTPUT-BUFFER is passed through from the prefix argument, as in
+`async-shell-command'.
+
+The output buffer is named after COMMAND. Vanilla reuses one name and
+`async-shell-command-buffer' is set to `new-buffer', so three background
+jobs would otherwise be *Async Shell Command*, <2> and <3> -- unreadable
+in the popper cycle. Two runs of the same command still get a <2> suffix."
+  (interactive (list (read-shell-command "Async shell command: ")
+                     current-prefix-arg))
+  (let* ((default-directory (my/shell-command-root))
+         (shell-command-buffer-name-async
+          (format "*async: %s*"
+                  (truncate-string-to-width command 40 nil nil t))))
+    (async-shell-command command output-buffer)))
+
+(defun my/shell-command ()
+  "Run `shell-command' synchronously from the project root.
+Output lands in *Shell Command Output*, which popper treats as a popup."
   (interactive)
-  (let* ((project (project-current t))
-         (root (project-root project))
-         (config-home (or (getenv "XDG_CONFIG_HOME")
-                          (expand-file-name "~/.config")))
-         (launcher (expand-file-name "scripts/agent-session" config-home)))
-    (when (file-remote-p root)
-      (user-error "Agent sessions require a local project"))
-    (unless (file-executable-p launcher)
-      (user-error "Agent session launcher is not executable: %s" launcher))
-    (let ((process (start-process "agent-session" nil launcher root)))
-      (set-process-query-on-exit-flag process nil))))
+  (let ((default-directory (my/shell-command-root)))
+    (call-interactively #'shell-command)))
 
 (defun my/forge-url-from-remote (remote)
   "Return the web URL for a supported Git REMOTE."
@@ -163,11 +195,9 @@ either may be customised into the other form, so handle both."
 (global-set-key (kbd "M-o") #'other-window)
 
 (global-set-key (kbd "C-c u") #'my/list-unsaved-buffers)
-;; match-paren is bound in meow-config.el, not here. meow builds its normal
-;; state keymap with (suppress-keymap map t), which rebinds every
-;; self-inserting character to `undefined' -- so a global binding on "%" is
-;; shadowed the moment meow-global-mode is on. Modified keys such as the C-v
-;; and M-v above are unaffected.
+
+(define-key my/shell-map (kbd "a") #'my/async-shell-command)
+(define-key my/shell-map (kbd "!") #'my/shell-command)
 
 (define-prefix-command 'my/git-prefix-map)
 (global-set-key (kbd "C-c g") 'my/git-prefix-map)

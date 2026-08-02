@@ -22,11 +22,49 @@
   (markdown-enable-math t)
   (markdown-hide-urls nil))
 
-(setq compilation-scroll-output 'first-error)
+(require 'ansi-color)
+
+(setq compilation-scroll-output 'first-error
+      ;; Save modified buffers silently rather than prompting per file on
+      ;; every build.
+      compilation-ask-about-save nil
+      ;; recompile means recompile; do not ask whether to kill the running one.
+      compilation-always-kill t)
+
+;; Build tools emit colour when they detect a terminal, and direnv-provided
+;; toolchains frequently do. Without this the escape sequences render as
+;; literal garbage in the compilation buffer.
+(add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
+
+(defun my/compilation-close-on-success (buffer status)
+  "Dismiss BUFFER's popup window when STATUS reports a clean finish.
+Failures stay on screen.
+
+Deliberately not `popper-close-latest': that closes whichever popup is
+newest, which is the terminal rather than the build if one was opened while
+the build ran. Deleting this buffer's own side window is precise, and the
+buffer stays alive as a buried popup reachable through C-c s c.
+
+The one-second delay is also deliberate -- a window that vanishes the
+instant it appears reads as a glitch rather than as a result."
+  (when (and (bound-and-true-p popper-mode)
+             (string-prefix-p "finished" status))
+    (run-at-time
+     1 nil
+     (lambda ()
+       (when-let* ((window (get-buffer-window buffer)))
+         ;; Only ever close a popup window. If the buffer was promoted to a
+         ;; normal window, or is the sole window, leave it alone.
+         (when (and (window-parameter window 'window-side)
+                    (not (one-window-p 'nomini)))
+           (delete-window window)))))))
+
+(add-hook 'compilation-finish-functions #'my/compilation-close-on-success)
 
 (define-prefix-command 'my/build-prefix-map)
 (global-set-key (kbd "C-c b") 'my/build-prefix-map)
 (define-key my/build-prefix-map (kbd "b") #'project-compile)
+(define-key my/build-prefix-map (kbd "c") #'compile)
 (define-key my/build-prefix-map (kbd "r") #'recompile)
 (define-key my/build-prefix-map (kbd "k") #'kill-compilation)
 

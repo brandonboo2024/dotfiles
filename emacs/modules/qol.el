@@ -125,7 +125,8 @@ only a table needs to be narrowed."
   (setq mood-line-glyph-alist mood-line-glyphs-unicode)
   (mood-line-mode))
 
-;; centaur-tabs groups project buffers; tab-bar provides workspaces.
+;; centaur-tabs groups project buffers; tab-bar provides workspaces; popper
+;; owns transient buffers. Three separate axes, no overlap.
 
 (defun my/centaur-tabs-buffer-groups ()
   "Group tabs by the current project.el project."
@@ -133,7 +134,9 @@ only a table needs to be narrowed."
             (project-name project)
           "Common")))
 
-(defvar my/centaur-tabs-extra-modes '(eat-mode dired-mode)
+;; eat-mode used to be here. Terminals are popper popups now, so a tab for one
+;; would be a second, contradictory way to reach the same buffer.
+(defvar my/centaur-tabs-extra-modes '(dired-mode)
   "Non-file-visiting modes that still earn a tab.")
 
 (defun my/centaur-tabs-eligible-p (buffer)
@@ -225,6 +228,88 @@ sessions without them until a graphical frame exists."
                 #'my/tab-bar-select-digit))
   (tab-bar-mode 1))
 
+(defun my/popper-gptel-p (&optional buffer)
+  "Return non-nil when BUFFER is a gptel chat buffer.
+gptel-mode is a minor mode, so it cannot go in `popper-reference-buffers'
+as a mode symbol -- popper only matches those against `major-mode'. The
+optional argument is deliberate: popper has called predicates both with the
+buffer and with it merely current, and this shape survives either."
+  (with-current-buffer (or buffer (current-buffer))
+    (bound-and-true-p gptel-mode)))
+
+(defun my/popper-cleanup ()
+  "Kill every popup buffer whose process has finished.
+A day of builds and one-off commands leaves a long cycle of dead
+*compilation* and *async: ...* buffers. This reaps them in one go.
+
+Anything still running -- a live terminal, a build in progress, a long
+command -- is kept, so this is safe to run at any moment. File-visiting
+buffers are skipped outright: `popper-toggle-type' can promote one to a
+popup, and killing it could discard real work."
+  (interactive)
+  (let ((killed 0))
+    (dolist (buffer (buffer-list))
+      (when (and (popper-popup-p buffer)
+                 (not (buffer-file-name buffer))
+                 (let ((process (get-buffer-process buffer)))
+                   (or (null process)
+                       (not (memq (process-status process) '(run stop))))))
+        (kill-buffer buffer)
+        (setq killed (1+ killed))))
+    (popper--update-popups)
+    (message "Killed %d finished popup%s" killed (if (= killed 1) "" "s"))))
+
+(use-package popper
+  :demand t
+  :init
+  ;; `popper-group-by-project' signals a user-error unless `project-root' is
+  ;; already fboundp, and popper calls it while enabling popper-mode; without
+  ;; this the :config block aborts and popper-echo-mode is silently never on.
+  ;; Loading a built-in here is safe only because init.el pseudo-packages it.
+  (require 'project)
+  :custom
+  (popper-reference-buffers
+   '(eat-mode
+     compilation-mode
+     my/popper-gptel-p
+     ;; "\\*async: " is my/async-shell-command; the other two are what vanilla
+     ;; M-& and M-! produce.
+     "^\\*async: "
+     "\\*Async Shell Command\\*"
+     "\\*Shell Command Output\\*"
+     "\\*Backtrace\\*"
+     "\\*Warnings\\*"
+     ;; A `hide' entry is classified as a popup but never raised. These two are
+     ;; pure build noise -- straight rebuilds a package and the log window lands
+     ;; on top of whatever is being read. They stay reachable via C-x b, and
+     ;; C-c s c cycles to them.
+     ("\\*Native-compile-Log\\*" . hide)
+     ("\\*Async-native-compile-log\\*" . hide)
+     ("\\*Compile-Log\\*" . hide)
+     ("\\*straight-process\\*" . hide)))
+  ;; popper-window-height is deliberately left at its default,
+  ;; `popper--fit-window-height', which scales to the buffer and caps at a
+  ;; third of the frame. It wants chars or a function, not a fraction.
+  ;;
+  ;; Terminals are named per project by `eat-project', so grouping keeps
+  ;; C-c s c cycling inside the current project instead of across all of them.
+  (popper-group-function #'popper-group-by-project)
+  :bind (;; Bound twice on purpose: C-` is the muscle-memory key but does not
+         ;; reliably reach Emacs through a terminal, and C-c s s always does.
+         ("C-`" . popper-toggle)
+         :map my/shell-map
+         ("s" . popper-toggle)
+         ("c" . popper-cycle)
+         ("C" . popper-cycle-backwards)
+         ("p" . popper-toggle-type)
+         ;; k kills the one in front of you, K reaps every finished one.
+         ;; C-u C-u C-c s s buries them all without killing anything.
+         ("k" . popper-kill-latest-popup)
+         ("K" . my/popper-cleanup))
+  :config
+  (popper-mode 1)
+  (popper-echo-mode 1))
+
 (use-package dirvish
   :demand t
   :custom
@@ -250,10 +335,10 @@ sessions without them until a graphical frame exists."
   (dirvish-override-dired-mode))
 
 (use-package project
+  :straight nil
   :bind
   ("C-c p B" . project-list-buffers)
   ("C-c p p" . project-switch-project)
-  ("C-c p t" . my/open-project-agent-session)
-  ("C-c p k" . project-kill-buffers))
+   ("C-c p k" . project-kill-buffers))
 
 (provide 'qol)

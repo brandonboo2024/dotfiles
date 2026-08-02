@@ -184,6 +184,7 @@
       "C-c e"   "external"
       "C-c g"   "git"
       "C-c b"   "build"
+      "C-c s"   "shell"
       "C-c t"   "tabs")))
 
 ;; Use pdf-view-mode in motion mode

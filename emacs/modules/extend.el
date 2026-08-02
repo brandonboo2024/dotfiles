@@ -17,9 +17,24 @@
   :config
   (pdf-loader-install))
 
+;; Terminals are popper popups (see modules/qol.el): C-c s t opens or selects
+;; this project's terminal, C-c s s toggles it out of sight and back.
 (use-package eat
   :custom
-  (eat-term-name "xterm-256color"))
+  (eat-term-name "xterm-256color")
+  :bind (:map my/shell-map
+              ("t" . my/eat-project)
+              ("n" . eat)))
+
+;; async-shell-command defaults to reusing one buffer and asking what to do
+;; when it is busy, which turns a second background command into a prompt.
+;; A new buffer per invocation removes the question entirely; popper's
+;; "\\*Async Shell Command\\*" pattern matches the <2>, <3> suffixes too.
+;; Deferring the display until output arrives means a silent command never
+;; steals a window at all.
+(setq async-shell-command-buffer 'new-buffer
+      async-shell-command-display-buffer nil
+      shell-command-prompt-show-cwd t)
 
 (setq send-mail-function 'mailclient-send-it)
 
@@ -77,16 +92,14 @@
 
 (use-package gptel
   :config
-  (setq gptel-model 'cohere/north-mini-code:free
+  (setq gptel-model 'openai/gpt-oss-20b:free
         gptel-backend
         (gptel-make-openai "OpenRouter"
           :host "openrouter.ai"
           :endpoint "/api/v1/chat/completions"
           :stream t
           :key #'gptel-api-key
-          :models '(cohere/north-mini-code:free
-                    openrouter/owl-alpha
-                    poolside/laguna-m.1:free))))
+          :models '(openai/gpt-oss-20b:free))))
 
 ;; meow lives in meow-config.el, which owns both its key tables and the
 ;; package declaration.
