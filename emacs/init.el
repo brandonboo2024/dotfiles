@@ -128,6 +128,8 @@
 (require 'qol)
 (require 'extend)
 (require 'notes)
+(require 'task-trial)
+(my/org-trial-enable)
 (require 'dev)
 (require 'meow-config)
 
