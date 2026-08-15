@@ -42,7 +42,8 @@
 (column-number-mode 1)
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode 1)
-(blink-cursor-mode -1)
+;; Emacs initializes this option after init.el, so disable it afterward.
+(add-hook 'after-init-hook (lambda () (blink-cursor-mode -1)))
 (setq visible-cursor t)
 (pixel-scroll-precision-mode 1)
 (set-face-attribute 'default nil :font "Berkeley Mono" :height 220)
