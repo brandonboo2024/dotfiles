@@ -72,6 +72,10 @@
      (motion . (" MOTION " . (:inherit mood-line-status-info
                             :inverse-video t :weight bold)))))
   :config
+  ;; Reloading mood-line can replace the already-loaded Flymake updater with
+  ;; its lazy stub. Load the small checker module explicitly so the advice
+  ;; always targets a real function, including after config/package reloads.
+  (load "mood-line-segment-checker" nil 'nomessage)
   (setq mood-line-glyph-alist mood-line-glyphs-unicode)
   (mood-line-mode))
 

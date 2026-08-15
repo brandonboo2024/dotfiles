@@ -49,6 +49,10 @@
 (set-face-attribute 'default nil :font "Berkeley Mono" :height 180)
 (setq custom-safe-themes t)
 (load-theme 'newcomers-presets)
+;; The preset enables Flyspell in programming and text buffers. Jinx owns
+;; spell checking here, so do not start a second checker that requires ispell.
+(remove-hook 'prog-mode-hook #'flyspell-prog-mode)
+(remove-hook 'text-mode-hook #'flyspell-mode)
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode
