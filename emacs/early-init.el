@@ -29,8 +29,5 @@
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
 
-;; Defer GC during startup; gcmh takes over afterward in modules/qol.el.
-(setq gc-cons-threshold most-positive-fixnum)
-
 (setq auto-save-list-file-prefix
       (expand-file-name "auto-save-list/.saves-" my/emacs-state-directory))

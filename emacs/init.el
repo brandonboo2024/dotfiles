@@ -46,7 +46,7 @@
 (add-hook 'after-init-hook (lambda () (blink-cursor-mode -1)))
 (setq visible-cursor t)
 (pixel-scroll-precision-mode 1)
-(set-face-attribute 'default nil :font "Berkeley Mono" :height 220)
+(set-face-attribute 'default nil :font "Berkeley Mono" :height 180)
 (setq custom-safe-themes t)
 (use-package doric-themes
   :config
@@ -80,7 +80,6 @@
 (setq-default indent-tabs-mode nil)
 (setq-default tab-always-indent 'complete)
 (dolist (mode '(term-mode-hook
-                vterm-mode-hook
                 eshell-mode-hook
                 eat-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
@@ -129,8 +128,6 @@
 (require 'qol)
 (require 'extend)
 (require 'notes)
-(require 'task-trial)
-(my/org-trial-enable)
 (require 'dev)
 (require 'meow-config)
 

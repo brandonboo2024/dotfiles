@@ -3,38 +3,11 @@
 ;; Contains extensions/functionalities to further extend emacs
 ;; Are all useful/cannot be replaced, but I would not consider them important enough to be part of core.el in a major cleanse
 
-;; Zoom keys in pdf-view-mode: + / = enlarge, - shrink, 0 reset to
-;; `pdf-view-display-size', W fit width, H fit height, P fit page. `s b' crops
-;; to the text bounding box, which is the real fix for a scanned page with
-;; wide margins; `s r' undoes it.
-(use-package pdf-tools
-  :straight nil
-  :magic ("%PDF" . pdf-view-mode)
-  :custom
-  (pdf-view-display-size 'fit-page)
-  ;; Default 1.25 is a coarse step at this DPI.
-  (pdf-view-resize-factor 1.1)
-  :config
-  (pdf-loader-install))
-
-;; Terminals are popper popups (see modules/qol.el): C-c s t opens or selects
-;; this project's terminal, C-c s s toggles it out of sight and back.
 (use-package eat
+  :commands (eat)
   :custom
   (eat-term-name "xterm-256color")
-  :bind (:map my/shell-map
-              ("t" . my/eat-project)
-              ("n" . eat)))
-
-;; async-shell-command defaults to reusing one buffer and asking what to do
-;; when it is busy, which turns a second background command into a prompt.
-;; A new buffer per invocation removes the question entirely; popper's
-;; "\\*Async Shell Command\\*" pattern matches the <2>, <3> suffixes too.
-;; Deferring the display until output arrives means a silent command never
-;; steals a window at all.
-(setq async-shell-command-buffer 'new-buffer
-      async-shell-command-display-buffer nil
-      shell-command-prompt-show-cwd t)
+  :bind ("C-c s" . eat))
 
 (setq send-mail-function 'mailclient-send-it)
 
@@ -90,8 +63,6 @@
   ([remap undo] . undo-fu-only-undo)
   ([remap undo-redo] . undo-fu-only-redo))
 
-(use-package vundo)
-
 (use-package jinx
   :straight nil
   :hook (text-mode . jinx-mode)
@@ -100,6 +71,7 @@
   (jinx-languages "en_US")
   (text-mode-ispell-word-completion nil))
 
+;; uses ~/.authinfo
 (use-package gptel
   :config
   (setq gptel-model 'openai/gpt-oss-20b:free

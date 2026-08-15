@@ -178,19 +178,15 @@
 
   (with-eval-after-load 'which-key
     (which-key-add-keymap-based-replacements global-map
-      "C-c o"   "org"
-      "C-c o t" "roam tags"
       "C-c p"   "project"
       "C-c e"   "external"
       "C-c g"   "git"
       "C-c b"   "build"
-      "C-c s"   "shell"
-      "C-c t"   "tabs")))
+      "C-c t"   "tabs"))
 
-;; Use pdf-view-mode in motion mode
-(dolist (entry '((pdf-view-mode . motion)
-                 (eat-mode . insert)))
-  (add-to-list 'meow-mode-state-list entry))
+  ;; Terminal input should work immediately without entering Meow insert state
+  ;; by hand.
+  (add-to-list 'meow-mode-state-list '(eat-mode . insert)))
 
 ;; Disable meow for notmuch
 (defvar my/meow-disabled-modes

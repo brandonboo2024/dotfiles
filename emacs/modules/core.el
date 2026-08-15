@@ -6,11 +6,9 @@
 ;; Whichkey + Helpful: Self-documentation
 ;; Consult: Better commands
 ;; Embark: Context aware actions
-;; Wgrep: Edit grep results in place
 ;; Orderless: Better matching
 ;; Marginalia: Pretty Info
 ;; Helpful: Nicer info
-;; Org mode
 
 
 (use-package vertico ;; Displays minibuffers in a nicer window
@@ -89,11 +87,6 @@
 
 (use-package embark-consult
   :after  (embark consult))
-
-(use-package wgrep
-  :defer t
-  :custom
-  (wgrep-auto-save-buffer t))
 
 (use-package orderless ;; No more prefix-only matching
   :custom

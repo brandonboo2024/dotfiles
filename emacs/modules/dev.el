@@ -13,8 +13,6 @@
 (use-package zig-mode
   :mode "\\.zig\\'")
 
-(add-to-list 'major-mode-remap-alist '(rust-mode . rust-ts-mode))
-
 (use-package markdown-mode
   :mode (("\\.markdown\\'" . markdown-mode)
          ("\\.md\\'" . markdown-mode)
@@ -46,31 +44,6 @@
 ;; literal garbage in the compilation buffer.
 (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
 
-(defun my/compilation-close-on-success (buffer status)
-  "Dismiss BUFFER's popup window when STATUS reports a clean finish.
-Failures stay on screen.
-
-Deliberately not `popper-close-latest': that closes whichever popup is
-newest, which is the terminal rather than the build if one was opened while
-the build ran. Deleting this buffer's own side window is precise, and the
-buffer stays alive as a buried popup reachable through C-c s c.
-
-The one-second delay is also deliberate -- a window that vanishes the
-instant it appears reads as a glitch rather than as a result."
-  (when (and (bound-and-true-p popper-mode)
-             (string-prefix-p "finished" status))
-    (run-at-time
-     1 nil
-     (lambda ()
-       (when-let* ((window (get-buffer-window buffer)))
-         ;; Only ever close a popup window. If the buffer was promoted to a
-         ;; normal window, or is the sole window, leave it alone.
-         (when (and (window-parameter window 'window-side)
-                    (not (one-window-p 'nomini)))
-           (delete-window window)))))))
-
-(add-hook 'compilation-finish-functions #'my/compilation-close-on-success)
-
 (define-prefix-command 'my/build-prefix-map)
 (global-set-key (kbd "C-c b") 'my/build-prefix-map)
 (define-key my/build-prefix-map (kbd "b") #'project-compile)
@@ -79,29 +52,8 @@ instant it appears reads as a glitch rather than as a result."
 (define-key my/build-prefix-map (kbd "k") #'kill-compilation)
 
 (defconst my/clangd-build-directories
-  '("" "build" "build-debug" "build-release"
-    "cmake-build-debug" "cmake-build-release")
+  '("" "build")
   "Directories under the project root that may hold a compilation database.")
-
-(defconst my/make-project-files
-  '("Makefile" "makefile" "GNUmakefile")
-  "Make project markers recognized for C and C++ buffers.")
-
-(defun my/project-try-makefile (directory)
-  "Return the nearest Make-based C or C++ project above DIRECTORY."
-  (when (derived-mode-p 'c-mode 'c++-mode)
-    (when-let* ((root
-                 (locate-dominating-file
-                  directory
-                  (lambda (candidate)
-                    (seq-some
-                     (lambda (marker)
-                       (file-exists-p
-                        (expand-file-name marker candidate)))
-                     my/make-project-files)))))
-      (cons 'transient root))))
-
-(add-hook 'project-find-functions #'my/project-try-makefile)
 
 (defun my/clangd-database-directory (project)
   "Return the directory holding PROJECT's compile_commands.json, or nil.
@@ -152,20 +104,16 @@ Non-matching globs are simply ignored, so one list covers every machine.")
        (list (concat "--compile-commands-dir=" database-directory))))))
 
 (setq-default eglot-workspace-configuration
-              '(:rust-analyzer (:check (:command "clippy")
-                                :procMacro (:enable t))
-                :nixd (:formatting (:command ["nixfmt"]))))
+              '(:nixd (:formatting (:command ["nixfmt"]))))
 
 (use-package eglot
   :straight nil
   :hook
   ((c-mode
     c++-mode
-    rust-ts-mode
     python-mode
     zig-mode
     nix-mode) . eglot-ensure)
-  ;; ((typescript-mode tsx-mode js-mode) . eglot-ensure)
   :bind (:map eglot-mode-map
               ("C-c l a" . eglot-code-actions)
               ("C-c l r" . eglot-rename)
@@ -187,22 +135,6 @@ Non-matching globs are simply ignored, so one list covers every machine.")
   (with-eval-after-load 'which-key
     (which-key-add-keymap-based-replacements eglot-mode-map
       "C-c l" "lsp")))
-
-;; (use-package treesit
-;;   :straight nil
-;;   :custom
-;;   (treesit-font-lock-level 2)
-;;   :config
-;;   ;; Auto-enable treesitter major modes when grammar is available
-;;   (setq major-mode-remap-alist
-;;         '((c-mode . c-ts-mode)
-;;           (c++-mode . c-ts-mode)
-;;           (rust-mode . rust-ts-mode)
-;;           (python-mode . python-ts-mode)
-;;           (bash-mode . bash-ts-mode)
-;;           (json-mode . json-ts-mode)
-;;           (yaml-mode . yaml-ts-mode)
-;;           (dockerfile-mode . dockerfile-ts-mode))))
 
 (use-package magit
   :bind
