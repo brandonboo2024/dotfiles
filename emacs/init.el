@@ -48,9 +48,7 @@
 (pixel-scroll-precision-mode 1)
 (set-face-attribute 'default nil :font "Berkeley Mono" :height 180)
 (setq custom-safe-themes t)
-(use-package doric-themes
-  :config
-  (load-theme 'doric-beach))
+(load-theme 'newcomers-presets)
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode
