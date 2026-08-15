@@ -135,7 +135,6 @@
 (use-package project
   :straight nil
   :bind
-  ("C-c p B" . project-list-buffers)
   ("C-c p p" . project-switch-project)
   ("C-c p k" . project-kill-buffers))
 
