@@ -1,13 +1,15 @@
 #!/bin/sh
 
-select="$(
-    fd -a -I -e pdf -e epub --full-path . "$HOME/200_reading/" |
-    sed "s|^${HOME}/200_reading/||" |
-    fuzzel --dmenu -w 50
+filepath="$(
+    fd -a -I -e pdf -e epub --full-path . \
+        "$HOME/200_reading/" \
+        "$HOME/101_school_materials/" |
+    while IFS= read -r path; do
+        printf '%s\t%s\n' "$path" "${path##*/}"
+    done |
+    fuzzel --dmenu --with-nth=2 --accept-nth=1 --only-match -w 50
 )" || exit 0
 
-[ -n "$select" ] || exit 0
-
-filepath="$HOME/200_reading/$select"
+[ -n "$filepath" ] || exit 0
 
 setsid -f env sioyek "$filepath" >/tmp/sioyek.log 2>&1 </dev/null
