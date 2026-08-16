@@ -210,6 +210,7 @@ riverctl rule-add -app-id "emacs" tags $((1 << 0))
 riverctl rule-add -app-id "agent" tags $((1 << 1))
 riverctl rule-add -app-id "firefox" tags $((1 << 2))
 riverctl rule-add -app-id "sioyek" tags $((1 << 3))
+riverctl rule-add -app-id "slack" tags $((1 << 4))
 
 # Several candidates per application because the app-id differs between the
 # Wayland and XWayland builds, and a rule whose app-id does not match is
