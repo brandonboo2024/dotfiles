@@ -31,7 +31,9 @@
   :demand t)
 
 ;; Window Graphics
-(setq default-frame-alist '((undecorated . t)))
+(setq default-frame-alist
+      '((undecorated . t)
+        (font . "Berkeley Mono-22")))
 (setq inhibit-startup-message t)
 (setq use-dialog-box nil)
 (scroll-bar-mode -1)
@@ -46,9 +48,13 @@
 (add-hook 'after-init-hook (lambda () (blink-cursor-mode -1)))
 (setq visible-cursor t)
 (pixel-scroll-precision-mode 1)
-(set-face-attribute 'default nil :font "Berkeley Mono" :height 180)
 (setq custom-safe-themes t)
 (load-theme 'newcomers-presets)
+(electric-pair-mode -1)
+(custom-set-faces
+ '(default ((t (:family "Berkeley Mono" :height 220))))
+ '(fixed-pitch ((t (:family "Berkeley Mono"))))
+ '(variable-pitch ((t (:family "TeX Gyre Pagella" :height 240)))))
 ;; The preset enables Flyspell in programming and text buffers. Jinx owns
 ;; spell checking here, so do not start a second checker that requires ispell.
 (remove-hook 'prog-mode-hook #'flyspell-prog-mode)

@@ -89,12 +89,11 @@
   :after  (embark consult))
 
 (use-package orderless ;; No more prefix-only matching
-  :custom
-  (completion-styles '(orderless basic))
-  (completion-category-overrides
-   '((eglot (styles orderless))
-     (eglot-capf (styles orderless))
-     (file (styles basic partial-completion)))))
+  :config
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides
+        '((file (styles basic partial-completion)))))
 
 (use-package marginalia ;; Gives rich info on files selected in minibuffer
   :config

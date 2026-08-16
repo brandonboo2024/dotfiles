@@ -88,7 +88,7 @@
 (use-package tab-bar
   :straight nil
   :custom
-  (tab-bar-show 1)
+  (tab-bar-show 0)
   (tab-bar-close-button-show nil)
   (tab-bar-new-tab-choice "*scratch*")
   :bind (:map my/tabs-map
