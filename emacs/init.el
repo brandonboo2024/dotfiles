@@ -49,16 +49,25 @@
 (setq visible-cursor t)
 (pixel-scroll-precision-mode 1)
 (setq custom-safe-themes t)
-(load-theme 'newcomers-presets)
 (electric-pair-mode -1)
+
+;; Keep convenience behavior explicit instead of loading a broad preset.
+(setq frame-resize-pixelwise t
+      window-resize-pixelwise t
+      frame-inhibit-implied-resize t
+      save-interprogram-paste-before-kill t
+      imenu-auto-rescan t
+      shell-command-prompt-show-cwd t
+      vc-find-revision-no-save t)
+(delete-selection-mode 1)
+(context-menu-mode 1)
+(global-xref-mouse-mode 1)
+(global-completion-preview-mode 1)
+
 (custom-set-faces
- '(default ((t (:family "Berkeley Mono" :height 220))))
+ '(default ((t (:family "Berkeley Mono" :height 230))))
  '(fixed-pitch ((t (:family "Berkeley Mono"))))
- '(variable-pitch ((t (:family "TeX Gyre Pagella" :height 240)))))
-;; The preset enables Flyspell in programming and text buffers. Jinx owns
-;; spell checking here, so do not start a second checker that requires ispell.
-(remove-hook 'prog-mode-hook #'flyspell-prog-mode)
-(remove-hook 'text-mode-hook #'flyspell-mode)
+ '(variable-pitch ((t (:family "TeX Gyre Pagella" :height 270)))))
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode
@@ -89,7 +98,7 @@
 (setq-default tab-always-indent 'complete)
 (dolist (mode '(term-mode-hook
                 eshell-mode-hook
-                eat-mode-hook))
+                ghostel-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 (setq scroll-margin 20)
 (setq scroll-conservatively 101)

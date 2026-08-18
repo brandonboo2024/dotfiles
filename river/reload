@@ -216,7 +216,7 @@ riverctl rule-add -app-id "slack" tags $((1 << 4))
 # Wayland and XWayland builds, and a rule whose app-id does not match is
 # silently inert rather than an error. Confirm with `lswt` and prune.
 for app in spotify org.telegram.desktop telegram-desktop \
-           whatsapp-electron whatsapp-for-linux vesktop
+           com.github.dagmoller.whatsapp-electron vesktop
 do
     riverctl rule-del -app-id "$app" tags 2>/dev/null || true
     riverctl rule-add -app-id "$app" tags $((1 << 4))

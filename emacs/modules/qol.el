@@ -95,7 +95,6 @@
               ("c" . tab-new)
               ("n" . tab-next)
               ("p" . tab-previous)
-              ("l" . tab-recent)
               ("k" . tab-close)
               ("K" . tab-close-other)
               ("," . tab-rename)
@@ -137,5 +136,25 @@
   :bind
   ("C-c p p" . project-switch-project)
   ("C-c p k" . project-kill-buffers))
+
+;; Org-mode QOL
+(defun my/org-presentation ()
+  "Use a quiet, readable presentation in Org buffers."
+  (visual-line-mode 1)
+  (display-line-numbers-mode -1)
+  (setq-local line-spacing 0.15))
+
+(add-hook 'org-mode-hook #'my/org-presentation)
+
+(use-package org-modern
+  :hook
+  ((org-mode . org-modern-mode)
+   (org-agenda-finalize . org-modern-agenda)))
+
+(use-package visual-fill-column
+  :hook (org-mode . visual-fill-column-mode)
+  :custom
+  (visual-fill-column-width 100)
+  (visual-fill-column-center-text t))
 
 (provide 'qol)
