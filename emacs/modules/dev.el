@@ -137,11 +137,14 @@ Non-matching globs are simply ignored, so one list covers every machine.")
       "C-c l" "lsp")))
 
 (use-package magit
-  :bind
-  ("C-x g" . magit-status)
+  :bind (("C-x g" . magit-status)
+         :map project-prefix-map
+         ("v" . magit-status))
   :custom
   (magit-display-buffer-function
-   #'magit-display-buffer-same-window-except-diff-v1))
+   #'magit-display-buffer-same-window-except-diff-v1)
+  :config
+  (add-to-list 'project-switch-commands '(magit-status "Magit") t))
 
 (use-package diff-hl
   :custom
