@@ -69,7 +69,7 @@
 (custom-set-faces
  '(default ((t (:family "Berkeley Mono" :height 230))))
  '(fixed-pitch ((t (:family "Berkeley Mono"))))
- '(variable-pitch ((t (:family "ETBembo" :height 270)))))
+ '(variable-pitch ((t (:family "ETBembo" :height 260)))))
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode

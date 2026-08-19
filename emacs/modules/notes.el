@@ -70,6 +70,7 @@
                   org-todo
                   org-verbatim))
     (face-remap-add-relative face 'fixed-pitch))
+  (face-remap-add-relative 'org-table '(:height 0.9))
   (face-remap-add-relative
    'org-document-title '(:inherit variable-pitch :height 386))
   (face-remap-add-relative

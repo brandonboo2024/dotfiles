@@ -139,12 +139,12 @@ Non-matching globs are simply ignored, so one list covers every machine.")
 (use-package magit
   :bind (("C-x g" . magit-status)
          :map project-prefix-map
-         ("v" . magit-status))
+         ("v" . magit-project-status))
   :custom
   (magit-display-buffer-function
    #'magit-display-buffer-same-window-except-diff-v1)
   :config
-  (add-to-list 'project-switch-commands '(magit-status "Magit") t))
+  (add-to-list 'project-switch-commands '(magit-project-status "Magit") t))
 
 (use-package diff-hl
   :custom
