@@ -33,6 +33,7 @@
 ;; Window Graphics
 (setq default-frame-alist
       '((undecorated . t)
+        (internal-border-width . 24)
         (font . "Berkeley Mono-22")))
 (setq inhibit-startup-message t)
 (setq use-dialog-box nil)
@@ -46,7 +47,8 @@
 (global-display-line-numbers-mode 1)
 ;; Emacs initializes this option after init.el, so disable it afterward.
 (add-hook 'after-init-hook (lambda () (blink-cursor-mode -1)))
-(setq visible-cursor t)
+(setq visible-cursor t
+      cursor-in-non-selected-windows nil)
 (pixel-scroll-precision-mode 1)
 (setq custom-safe-themes t)
 (electric-pair-mode -1)
@@ -67,7 +69,7 @@
 (custom-set-faces
  '(default ((t (:family "Berkeley Mono" :height 230))))
  '(fixed-pitch ((t (:family "Berkeley Mono"))))
- '(variable-pitch ((t (:family "TeX Gyre Pagella" :height 270)))))
+ '(variable-pitch ((t (:family "ETBembo" :height 270)))))
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode

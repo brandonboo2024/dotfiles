@@ -121,7 +121,7 @@
   :bind
   (;; `d' is the only free letter left under the C-c p project prefix, and a
    ;; project file tree belongs there. which-key already labels C-c p.
-   ("C-c p d" . dirvish-side)
+   ("M-`" . dirvish-side)
    :map dirvish-mode-map
    ("<tab>" . dirvish-subtree-toggle)
    ;; dirvish-override-dired-mode only gives dired the attributes above. The
@@ -142,6 +142,7 @@
   "Use a quiet, readable presentation in Org buffers."
   (visual-line-mode 1)
   (display-line-numbers-mode -1)
+  (setq-local fill-column 72)
   (setq-local line-spacing 0.15))
 
 (add-hook 'org-mode-hook #'my/org-presentation)
@@ -151,10 +152,21 @@
   ((org-mode . org-modern-mode)
    (org-agenda-finalize . org-modern-agenda)))
 
+(use-package org-appear
+  :after org
+  :hook (org-mode . org-appear-mode))
+
 (use-package visual-fill-column
   :hook (org-mode . visual-fill-column-mode)
   :custom
-  (visual-fill-column-width 100)
+  (visual-fill-column-width 72)
   (visual-fill-column-center-text t))
+
+(use-package uniquify
+  :straight nil
+  :custom
+  (uniquify-buffer-name-style 'reverse)
+  (uniquify-separator " • ")
+  (uniquify-after-kill-buffer-p t))
 
 (provide 'qol)

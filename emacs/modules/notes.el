@@ -51,8 +51,33 @@
 (defun my/org-variable-pitch ()
   "Use variable-pitch prose and fixed-pitch structured text."
   (variable-pitch-mode 1)
-  (dolist (face '(org-block org-code org-formula org-table org-verbatim))
-    (face-remap-add-relative face 'fixed-pitch)))
+  (dolist (face '(org-block
+                  org-block-begin-line
+                  org-block-end-line
+                  org-checkbox
+                  org-code
+                  org-date
+                  org-document-info-keyword
+                  org-done
+                  org-drawer
+                  org-formula
+                  org-meta-line
+                  org-priority
+                  org-property-value
+                  org-special-keyword
+                  org-table
+                  org-tag
+                  org-todo
+                  org-verbatim))
+    (face-remap-add-relative face 'fixed-pitch))
+  (face-remap-add-relative
+   'org-document-title '(:inherit variable-pitch :height 386))
+  (face-remap-add-relative
+   'org-level-1 '(:inherit variable-pitch :height 347))
+  (face-remap-add-relative
+   'org-level-2 '(:inherit variable-pitch :height 309))
+  (face-remap-add-relative
+   'org-level-3 '(:inherit variable-pitch :height 289)))
 
 (use-package org
   :straight nil
@@ -66,6 +91,12 @@
   (org-special-ctrl-a/e t)
   (org-insert-heading-respect-content t)
   (org-ellipsis "…")
+  (org-auto-align-tags nil)
+  (org-tags-column 0)
+  (org-agenda-tags-column 0)
+  (org-hide-emphasis-markers t)
+  (org-pretty-entities t)
+  (org-pretty-entities-include-sub-superscripts nil)
   :hook (org-mode . my/org-variable-pitch)
   :config
   (setq org-agenda-files
