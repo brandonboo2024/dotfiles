@@ -31,6 +31,10 @@ Like normal Emacs `C-k'.  Kill to end of line and put content in kill-ring."
   :straight ghostel
   :hook (after-init . ghostel-compile-global-mode))
 
+(use-package ghostel-comint
+  :straight ghostel
+  :hook (after-init . ghostel-comint-global-mode))
+
 (setq send-mail-function 'mailclient-send-it)
 
 (use-package notmuch

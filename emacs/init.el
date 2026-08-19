@@ -69,7 +69,18 @@
 (custom-set-faces
  '(default ((t (:family "Berkeley Mono" :height 230))))
  '(fixed-pitch ((t (:family "Berkeley Mono"))))
- '(variable-pitch ((t (:family "IBM Plex Serif" :height 260)))))
+ '(variable-pitch ((t (:family "IBM Plex Sans" :height 260)))))
+
+;; Theme
+(use-package lambda-themes
+  :straight (:type git :host github :repo "lambda-emacs/lambda-themes")
+  :custom
+  (lambda-themes-set-italic-comments t)
+  (lambda-themes-set-italic-keywords t)
+  (lambda-themes-set-variable-pitch t)
+  (lambda-themes-set-vibrant t)
+  :config
+  (load-theme 'lambda-light))
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode

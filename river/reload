@@ -44,6 +44,12 @@ riverctl map normal Super+Shift S spawn screenshot-region
 riverctl map normal Super V spawn cliphist-fuzzel-img
 riverctl map normal Super Escape spawn networkmanager_dmenu
 
+# Fnott notification controls. Actions are selected with the Fuzzel helper
+# configured in fnott/fnott.ini.
+riverctl map normal Super N spawn "fnottctl dismiss"
+riverctl map normal Super+Shift N spawn "fnottctl dismiss all"
+riverctl map normal Super+Control N spawn "fnottctl actions"
+
 # Super+J and Super+K to focus the next/previous view in the layout stack
 riverctl map normal Super J focus-view next
 riverctl map normal Super K focus-view previous
