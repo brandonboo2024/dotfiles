@@ -119,14 +119,9 @@
      ("n" "~/nixos/"    "nixos")
      ("o" "~/org/"      "org")))
   :bind
-  (;; `d' is the only free letter left under the C-c p project prefix, and a
-   ;; project file tree belongs there. which-key already labels C-c p.
-   ("M-`" . dirvish-side)
+  (("M-`" . dirvish-side)
    :map dirvish-mode-map
    ("<tab>" . dirvish-subtree-toggle)
-   ;; dirvish-override-dired-mode only gives dired the attributes above. The
-   ;; parent column and preview pane live in the full-frame layout, which
-   ;; nothing enters on its own -- without this, C-x d never previews.
    ("<backtab>" . dirvish-layout-toggle))
   :config
   (dirvish-override-dired-mode))
@@ -140,6 +135,7 @@
 ;; Org-mode QOL
 (defun my/org-presentation ()
   "Use a quiet, readable presentation in Org buffers."
+  (org-indent-mode 1)
   (visual-line-mode 1)
   (display-line-numbers-mode -1)
   (setq-local fill-column 72)
@@ -148,6 +144,11 @@
 (add-hook 'org-mode-hook #'my/org-presentation)
 
 (use-package org-modern
+  :custom
+  (org-modern-star 'replace)
+  (org-modern-replace-stars '("●" "○" "✸" "✿"))
+  :custom-face
+  (org-modern-symbol ((t (:family "DejaVu Sans"))))
   :hook
   ((org-mode . org-modern-mode)
    (org-agenda-finalize . org-modern-agenda)))

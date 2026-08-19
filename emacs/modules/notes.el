@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
+;; Mainly configuration for prose
+
 (defun my/org-project-files ()
   "Return Org files below the projects directory."
   (directory-files-recursively
