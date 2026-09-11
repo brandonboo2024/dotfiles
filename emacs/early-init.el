@@ -1,6 +1,10 @@
 ;; To prevent straight.el and package.el to conflict  -*- lexical-binding: t; -*-
 (setq package-enable-at-startup nil)
 
+;; ensure native compilation for speed
+;; Ensure Emacs loads the most recent byte-compiled files.
+(setq load-prefer-newer t)
+
 ;; Keep generated package and state data out of the Git-controlled config.
 (defconst my/emacs-data-directory
   (expand-file-name

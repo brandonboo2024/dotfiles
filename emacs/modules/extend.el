@@ -100,14 +100,11 @@ Like normal Emacs `C-k'.  Kill to end of line and put content in kill-ring."
 ;; uses ~/.authinfo
 (use-package gptel
   :config
-  (setq gptel-model 'openai/gpt-oss-20b:free
+  (setq gptel-model 'deepseek-v4-flash
         gptel-backend
-        (gptel-make-openai "OpenRouter"
-          :host "openrouter.ai"
-          :endpoint "/api/v1/chat/completions"
+        (gptel-make-deepseek "DeepSeek"
           :stream t
-          :key #'gptel-api-key
-          :models '(openai/gpt-oss-20b:free))))
+          :key #'gptel-api-key)))
 
 ;; meow lives in meow-config.el, which owns both its key tables and the
 ;; package declaration.

@@ -30,6 +30,34 @@
 (use-package no-littering
   :demand t)
 
+(use-package compile-angel
+  :demand t
+  :config
+  ;; Set `compile-angel-verbose' to nil to disable compile-angel messages.
+  ;; (When set to nil, compile-angel won't show which file is being compiled.)
+  (setq compile-angel-verbose nil)
+
+  ;; The following directive prevents compile-angel from compiling your init
+  ;; files. If you choose to remove this push to `compile-angel-excluded-path-suffixes'
+  ;; and compile your pre/post-init files, ensure you understand the
+  ;; implications and thoroughly test your code. For example, if you're using
+  ;; the `use-package' macro, you'll need to explicitly add:
+  ;; (eval-when-compile (require 'use-package))
+  ;; at the top of your init file.
+  (push "/init.el" compile-angel-excluded-path-suffixes)
+  (push "/early-init.el" compile-angel-excluded-path-suffixes)
+
+  ;; Keep Straight's use-package setup interpreted in configuration modules.
+  (compile-angel-exclude-directory
+   (expand-file-name "modules/" user-emacs-directory))
+
+  ;; Uncomment the line below to compile automatically when an Elisp file is saved
+  ;; (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode)
+
+  ;; A global mode that compiles .el files when they are loaded
+  ;; using `load' or `require'.
+  (compile-angel-on-load-mode 1))
+
 ;; Window Graphics
 (setq default-frame-alist
       '((undecorated . t)
@@ -43,6 +71,7 @@
 (set-fringe-mode 10)
 (menu-bar-mode -1)
 (column-number-mode 1)
+(setq multiple-terminals-merge-keyboards 1)
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode 1)
 ;; Emacs initializes this option after init.el, so disable it afterward.
@@ -163,6 +192,3 @@
 
 (when (file-exists-p custom-file)
   (load custom-file nil 'nomessage))
-
-;; TODO:
-;; latex / pdf / citation workflow

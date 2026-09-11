@@ -100,12 +100,16 @@
   (org-hide-emphasis-markers t)
   (org-pretty-entities t)
   (org-pretty-entities-include-sub-superscripts nil)
+  (org-preview-latex-default-process 'dvisvgm)
+  (org-todo-keywords
+   '((type "TODO(t)" "EVENT(e)" "REMINDER(r)" "ADMIN(a)" "|" "DONE(d)")))
   :hook (org-mode . my/org-variable-pitch)
   :config
+  (setf (alist-get 'file org-link-frame-setup) #'find-file)
   (setq org-agenda-files
         (cons org-default-notes-file (my/org-project-files))
         org-capture-templates
-        '(("t" "Task" entry (file "") "* TODO %?")
+        '(("t" "Task" entry (file "") "* %^{Type|TODO|EVENT|REMINDER|ADMIN} %?")
           ("a" "Thought" entry (file "") "* %?")
           ("c" "Course index" plain
            (file my/org-capture-course-index-file)
@@ -119,7 +123,7 @@
 
 ** Resources
 
-* Units
+* Index
 
 * Suggested Readings
 
@@ -163,12 +167,41 @@
   (org-roam-capture-templates
    '(("d" "Distilled note" plain "%?"
       :target (file+head "${slug}.org"
-                         "#+title: ${title}\n")
+                         "#+title: ${title}
+* Parent(s)
+")
       :unnarrowed t)))
   :config
   (org-roam-db-autosync-mode)
   :bind
   (("C-c n f" . org-roam-node-find)
    ("C-c n i" . org-roam-node-insert)))
+
+(use-package tex
+  :straight nil
+  :demand t
+  :mode ("\\.tex\\'" . LaTeX-mode)
+  :hook ((LaTeX-mode . turn-on-reftex)
+         (LaTeX-mode . TeX-source-correlate-mode)
+         (LaTeX-mode . visual-line-mode))
+  :custom
+  (TeX-auto-save t)
+  (TeX-parse-self t)
+  (TeX-master nil)
+  (TeX-PDF-mode t)
+  (TeX-source-correlate-method 'synctex)
+  (TeX-source-correlate-start-server t)
+  (TeX-view-program-selection '((output-pdf "Sioyek")))
+  (reftex-plug-into-AUCTeX t))
+
+(use-package auctex-latexmk
+  :straight nil
+  :after tex
+  :custom
+  (auctex-latexmk-inherit-TeX-PDF-mode t)
+  :config
+  (auctex-latexmk-setup)
+  :hook
+  (LaTeX-mode . (lambda () (setq-local TeX-command-default "LatexMk"))))
 
 (provide 'notes)

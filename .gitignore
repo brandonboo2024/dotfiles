@@ -14,3 +14,4 @@ history
 recentf.eld
 emacs/games/
 *.elc
+tree-sitter/

@@ -108,6 +108,9 @@
   (tab-bar-mode 1))
 
 ;; Nicer dired
+(setq dired-kill-when-opening-new-dired-buffer t ;; prevent dired buffer overflow
+      dired-clean-confirm-killing-deleted-buffers nil)
+
 (use-package dirvish
   :demand t
   :custom
@@ -132,21 +135,34 @@
   ("C-c p p" . project-switch-project)
   ("C-c p k" . project-kill-buffers))
 
-;; Org-mode QOL
-(defun my/org-presentation ()
-  "Use a quiet, readable presentation in Org buffers."
-  (org-indent-mode 1)
+;; Prose presentation
+(defun my/presentation ()
+  "Use a quiet, readable presentation in Org and Markdown buffers."
+  (when (derived-mode-p 'org-mode)
+    (org-indent-mode 1))
   (visual-line-mode 1)
+  (variable-pitch-mode 1)
   (display-line-numbers-mode -1)
-  (setq-local fill-column 72)
+  (setq-local fill-column 120)
   (setq-local line-spacing 0.15))
 
-(add-hook 'org-mode-hook #'my/org-presentation)
+(add-hook 'org-mode-hook #'my/presentation)
+(add-hook 'markdown-mode-hook #'my/presentation)
 
 (use-package org-modern
   :custom
   (org-modern-star 'replace)
   (org-modern-replace-stars '("●" "○" "✸" "✿"))
+  (org-modern-todo-faces
+   '(("EVENT"
+      :background "green"
+      :foreground "white")
+     ("REMINDER"
+      :background "brown"
+      :foreground "white")
+     ("ADMIN"
+      :background "dark slate blue"
+      :foreground "white")))
   :custom-face
   (org-modern-symbol ((t (:family "DejaVu Sans"))))
   :hook
@@ -158,9 +174,12 @@
   :hook (org-mode . org-appear-mode))
 
 (use-package visual-fill-column
-  :hook (org-mode . visual-fill-column-mode)
+  :hook
+  ((org-mode . visual-fill-column-mode)
+   (markdown-mode . visual-fill-column-mode)
+   (LaTeX-mode . visual-fill-column-mode))
   :custom
-  (visual-fill-column-width 72)
+  (visual-fill-column-width 90)
   (visual-fill-column-center-text t))
 
 (use-package uniquify
