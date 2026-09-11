@@ -147,8 +147,9 @@ Non-matching globs are simply ignored, so one list covers every machine.")
   (add-to-list 'project-switch-commands '(magit-project-status "Magit") t))
 
 (use-package diff-hl
+  :hook (dired-mode . diff-hl-dired-mode)
   :custom
-  (diff-hl-side 'right)
+  (diff-hl-side 'left)
   :config
   (global-diff-hl-mode)
   (diff-hl-flydiff-mode)

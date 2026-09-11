@@ -109,4 +109,37 @@ Like normal Emacs `C-k'.  Kill to end of line and put content in kill-ring."
 ;; meow lives in meow-config.el, which owns both its key tables and the
 ;; package declaration.
 
+;; snippets
+(use-package yasnippet
+  :hook
+  (prog-mode . yas-minor-mode)
+  :custom
+  (yas-snippet-dirs (list (expand-file-name "snippets/" user-emacs-directory)))
+  (yas-triggers-in-field t))
+
+(use-package yasnippet-snippets
+  :after yasnippet)
+
+(use-package yasnippet-capf
+  :after yasnippet
+  :demand t
+  :hook (yas-minor-mode . my/yas-completion-setup)
+  :config
+  (require 'cape)
+
+  (defun my/yas-completion-setup ()
+    "Offer snippets through Corfu when Yasnippet is enabled."
+    (if yas-minor-mode
+        (add-hook 'completion-at-point-functions #'yasnippet-capf nil t)
+      (remove-hook 'completion-at-point-functions #'yasnippet-capf t)))
+
+  (defun my/eglot-capf-with-yasnippet (capf &rest args)
+    "Merge Eglot's CAPF with snippets, preserving both exit functions."
+    (cape-wrap-super (lambda () (apply capf args)) #'yasnippet-capf))
+
+  (with-eval-after-load 'eglot
+    (advice-add 'eglot-completion-at-point :around
+                #'my/eglot-capf-with-yasnippet)))
+
+
 (provide 'extend)
