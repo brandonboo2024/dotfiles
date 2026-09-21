@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-;; Mainly configuration for prose
+;; Config for note taking
 
 (defun my/org-project-files ()
   "Return Org files below the projects directory."
@@ -82,6 +82,14 @@
   (face-remap-add-relative
    'org-level-3 '(:inherit variable-pitch :height 289)))
 
+; for html exports
+(use-package htmlize
+  :defer t)
+
+;; Nix supplies the native zmq dependency; Straight manages the frontend.
+(use-package jupyter
+  :defer t)
+
 (use-package org
   :straight nil
   :custom
@@ -105,6 +113,22 @@
    '((type "TODO(t)" "EVENT(e)" "REMINDER(r)" "ADMIN(a)" "|" "DONE(d)")))
   :hook (org-mode . my/org-variable-pitch)
   :config
+  (require 'org-tempo)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (C . t)
+     (shell . t)
+     (python . t)
+     (jupyter . t)))
+  (with-eval-after-load 'ox-latex
+    (setq org-latex-src-block-backend 'minted)
+    (add-to-list 'org-latex-packages-alist '("" "minted")))
+  ;; Kernel setup and Org export create temporary buffers that need direnv.
+  (with-eval-after-load 'envrc
+    (dolist (command '(jupyter-run-repl jupyter-repl-restart-kernel
+                       org-export-as))
+      (advice-add command :around #'envrc-propagate-environment)))
   (setf (alist-get 'file org-link-frame-setup) #'find-file)
   (setq org-agenda-files
         (cons org-default-notes-file (my/org-project-files))
@@ -168,14 +192,15 @@
    '(("d" "Distilled note" plain "%?"
       :target (file+head "${slug}.org"
                          "#+title: ${title}
-* Parent(s)
+* ${title}
 ")
       :unnarrowed t)))
   :config
   (org-roam-db-autosync-mode)
   :bind
   (("C-c n f" . org-roam-node-find)
-   ("C-c n i" . org-roam-node-insert)))
+   ("C-c n i" . org-roam-node-insert)
+   ("C-c n l" . org-roam-buffer-toggle)))
 
 (use-package tex
   :straight nil

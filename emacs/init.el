@@ -19,7 +19,7 @@
 
 (setq straight-use-package-by-default 1) ;; use-package integration by default
 
-(dolist (pkg '(seq eldoc xref flymake external-completion project org))
+(dolist (pkg '(seq eldoc xref flymake external-completion project org zmq))
   (add-to-list 'straight-built-in-pseudo-packages pkg))
 
 (setq no-littering-etc-directory
