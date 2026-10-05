@@ -90,6 +90,43 @@
 (use-package jupyter
   :defer t)
 
+(with-eval-after-load 'jupyter-org-client
+  ;; Restarted kernels cannot finish requests belonging to the old process.
+  (defun my/jupyter-clear-restarted-org-requests (client)
+    "Clear stale Org execution markers after CLIENT successfully restarts."
+    (when (object-of-class-p client 'jupyter-org-client)
+      (let (requests)
+        (dolist (buffer (buffer-list))
+          (with-current-buffer buffer
+            (when (derived-mode-p 'org-mode)
+              (save-restriction
+                (widen)
+                (let ((pos (point-min)))
+                  (while (< pos (point-max))
+                    (let ((req (get-text-property pos 'jupyter-request)))
+                      (when (and (jupyter-org-request-p req)
+                                 (eq (jupyter-request-client req) client)
+                                 (not (jupyter-request-idle-p req)))
+                        (cl-pushnew req requests)))
+                    (setq pos (next-single-property-change
+                               pos 'jupyter-request nil (point-max)))))))))
+        (dolist (req requests)
+          (jupyter-org-abort req)))))
+
+  (advice-add 'jupyter-restart-kernel :after
+              #'my/jupyter-clear-restarted-org-requests)
+
+  ;; Compatibility workaround: emacs-jupyter/jupyter#607.
+  (defun my/jupyter-org-results-drawer-pre-blank (element)
+    "Supply the drawer spacing required by current Org interpreters."
+    (when (and (eq (org-element-type element) 'drawer)
+               (null (org-element-property :pre-blank element)))
+      (org-element-put-property element :pre-blank 0))
+    element)
+
+  (advice-add 'jupyter-org-results-drawer :filter-return
+              #'my/jupyter-org-results-drawer-pre-blank))
+
 (use-package org
   :straight nil
   :custom
@@ -107,6 +144,7 @@
   (org-agenda-tags-column 0)
   (org-hide-emphasis-markers t)
   (org-pretty-entities t)
+  (org-list-allow-alphabetical t)
   (org-pretty-entities-include-sub-superscripts nil)
   (org-preview-latex-default-process 'dvisvgm)
   (org-todo-keywords
@@ -124,8 +162,21 @@
   (with-eval-after-load 'ox-latex
     (setq org-latex-src-block-backend 'minted)
     (add-to-list 'org-latex-packages-alist '("" "minted")))
-  ;; Kernel setup and Org export create temporary buffers that need direnv.
+  (setq jupyter-org-auto-connect nil)
+
+  ; we remove hook to load on org-mode, and shift it to envrc
+  (remove-hook 'org-mode-hook #'org-babel-jupyter-make-local-aliases)
+
   (with-eval-after-load 'envrc
+    (add-hook 'envrc-mode-hook
+              (lambda ()
+                (when (and envrc-mode
+                           (derived-mode-p 'org-mode)
+                           (executable-find jupyter-executable))
+                  (org-babel-jupyter-make-local-aliases)))))
+
+  ;; when we restart the jupyter-kernel or export into other buffers, get envrc to carry over the environment to other buffers created
+    (with-eval-after-load 'envrc
     (dolist (command '(jupyter-run-repl jupyter-repl-restart-kernel
                        org-export-as))
       (advice-add command :around #'envrc-propagate-environment)))

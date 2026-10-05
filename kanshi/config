@@ -10,6 +10,19 @@ profile prometheus-internal {
                }
 }
 
+profile prometheus-dual {
+        output eDP-1 {
+               mode 3200x2000@165
+               position 0,0
+               scale 1
+        }
+        output HDMI-A-1 {
+               mode 1920x1080@180
+               position 3200,0
+               scale 1
+        }
+}
+
 profile hephaestus-dual {
         output DP-4 {
                mode 2560x1440@165
