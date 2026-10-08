@@ -179,7 +179,7 @@
    (markdown-mode . visual-fill-column-mode)
    (LaTeX-mode . visual-fill-column-mode))
   :custom
-  (visual-fill-column-width 90)
+  (visual-fill-column-width 130)
   (visual-fill-column-center-text t))
 
 (use-package uniquify

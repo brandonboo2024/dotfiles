@@ -12,9 +12,10 @@ config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 # D-Bus activation and systemd services must see River's display before the
 # target starts. Stopping first also clears a target left by an interrupted
-# prior session.
+# prior session. DISPLAY is River's Xwayland: without it, X-only clients
+# launched from services (sioyek forced onto xcb, via the Emacs daemon) abort.
 dbus-update-activation-environment --systemd \
-    WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river XDG_SESSION_TYPE=wayland
+    WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP=river XDG_SESSION_TYPE=wayland
 systemctl --user stop river-session.target
 systemctl --user start river-session.target
 
