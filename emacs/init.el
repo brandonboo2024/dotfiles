@@ -107,9 +107,11 @@
   (lambda-themes-set-italic-comments t)
   (lambda-themes-set-italic-keywords t)
   (lambda-themes-set-variable-pitch t)
-  (lambda-themes-set-vibrant t)
-  :config
-  (load-theme 'lambda-light))
+  (lambda-themes-set-vibrant t))
+
+(use-package vscode-dark-plus-theme
+  :ensure t
+  :config (load-theme 'vscode-dark-plus))
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode

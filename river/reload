@@ -228,6 +228,27 @@ do
     riverctl rule-add -app-id "$app" tags $((1 << 4))
 done
 
+# Zoom runs under XWayland (xwayland=true in zoomus.conf), so every window
+# shares the app-id "zoom". Float all of them by default, which catches the
+# toasts, settings, chat, participants, and screen-share toolbars, then tile
+# the main and meeting windows back in. Per-title rules beat the app-id-only
+# rule because river applies the most specific match.
+riverctl rule-del -app-id "zoom" float 2>/dev/null || true
+riverctl rule-add -app-id "zoom" float
+for title in "Zoom Workplace*" "Zoom Meeting" "Meeting" "Zoom - *"
+do
+    riverctl rule-del -app-id "zoom" -title "$title" no-float 2>/dev/null || true
+    riverctl rule-add -app-id "zoom" -title "$title" no-float
+done
+
+# Browser-side call helpers: the screen-sharing indicator and
+# picture-in-picture video.
+for title in "*Sharing Indicator" "Picture-in-Picture"
+do
+    riverctl rule-del -app-id "firefox" -title "$title" float 2>/dev/null || true
+    riverctl rule-add -app-id "firefox" -title "$title" float
+done
+
 # Consistent decorations
 riverctl rule-del ssd 2>/dev/null || true
 riverctl rule-add ssd

@@ -80,7 +80,9 @@
   (face-remap-add-relative
    'org-level-2 '(:inherit variable-pitch :height 309))
   (face-remap-add-relative
-   'org-level-3 '(:inherit variable-pitch :height 289)))
+   'org-level-3 '(:inherit variable-pitch :height 289))
+  (face-remap-add-relative
+   'org-level-4 '(:inherit variable-pitch :height 270)))
 
 ; for html exports
 (use-package htmlize
@@ -212,12 +214,19 @@
            "#+title: %^{Unit title}
 #+category: %^{Category}
 
-* Agenda
+* Agenda [/]
+- [ ] %?
 
 * Class Part
 
 * Notes
-%?
+
+* Questions [/]
+
+* Connections
+
+*Recap
+
 * Further Reading
 "
            :jump-to-captured t)))
