@@ -36,6 +36,20 @@ profile hephaestus-dual {
                }
 }
 
+profile hephaestus-dual-hdmi1 {
+        output DP-4 {
+               mode 2560x1440@165
+               position 0,0
+               scale 1
+               }
+
+        output HDMI-A-1 {
+               mode 1920x1080@180
+               position 2560,0
+               scale 1
+               }
+}
+
 profile hephaestus-single {
         output DP-4 {
                mode 2560x1440@165
