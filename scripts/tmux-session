@@ -1,23 +1,66 @@
 #!/bin/sh
 
 # Switch the tmux client to a project's session, creating it if needed.
-# Pick the project with fzf, or pass a directory (used by tmux.conf bindings).
+# Pick the project with fzf (running sessions first, Ctrl-X to kill), or
+# pass a directory (used by tmux.conf bindings).
 
 # shellcheck source=/dev/null
 . "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
 
+list_entries() {
+    running=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
+    printf '%s\n' "$running" | sed '/^$/d; s/^/[active] /'
+    project_list |
+        while IFS= read -r dir; do
+            name=$(session_name "$dir")
+            printf '%s\n' "$running" | grep -qxF "$name" || printf '%s\n' "${dir#"$HOME/"}"
+        done
+}
+
+case "${1:-}" in
+    --list)
+        list_entries
+        exit 0
+        ;;
+    --kill)
+        entry=${2:-}
+        case "$entry" in
+            "[active] "*)
+                target=${entry#"[active] "}
+                tmux kill-session -t "=$target" 2>/dev/null || true
+                ;;
+        esac
+        exit 0
+        ;;
+esac
+
 if [ "$#" -eq 1 ]; then
     selected=$1
-else
-    selected=$(project_list | sed "s#^$HOME/##" | fzf --tmux center,80%) || exit 0
     [ -n "$selected" ] || exit 0
-    selected="$HOME/$selected"
+    selected_name=$(session_name "$selected")
+    tmux new-session -d -A -s "$selected_name" -c "$selected"
+    tmux switch-client -t "=$selected_name"
+    exit 0
 fi
 
-[ -n "$selected" ] || exit 0
+self=$(command -v "$0" 2>/dev/null || printf '%s' "$0")
+choice=$(
+    list_entries |
+        fzf --tmux center,80% \
+            --header 'enter: switch | ctrl-x: kill session' \
+            --bind "ctrl-x:execute-silent(\"$self\" --kill {})+reload(\"$self\" --list)"
+) || exit 0
+[ -n "$choice" ] || exit 0
 
-selected_name=$(session_name "$selected")
-
-# -A creates the session only if it does not exist, atomically.
-tmux new-session -d -A -s "$selected_name" -c "$selected"
-tmux switch-client -t "$selected_name"
+case "$choice" in
+    "[active] "*)
+        selected_name=${choice#"[active] "}
+        tmux switch-client -t "=$selected_name"
+        ;;
+    *)
+        selected="$HOME/$choice"
+        selected_name=$(session_name "$selected")
+        tmux new-session -d -A -s "$selected_name" -c "$selected"
+        tmux switch-client -t "=$selected_name"
+        ;;
+esac

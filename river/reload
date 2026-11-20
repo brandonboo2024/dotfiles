@@ -37,11 +37,19 @@ riverctl map normal Super+Shift E exit
 riverctl map normal Super+Shift R spawn "$config_home/river/reload"
 riverctl map normal Super P spawn open-pdf
 riverctl map normal Super A spawn agent-session
+riverctl map normal Super C spawn org-capture-quick
+riverctl map normal Super M spawn audio-menu
 riverctl map normal None F10 spawn power-menu
 riverctl map normal None F12 spawn screenshot-full
 riverctl map normal Super+Shift S spawn screenshot-region
 riverctl map normal Super V spawn cliphist-fuzzel-img
-riverctl map normal Super Escape spawn networkmanager_dmenu
+# Deferred expansion: riverctl passes these commands to `sh -c` on keypress.
+# shellcheck disable=SC2016
+bar_signal='pidfile="${XDG_RUNTIME_DIR:-/tmp}/status-bar.pid"; [ -r "$pidfile" ] && kill -USR1 "$(cat "$pidfile")" 2>/dev/null || true'
+riverctl map normal Super Escape spawn "networkmanager_dmenu; $bar_signal"
+riverctl map normal Super+Shift Escape spawn bt-menu
+riverctl map normal Super Tab focus-previous-tags
+riverctl map normal Super Z zoom
 
 # Fnott notification controls. Actions are selected with the Fuzzel helper
 # configured in fnott/fnott.ini.
@@ -118,11 +126,15 @@ do
     riverctl map normal Super+Shift+Control "$i" toggle-view-tags "$tags"
 done
 
-# Super+0 to focus all tags
-# Super+Shift+0 to tag focused view with all tags
-all_tags=$(((1 << 32) - 1))
+# Super+0 to focus all normal tags (excluding the scratchpad tag)
+# Super+Shift+0 to tag focused view with all normal tags
+# Super+grave / Super+Shift+grave for scratchpad tag (bit 20)
+scratch_tag=$((1 << 20))
+all_tags=$(((1 << 20) - 1))
 riverctl map normal Super 0 set-focused-tags $all_tags
 riverctl map normal Super+Shift 0 set-view-tags $all_tags
+riverctl map normal Super grave toggle-focused-tags $scratch_tag
+riverctl map normal Super+Shift grave set-view-tags $scratch_tag
 
 # Super+Shift+F to toggle float
 riverctl map normal Super+Shift F toggle-float
@@ -163,10 +175,10 @@ do
     riverctl map "$mode" None XF86Eject spawn 'eject -T'
 
     # Control pulse audio volume with pamixer (https://github.com/cdemoulins/pamixer)
-    riverctl map "$mode" None XF86AudioRaiseVolume spawn "pamixer -i 5 && pamixer --get-volume > \"\$XDG_RUNTIME_DIR/wob.sock\""
-    riverctl map "$mode" None XF86AudioLowerVolume spawn "pamixer -d 5 && pamixer --get-volume > \"\$XDG_RUNTIME_DIR/wob.sock\""
-    riverctl map "$mode" None XF86AudioMute spawn "pamixer --toggle-mute && if [ \"\$(pamixer --get-mute)\" = true ]; then printf '0\n'; else pamixer --get-volume; fi > \"\$XDG_RUNTIME_DIR/wob.sock\""
-    riverctl map "$mode" None XF86AudioMicMute spawn "pamixer --default-source --toggle-mute && if [ \"\$(pamixer --default-source --get-mute)\" = true ]; then printf '0\n'; else pamixer --default-source --get-volume; fi > \"\$XDG_RUNTIME_DIR/wob.sock\""
+    riverctl map "$mode" None XF86AudioRaiseVolume spawn "pamixer -i 5 && pamixer --get-volume > \"\$XDG_RUNTIME_DIR/wob.sock\"; $bar_signal"
+    riverctl map "$mode" None XF86AudioLowerVolume spawn "pamixer -d 5 && pamixer --get-volume > \"\$XDG_RUNTIME_DIR/wob.sock\"; $bar_signal"
+    riverctl map "$mode" None XF86AudioMute spawn "pamixer --toggle-mute && if [ \"\$(pamixer --get-mute)\" = true ]; then printf '0\n'; else pamixer --get-volume; fi > \"\$XDG_RUNTIME_DIR/wob.sock\"; $bar_signal"
+    riverctl map "$mode" None XF86AudioMicMute spawn "pamixer --default-source --toggle-mute && if [ \"\$(pamixer --default-source --get-mute)\" = true ]; then printf '0\n'; else pamixer --default-source --get-volume; fi > \"\$XDG_RUNTIME_DIR/wob.sock\"; $bar_signal"
 
     # Control MPRIS aware media players with playerctl (https://github.com/altdesktop/playerctl)
     riverctl map "$mode" None XF86AudioMedia spawn 'playerctl play-pause'
@@ -232,6 +244,10 @@ do
     riverctl rule-del -app-id "firefox" -title "$title" float 2>/dev/null || true
     riverctl rule-add -app-id "firefox" -title "$title" float
 done
+
+# Floating Org quick-capture popup frame (spawned by org-capture-quick).
+riverctl rule-del -app-id "emacs" -title "org-capture" float 2>/dev/null || true
+riverctl rule-add -app-id "emacs" -title "org-capture" float
 
 # Consistent decorations
 riverctl rule-del ssd 2>/dev/null || true

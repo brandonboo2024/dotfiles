@@ -75,7 +75,8 @@
 (column-number-mode 1)
 (setq multiple-terminals-merge-keyboards 1)
 (setq display-line-numbers-type 'relative)
-(global-display-line-numbers-mode 1)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+(add-hook 'conf-mode-hook #'display-line-numbers-mode)
 ;; blink-cursor-mode is enabled after init.el runs, so turn it off later.
 (add-hook 'after-init-hook (lambda () (blink-cursor-mode -1)))
 (setq visible-cursor t
@@ -91,7 +92,8 @@
       save-interprogram-paste-before-kill t
       imenu-auto-rescan t
       shell-command-prompt-show-cwd t
-      vc-find-revision-no-save t)
+      vc-find-revision-no-save t
+      epg-pinentry-mode 'loopback)
 (delete-selection-mode 1)
 (context-menu-mode 1)
 (global-xref-mouse-mode 1)
@@ -144,10 +146,6 @@
 (setq sentence-end-double-space nil)
 (setq-default indent-tabs-mode nil)
 (setq-default tab-always-indent 'complete)
-(dolist (mode '(term-mode-hook
-                eshell-mode-hook
-                ghostel-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
 (setq scroll-margin 20)
 (setq scroll-conservatively 101)
 (setq scroll-preserve-screen-position t)

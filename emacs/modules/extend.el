@@ -107,14 +107,31 @@ Like normal Emacs `C-k'.  Kill to end of line and put content in kill-ring."
   (jinx-languages "en_US")
   (text-mode-ispell-word-completion nil))
 
+(define-prefix-command 'my/ai-prefix-map)
+(global-set-key (kbd "C-c a") 'my/ai-prefix-map)
+
 ;; uses ~/.authinfo
 (use-package gptel
+  :hook (gptel-mode . gptel-highlight-mode)
+  :bind (:map my/ai-prefix-map
+              ("a" . gptel)
+              ("m" . gptel-menu)
+              ("r" . gptel-rewrite)
+              ("s" . gptel-send)
+              ("c" . gptel-add)
+              ("f" . gptel-add-file)
+              ("x" . gptel-context-remove-all))
+  :custom
+  (gptel-default-mode 'org-mode)
+  (gptel-highlight-methods '(fringe face))
   :config
   (setq gptel-model 'deepseek-flash
         gptel-backend
         (gptel-make-deepseek "DeepSeek"
           :stream t
-          :key #'gptel-api-key)))
+          :key #'gptel-api-key))
+  (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n"
+        (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n"))
 
 ;; snippets
 (use-package yasnippet

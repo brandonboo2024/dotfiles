@@ -67,6 +67,13 @@
   ("M-y" . consult-yank-pop)
   ("M-g f" . consult-flymake)
   ("M-g i" . consult-imenu)
+  ("M-g I" . consult-imenu-multi)
+  ("M-g o" . consult-outline)
+  ("M-g g" . consult-goto-line)
+  ("M-g M-g" . consult-goto-line)
+  ("M-g m" . consult-mark)
+  ("M-g k" . consult-global-mark)
+  ("M-g e" . consult-compile-error)
   ;; C-c <key> searches globally, C-c p <key> searches the project.
   ;; Both pairs are defined in keybinds.el.
   ("C-c r" . my/global-rg)
@@ -85,6 +92,9 @@
 
 (use-package embark-consult
   :after  (embark consult))
+
+(use-package wgrep
+  :defer t)
 
 (use-package orderless
   :config

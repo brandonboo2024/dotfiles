@@ -83,6 +83,19 @@
   (interactive)
   (tab-bar-select-tab (- last-command-event ?0)))
 
+(defun my/project-switch-tab ()
+  "Switch to a tab-bar tab for a chosen project, creating it if needed."
+  (interactive)
+  (require 'project)
+  (let* ((dir (project-prompt-project-dir))
+         (name (file-name-nondirectory (directory-file-name dir)))
+         (tabs (mapcar (lambda (tab) (alist-get 'name tab)) (tab-bar-tabs))))
+    (if (member name tabs)
+        (tab-bar-switch-to-tab name)
+      (tab-new)
+      (tab-rename name)
+      (project-switch-project dir))))
+
 (use-package tab-bar
   :straight nil
   :custom
@@ -93,6 +106,7 @@
               ("c" . tab-new)
               ("n" . tab-next)
               ("p" . tab-previous)
+              ("s" . my/project-switch-tab)
               ("k" . tab-close)
               ("K" . tab-close-other)
               ("," . tab-rename)
@@ -104,6 +118,27 @@
                 (number-to-string (1+ i))
                 #'my/tab-bar-select-digit))
   (tab-bar-mode 1))
+
+(use-package popper
+  :bind (("C-`" . popper-toggle)
+         ("C-M-`" . popper-cycle)
+         :map my/tabs-map
+         ("P" . popper-toggle-type))
+  :init
+  ;; Match exact auxiliary buffer names so cphelper's *cphelper compile/snippet/submit*
+  ;; windows remain under cphelper's own layout control.
+  (setq popper-reference-buffers
+        '("\\`\\*compilation\\*\\'"
+          "\\`\\*Flymake diagnostics.*\\*\\'"
+          "\\`\\*Help\\*\\'"
+          "\\`\\*helpful .*\\*\\'"
+          "\\`\\*Occur\\*\\'"
+          "\\`\\*grep\\*\\'"
+          "\\`\\*Messages\\*\\'"
+          ghostel-mode))
+  :config
+  (popper-mode +1)
+  (popper-echo-mode +1))
 
 ;; Nicer dired
 (setq dired-kill-when-opening-new-dired-buffer t ;; one dired buffer at a time

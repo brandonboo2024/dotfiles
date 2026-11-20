@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# Switch default PipeWire audio sink or source via fuzzel.
+
+signal_bar() {
+    pidfile="${XDG_RUNTIME_DIR:-/tmp}/status-bar.pid"
+    [ -r "$pidfile" ] && kill -USR1 "$(cat "$pidfile")" 2>/dev/null || true
+}
+
+menu=$(
+    pw-dump 2>/dev/null | jq -r '
+        ([.[] | select(.type=="PipeWire:Interface:Metadata" and .props."metadata.name"=="default")
+          | .metadata[]
+          | select(.key=="default.audio.sink" or .key=="default.audio.source")
+          | {(.key): .value.name}] | add // {}) as $defs |
+        .[] |
+        select(.type=="PipeWire:Interface:Node"
+               and (.info.props."media.class"=="Audio/Sink"
+                    or .info.props."media.class"=="Audio/Source")) |
+        .info.props."media.class" as $cls |
+        .info.props."node.name" as $name |
+        (.info.props."node.description" // .info.props."node.nick" // $name) as $desc |
+        (if $cls == "Audio/Sink" then
+            if $defs."default.audio.sink" == $name then "[sink]   * " else "[sink]     " end
+         else
+            if $defs."default.audio.source" == $name then "[source] * " else "[source]   " end
+         end) as $prefix |
+        "\(.id)\t\($prefix)\($desc)"
+    '
+)
+
+[ -n "$menu" ] || exit 0
+
+id=$(printf '%s\n' "$menu" | fuzzel --dmenu --with-nth=2 --accept-nth=1 --only-match --prompt 'audio> ' -w 60) || exit 0
+[ -n "$id" ] || exit 0
+
+if wpctl set-default "$id"; then
+    signal_bar
+else
+    notify-send -u critical "Failed to set default audio device"
+    exit 1
+fi

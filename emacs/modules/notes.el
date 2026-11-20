@@ -25,6 +25,36 @@
   (interactive)
   (find-file org-default-notes-file))
 
+(defun my/org-capture-popup-frame-p (&optional frame)
+  "Return non-nil if FRAME (default selected) is the org-capture popup frame."
+  (equal (frame-parameter (or frame (selected-frame)) 'name) "org-capture"))
+
+(defun my/org-capture-popup-single-window ()
+  "Keep the dedicated org-capture popup frame to a single window."
+  (when (my/org-capture-popup-frame-p)
+    (delete-other-windows)))
+
+(defun my/org-capture-delete-popup-frame ()
+  "Delete the dedicated org-capture popup frame after capture finishes."
+  (when (my/org-capture-popup-frame-p)
+    (delete-frame)))
+
+(defun my/org-capture-frame ()
+  "Start `org-capture' in the dedicated floating frame."
+  (interactive)
+  (select-frame-by-name "org-capture")
+  (delete-other-windows)
+  (condition-case err
+      (org-capture)
+    (quit
+     (when (my/org-capture-popup-frame-p)
+       (delete-frame)))
+    (error
+     (when (and (my/org-capture-popup-frame-p)
+                (string= (error-message-string err) "Abort"))
+       (delete-frame))
+     (signal (car err) (cdr err)))))
+
 (defun my/org-read-course-directory ()
   "Prompt for an existing course directory."
   (file-name-as-directory
@@ -181,6 +211,8 @@
     (dolist (command '(jupyter-run-repl jupyter-repl-restart-kernel
                        org-export-as))
       (advice-add command :around #'envrc-propagate-environment)))
+  (add-hook 'org-capture-mode-hook #'my/org-capture-popup-single-window)
+  (add-hook 'org-capture-after-finalize-hook #'my/org-capture-delete-popup-frame)
   (setf (alist-get 'file org-link-frame-setup) #'find-file)
   (setq org-agenda-files
         (cons org-default-notes-file (my/org-project-files))
@@ -276,7 +308,13 @@
   (TeX-source-correlate-method 'synctex)
   (TeX-source-correlate-start-server t)
   (TeX-view-program-selection '((output-pdf "Sioyek")))
-  (reftex-plug-into-AUCTeX t))
+  (reftex-plug-into-AUCTeX t)
+  :config
+  (setf (alist-get "Sioyek" TeX-view-program-list nil nil #'equal)
+        '(("sioyek --reuse-window \"%o\""
+           (mode-io-correlate
+            " --forward-search-file \"%b\" --forward-search-line %n --inverse-search \"emacsclient +%2 \\\"%1\\\"\""))
+          "sioyek")))
 
 (use-package auctex-latexmk
   :straight nil

@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# Toggle Bluetooth power or connect/disconnect a paired device via fuzzel.
+
+if ! command -v bluetoothctl >/dev/null 2>&1; then
+    notify-send -u critical "bluetoothctl not found"
+    exit 1
+fi
+
+signal_bar() {
+    pidfile="${XDG_RUNTIME_DIR:-/tmp}/status-bar.pid"
+    [ -r "$pidfile" ] && kill -USR1 "$(cat "$pidfile")" 2>/dev/null || true
+}
+
+powered=$(bluetoothctl show 2>/dev/null | awk '/Powered:/ {print $2; exit}')
+if [ "$powered" = "yes" ]; then
+    power_entry=$(printf 'power\tPower: off (disable)')
+else
+    power_entry=$(printf 'power\tPower: on (enable)')
+fi
+
+connected=$(bluetoothctl devices Connected 2>/dev/null)
+paired=$(bluetoothctl devices Paired 2>/dev/null)
+
+menu=$(
+    printf '%s\n' "$power_entry"
+    if [ "$powered" = "yes" ] && [ -n "$paired" ]; then
+        printf '%s\n' "$paired" | while read -r _ mac name; do
+            [ -n "$mac" ] || continue
+            if printf '%s\n' "$connected" | grep -qF "Device $mac "; then
+                printf '%s\t[connected] %s\n' "$mac" "$name"
+            else
+                printf '%s\t[paired]    %s\n' "$mac" "$name"
+            fi
+        done
+    fi
+)
+
+choice=$(printf '%s\n' "$menu" | fuzzel --dmenu --with-nth=2 --accept-nth=1 --only-match --prompt 'bt> ' -w 45) || exit 0
+[ -n "$choice" ] || exit 0
+
+case "$choice" in
+    power)
+        if [ "$powered" = "yes" ]; then
+            bluetoothctl power off >/dev/null && notify-send "Bluetooth powered off"
+        else
+            bluetoothctl power on >/dev/null && notify-send "Bluetooth powered on"
+        fi
+        signal_bar
+        ;;
+    *)
+        if printf '%s\n' "$connected" | grep -qF "Device $choice "; then
+            if bluetoothctl disconnect "$choice" >/dev/null; then
+                notify-send "Bluetooth disconnected" "$choice"
+            else
+                notify-send -u critical "Bluetooth disconnect failed" "$choice"
+            fi
+        else
+            if bluetoothctl connect "$choice" >/dev/null; then
+                notify-send "Bluetooth connected" "$choice"
+            else
+                notify-send -u critical "Bluetooth connect failed" "$choice"
+            fi
+        fi
+        signal_bar
+        ;;
+esac

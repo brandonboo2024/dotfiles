@@ -23,7 +23,7 @@ kanshi &
 
 riverctl spawn "foot --server"
 
-riverctl spawn "status-bar | creek -fn 'Berkeley Mono':size=$BAR_FONT_SIZE -hg $BAR_HEIGHT"
+riverctl spawn "status-bar | creek -fn 'Berkeley Mono':size=$BAR_FONT_SIZE -hg $BAR_HEIGHT -nb $BAR_BG -nf $BAR_FG -fb $BAR_FOCUS_BG -ff $BAR_FOCUS_FG"
 riverctl spawn "swaybg -i $WALLPAPER"
 
 # Persist Wayland clipboard contents after the source application exits.

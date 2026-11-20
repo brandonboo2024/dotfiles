@@ -5,8 +5,8 @@
 # holds projects themselves. Space separated (no spaces in paths); export
 # either to override.
 
-: "${PROJECT_PARENTS:=$HOME/100_projects $HOME/102_school_work $HOME/103_school_proj}"
-: "${PROJECT_DIRS:=$HOME/nixos $HOME/nixos/config $HOME/201_resumes}"
+: "${PROJECT_PARENTS:=$HOME/100_projects $HOME/102_school_work $HOME/103_school_proj $HOME/work}"
+: "${PROJECT_DIRS:=$HOME/nixos $HOME/nixos/config $HOME/201_resumes $HOME/org}"
 
 # Print every project directory, one per line.
 project_list() {
@@ -20,7 +20,7 @@ project_list() {
 
 # tmux session name for a directory: its last two components relative to
 # $HOME (~/100_projects/notes -> 100_projects_notes, ~/nixos -> nixos), with
-# dots replaced since tmux reserves them in target names.
+# dots and colons replaced since tmux reserves them in target names.
 session_name() {
     printf '%s\n' "$1" |
         sed "s:/*$::; s:^$HOME/*::" |
@@ -29,5 +29,5 @@ session_name() {
             else if (NF > 1) printf "%s_%s", $(NF-1), $NF;
             else printf "%s", $NF
         }' |
-        tr . _
+        tr '.:' '__'
 }

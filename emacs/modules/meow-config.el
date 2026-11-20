@@ -156,7 +156,10 @@
       "C-c e"   "external"
       "C-c g"   "git"
       "C-c b"   "build"
-      "C-c t"   "tabs"))
+      "C-c t"   "tabs"
+      "C-c o"   "org"
+      "C-c n"   "notes"
+      "C-c a"   "ai"))
 
   ;; Start terminals in insert state.
   (add-to-list 'meow-mode-state-list '(ghostel-mode . insert)))

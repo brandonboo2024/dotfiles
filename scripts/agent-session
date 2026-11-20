@@ -2,7 +2,8 @@
 
 # Open an agent terminal: a tmux session per project, so agents survive the
 # window closing. With no argument, pick from running sessions and projects
-# without one in fuzzel. The app-id "agent" lets River tag the window.
+# without one in fuzzel, or press Alt+1 to kill a running session.
+# The app-id "agent" lets River tag the window.
 
 # shellcheck source=/dev/null
 . "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
@@ -12,6 +13,40 @@ if [ "$#" -gt 1 ]; then
     exit 2
 fi
 
+find_agent_client() {
+    tmux list-clients -F '#{client_pid} #{client_tty}' 2>/dev/null |
+        while read -r pid tty; do
+            [ -r "/proc/$pid/environ" ] || continue
+            if tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null | grep -qx 'AGENT_TMUX_CLIENT=1'; then
+                printf '%s\n' "$tty"
+                break
+            fi
+        done
+}
+
+open_agent_session() {
+    session=$1
+    dir=${2:-}
+    tty=$(find_agent_client)
+
+    if [ -n "$tty" ]; then
+        if [ -n "$dir" ]; then
+            tmux new-session -d -A -s "$session" -c "$dir"
+        else
+            tmux new-session -d -A -s "$session"
+        fi
+        exec tmux switch-client -c "$tty" -t "=$session"
+    fi
+
+    if [ -n "$dir" ]; then
+        exec footclient --app-id=agent -e env AGENT_TMUX_CLIENT=1 \
+             tmux new-session -A -s "$session" -c "$dir"
+    else
+        exec footclient --app-id=agent -e env AGENT_TMUX_CLIENT=1 \
+             tmux new-session -A -s "$session"
+    fi
+}
+
 # Called from Emacs with the current project.
 if [ "$#" -eq 1 ]; then
     target=$1
@@ -19,37 +54,50 @@ if [ "$#" -eq 1 ]; then
         printf 'agent-session: not a directory: %s\n' "$target" >&2
         exit 1
     fi
-
-    exec footclient --app-id=agent -e tmux new-session -A \
-         -s "$(session_name "$target")" -c "$target"
+    open_agent_session "$(session_name "$target")" "$target"
 fi
 
-running=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
+while true; do
+    running=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
 
-menu=$(
-    printf '%s\n' "$running" | sed '/^$/d; s/^/attach: /'
+    menu=$(
+        printf '%s\n' "$running" | sed '/^$/d; s/^/attach: /'
 
-    project_list |
-        while read -r dir; do
-            name=$(session_name "$dir")
-            printf '%s\n' "$running" | grep -qx "$name" || printf 'new: %s\n' "$dir"
-        done
-)
+        project_list |
+            while read -r dir; do
+                name=$(session_name "$dir")
+                printf '%s\n' "$running" | grep -qxF "$name" || printf 'new: %s\n' "$dir"
+            done
+    )
 
-[ -n "$menu" ] || exit 0
+    [ -n "$menu" ] || exit 0
 
-choice=$(printf '%s\n' "$menu" | fuzzel --dmenu -w 60 --prompt 'agent> ') || exit 0
-[ -n "$choice" ] || exit 0
+    rc=0
+    choice=$(printf '%s\n' "$menu" | fuzzel --dmenu -w 60 --prompt 'agent> ') || rc=$?
 
-target=${choice#*: }
+    if [ "$rc" -eq 10 ]; then
+        case "$choice" in
+            attach:*)
+                target=${choice#attach: }
+                if tmux kill-session -t "=$target" 2>/dev/null; then
+                    notify-send "Killed agent session" "$target"
+                fi
+                ;;
+        esac
+        continue
+    fi
 
-case "$choice" in
-    attach:*)
-        # -A recreates a session that exited after it was listed.
-        exec footclient --app-id=agent -e tmux new-session -A -s "$target"
-        ;;
-    new:*)
-        exec footclient --app-id=agent -e tmux new-session -A \
-             -s "$(session_name "$target")" -c "$target"
-        ;;
-esac
+    [ "$rc" -eq 0 ] && [ -n "$choice" ] || exit 0
+
+    target=${choice#*: }
+
+    case "$choice" in
+        attach:*)
+            open_agent_session "$target"
+            ;;
+        new:*)
+            open_agent_session "$(session_name "$target")" "$target"
+            ;;
+    esac
+    exit 0
+done

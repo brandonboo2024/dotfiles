@@ -16,6 +16,11 @@ BACKGROUND_COLOR=0x002b36
 BORDER_FOCUSED=0x93a1a1
 BORDER_UNFOCUSED=0x586e75
 
+BAR_BG="$BACKGROUND_COLOR"
+BAR_FG="$BORDER_FOCUSED"
+BAR_FOCUS_BG=0x073642
+BAR_FOCUS_FG=0xeee8d5
+
 # Apply the base input behavior to touchpads, compatibility pointers, and
 # external mice. Host files may override individual properties afterward.
 POINTER_PATTERN="pointer-*"
@@ -28,4 +33,4 @@ host_config="$config_home/river/hosts/$(uname -n).sh"
 PATH="$config_home/scripts:$PATH"
 WALLPAPER="${WALLPAPER:-$config_home/wallpaper}"
 
-export BAR_MODULES BAR_INTERVAL PATH WALLPAPER
+export BAR_MODULES BAR_INTERVAL BAR_BG BAR_FG BAR_FOCUS_BG BAR_FOCUS_FG PATH WALLPAPER

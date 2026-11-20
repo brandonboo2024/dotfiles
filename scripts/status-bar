@@ -3,21 +3,39 @@
 # Status line for creek, one line per tick. $BAR_MODULES (set per host in
 # river/) picks the modules and their order.
 #
-# /proc and /sys are read with builtins to avoid forks. Network and bluetooth
-# need helper programs, so they refresh every $BAR_SLOW_EVERY ticks and are
-# cached in between. Modules assign to $out instead of printing, because a
-# command substitution would run them in a subshell and lose their state.
+# /proc and /sys are read with builtins to avoid forks. Volume refreshes on
+# SIGUSR1 and every $BAR_VOL_EVERY ticks; network and bluetooth refresh on
+# SIGUSR1 and every $BAR_SLOW_EVERY ticks. Modules assign to $out instead of
+# printing, because a command substitution would run them in a subshell and
+# lose their state.
 
 : "${BAR_MODULES:=cpu ram bat vol net bt clock}"
 : "${BAR_INTERVAL:=2}"
+: "${BAR_VOL_EVERY:=5}"
 : "${BAR_SLOW_EVERY:=30}"
+
+: "${BAR_PIDFILE:=${XDG_RUNTIME_DIR:-/tmp}/status-bar.pid}"
+pidfile="$BAR_PIDFILE"
+sleep_pid=""
+refresh=0
+
+cleanup() {
+    [ -n "$sleep_pid" ] && kill "$sleep_pid" 2>/dev/null || true
+    rm -f "$pidfile"
+}
+
+trap cleanup EXIT
+trap 'exit 0' INT TERM HUP PIPE
+trap 'refresh=1; [ -n "$sleep_pid" ] && kill "$sleep_pid" 2>/dev/null || true' USR1
+printf '%s\n' "$$" > "$pidfile"
 
 # ─── CPU ────────────────────────────────────────────
 # Usage since the previous tick; primed once before the loop.
 prev_idle=0
 prev_total=0
+cpu_cache="CPU:0%"
 
-cpu_module() {
+cpu_refresh() {
     read -r _ user nice sys idle iowait irq softirq _ < /proc/stat
     total=$((user + nice + sys + idle + iowait + irq + softirq))
 
@@ -27,11 +45,13 @@ cpu_module() {
     prev_idle=$idle
 
     if [ "$d_total" -gt 0 ]; then
-        out="CPU:$(((100 * (d_total - d_idle)) / d_total))%"
+        cpu_cache="CPU:$(((100 * (d_total - d_idle)) / d_total))%"
     else
-        out="CPU:0%"
+        cpu_cache="CPU:0%"
     fi
 }
+
+cpu_module() { out="$cpu_cache"; }
 
 # ─── Memory ─────────────────────────────────────────
 # Used = total - available, printed in GiB with one decimal.
@@ -70,14 +90,18 @@ bat_module() {
 }
 
 # ─── Volume ─────────────────────────────────────────
-vol_module() {
+vol_cache="VOL:?"
+
+vol_refresh() {
     vol=$(pamixer --get-volume-human 2>/dev/null)
     if [ "$vol" = "muted" ]; then
-        out="VOL:MUTE"
+        vol_cache="VOL:MUTE"
     else
-        out="VOL:${vol:-?}"
+        vol_cache="VOL:${vol:-?}"
     fi
 }
+
+vol_module() { out="$vol_cache"; }
 
 # ─── Network (slow) ─────────────────────────────────
 # Uses the default-route interface, so docker bridges and veths are ignored.
@@ -128,15 +152,29 @@ clock_module() {
 
 # ─── Main loop ──────────────────────────────────────
 # Prime CPU counters before the first tick; slow modules refresh at tick=0.
-case " $BAR_MODULES " in *" cpu "*) cpu_module ;; esac
+case " $BAR_MODULES " in *" cpu "*) cpu_refresh ;; esac
 tick=0
 
 while true; do
-    if [ "$((tick % BAR_SLOW_EVERY))" -eq 0 ]; then
+    was_refresh=$refresh
+    refresh=0
+
+    # Sample CPU only on regular timer expirations so early USR1 wakes do not
+    # produce noisy sub-second readings.
+    if [ "$was_refresh" -eq 0 ] && [ "$tick" -gt 0 ]; then
+        case " $BAR_MODULES " in *" cpu "*) cpu_refresh ;; esac
+    fi
+
+    if [ "$tick" -eq 0 ] || [ "$was_refresh" -eq 1 ] || [ "$((tick % BAR_VOL_EVERY))" -eq 0 ]; then
+        case " $BAR_MODULES " in *" vol "*) vol_refresh ;; esac
+    fi
+
+    if [ "$tick" -eq 0 ] || [ "$was_refresh" -eq 1 ] || [ "$((tick % BAR_SLOW_EVERY))" -eq 0 ]; then
         case " $BAR_MODULES " in *" net "*) net_refresh ;; esac
         case " $BAR_MODULES " in *" bt "*)  bt_refresh  ;; esac
     fi
-    tick=$((tick + 1))
+
+    [ "$was_refresh" -eq 0 ] && tick=$((tick + 1))
 
     line=""
     for module in $BAR_MODULES; do
@@ -151,6 +189,12 @@ while true; do
         fi
     done
 
-    printf '%s\n' "$line"
-    sleep "$BAR_INTERVAL"
+    printf '%s\n' "$line" || exit 0
+
+    if [ "$refresh" -eq 0 ]; then
+        sleep "$BAR_INTERVAL" &
+        sleep_pid=$!
+        wait "$sleep_pid" 2>/dev/null || true
+        sleep_pid=""
+    fi
 done

@@ -6,6 +6,9 @@
 (require 'seq)
 
 (add-hook 'emacs-lisp-mode-hook #'flymake-mode)
+(when (executable-find "shellcheck")
+  (add-hook 'sh-mode-hook #'flymake-mode)
+  (add-hook 'sh-mode-hook #'sh-shellcheck-flymake))
 
 (use-package nix-mode
   :mode "\\.nix\\'")
@@ -129,8 +132,22 @@ covers every machine.")
     (which-key-add-keymap-based-replacements eglot-mode-map
       "C-c l" "lsp")))
 
+(defun my/project-agent-session ()
+  "Open or switch to this project's tmux agent session."
+  (interactive)
+  (unless (executable-find "agent-session")
+    (user-error "agent-session not found on PATH"))
+  (let ((root (expand-file-name (project-root (project-current t)))))
+    (start-process "agent-session" nil "agent-session" root)))
+
+(define-key project-prefix-map (kbd "a") #'my/project-agent-session)
+(add-to-list 'project-switch-commands '(my/project-agent-session "Agent") t)
+
 (use-package magit
   :bind (("C-x g" . magit-status)
+         :map my/git-prefix-map
+         ("f" . magit-file-dispatch)
+         ("b" . magit-blame-addition)
          :map project-prefix-map
          ("v" . magit-project-status))
   :custom
@@ -141,9 +158,22 @@ covers every machine.")
 
 (use-package diff-hl
   :hook (dired-mode . diff-hl-dired-mode)
+  :bind (:map my/git-prefix-map
+              ("n" . diff-hl-next-hunk)
+              ("p" . diff-hl-previous-hunk)
+              ("h" . diff-hl-show-hunk)
+              ("r" . diff-hl-revert-hunk)
+              ("s" . diff-hl-stage-current-hunk))
   :custom
   (diff-hl-side 'left)
   :config
+  (defvar-keymap my/diff-hl-repeat-map
+    :repeat t
+    "n" #'diff-hl-next-hunk
+    "p" #'diff-hl-previous-hunk
+    "h" #'diff-hl-show-hunk
+    "r" #'diff-hl-revert-hunk
+    "s" #'diff-hl-stage-current-hunk)
   (global-diff-hl-mode)
   (diff-hl-flydiff-mode)
   (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
