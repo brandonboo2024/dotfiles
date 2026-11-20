@@ -71,10 +71,11 @@ bat_module() {
 
 # ─── Volume ─────────────────────────────────────────
 vol_module() {
-    if [ "$(pamixer --get-mute 2>/dev/null)" = "true" ]; then
+    vol=$(pamixer --get-volume-human 2>/dev/null)
+    if [ "$vol" = "muted" ]; then
         out="VOL:MUTE"
     else
-        out="VOL:$(pamixer --get-volume 2>/dev/null)%"
+        out="VOL:${vol:-?}"
     fi
 }
 
@@ -87,7 +88,7 @@ net_refresh() {
     while read -r iface dest _; do
         [ "$dest" = "00000000" ] || continue
         if [ -d "/sys/class/net/$iface/wireless" ]; then
-            ssid=$(nmcli -t -f active,ssid dev wifi 2>/dev/null |
+            ssid=$(nmcli -t -f active,ssid dev wifi list --rescan no 2>/dev/null |
                        sed -n 's/^yes://p' | head -n 1)
             net_cache="${ssid:-wifi}"
         else
@@ -126,10 +127,8 @@ clock_module() {
 }
 
 # ─── Main loop ──────────────────────────────────────
-# Prime only the modules this host shows.
+# Prime CPU counters before the first tick; slow modules refresh at tick=0.
 case " $BAR_MODULES " in *" cpu "*) cpu_module ;; esac
-case " $BAR_MODULES " in *" net "*) net_refresh ;; esac
-case " $BAR_MODULES " in *" bt "*)  bt_refresh  ;; esac
 tick=0
 
 while true; do

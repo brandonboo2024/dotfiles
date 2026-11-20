@@ -4,7 +4,7 @@
 
 select="$(
   fd -I -e pdf -e epub --strip-cwd-prefix . |
-    sk --tmux center,80%
+    fzf --tmux center,80%
 )" || exit 0
 
 [ -n "$select" ] || exit 0

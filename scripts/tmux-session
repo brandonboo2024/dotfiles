@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Switch the tmux client to a project's session, creating it if needed.
-# Pick the project with sk, or pass a directory (used by tmux.conf bindings).
+# Pick the project with fzf, or pass a directory (used by tmux.conf bindings).
 
 # shellcheck source=/dev/null
 . "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
@@ -9,7 +9,7 @@
 if [ "$#" -eq 1 ]; then
     selected=$1
 else
-    selected=$(project_list | sed "s#^$HOME/##" | sk --tmux center,80%) || exit 0
+    selected=$(project_list | sed "s#^$HOME/##" | fzf --tmux center,80%) || exit 0
     [ -n "$selected" ] || exit 0
     selected="$HOME/$selected"
 fi

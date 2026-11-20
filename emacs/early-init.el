@@ -1,5 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
+;; Skip GC pauses during startup, then restore a reasonable runtime threshold.
+(setq gc-cons-threshold most-positive-fixnum)
+(add-hook 'emacs-startup-hook
+          (lambda () (setq gc-cons-threshold (* 16 1024 1024))))
+
 ;; straight.el manages packages, so keep package.el from activating its own.
 (setq package-enable-at-startup nil)
 

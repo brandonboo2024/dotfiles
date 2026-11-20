@@ -152,7 +152,7 @@ for mode in normal locked
 do
     # Remove River's defaults first so reloads do not emit overwrite warnings.
     for key in XF86Eject \
-               XF86AudioRaiseVolume XF86AudioLowerVolume XF86AudioMute \
+               XF86AudioRaiseVolume XF86AudioLowerVolume XF86AudioMute XF86AudioMicMute \
                XF86AudioMedia XF86AudioPlay XF86AudioPrev XF86AudioNext \
                XF86MonBrightnessUp XF86MonBrightnessDown
     do
@@ -166,6 +166,7 @@ do
     riverctl map "$mode" None XF86AudioRaiseVolume spawn "pamixer -i 5 && pamixer --get-volume > \"\$XDG_RUNTIME_DIR/wob.sock\""
     riverctl map "$mode" None XF86AudioLowerVolume spawn "pamixer -d 5 && pamixer --get-volume > \"\$XDG_RUNTIME_DIR/wob.sock\""
     riverctl map "$mode" None XF86AudioMute spawn "pamixer --toggle-mute && if [ \"\$(pamixer --get-mute)\" = true ]; then printf '0\n'; else pamixer --get-volume; fi > \"\$XDG_RUNTIME_DIR/wob.sock\""
+    riverctl map "$mode" None XF86AudioMicMute spawn "pamixer --default-source --toggle-mute && if [ \"\$(pamixer --default-source --get-mute)\" = true ]; then printf '0\n'; else pamixer --default-source --get-volume; fi > \"\$XDG_RUNTIME_DIR/wob.sock\""
 
     # Control MPRIS aware media players with playerctl (https://github.com/altdesktop/playerctl)
     riverctl map "$mode" None XF86AudioMedia spawn 'playerctl play-pause'
