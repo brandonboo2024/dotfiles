@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-;; Contains any useful programming utilities
+;; Programming: languages, compilation, Eglot, Git and direnv.
 
 (require 'project)
 (require 'seq)
@@ -33,15 +33,10 @@
 (require 'ansi-color)
 
 (setq compilation-scroll-output 'first-error
-      ;; Save modified buffers silently rather than prompting per file on
-      ;; every build.
-      compilation-ask-about-save nil
-      ;; recompile means recompile; do not ask whether to kill the running one.
-      compilation-always-kill t)
+      compilation-ask-about-save nil ;; save buffers without asking
+      compilation-always-kill t)     ;; restart a running build without asking
 
-;; Build tools emit colour when they detect a terminal, and direnv-provided
-;; toolchains frequently do. Without this the escape sequences render as
-;; literal garbage in the compilation buffer.
+;; Render ANSI colour codes from build tools.
 (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
 
 (define-prefix-command 'my/build-prefix-map)
@@ -77,11 +72,10 @@ build directory is never found on its own."
      "/etc/profiles/per-user/*/bin/*" "/run/current-system/sw/bin/*"
      "/nix/store/*/bin/*")
    ",")
-  "Globs of compiler drivers clangd may interrogate for system include paths.
-Without this clangd guesses the libstdc++ location and gets it wrong whenever
-its guess doesn't match the installed GCC, producing spurious
-\"vector file not found\" errors on an otherwise valid translation unit.
-Non-matching globs are simply ignored, so one list covers every machine.")
+  "Globs of compiler drivers clangd may query for system include paths.
+Otherwise clangd guesses the libstdc++ location and reports spurious
+\"file not found\" errors.  Non-matching globs are ignored, so one list
+covers every machine.")
 
 (defun my/eglot-clangd-contact (_interactive project)
   "Build the clangd command for PROJECT."
@@ -127,9 +121,8 @@ Non-matching globs are simply ignored, so one list covers every machine.")
   (eglot-confirm-server-edits nil)
   (eglot-extend-to-xref t)
   :config
-  (if (boundp 'eglot-events-buffer-config)
-      (setq eglot-events-buffer-config '(:size 0 :format full))
-    (set (intern "eglot-events-buffer-size") 0))
+  ;; Disable the events log, which slows Eglot down.
+  (setq eglot-events-buffer-config '(:size 0 :format full))
   (add-to-list 'eglot-server-programs
                '((c-mode c++-mode) . my/eglot-clangd-contact))
   (with-eval-after-load 'which-key
@@ -155,8 +148,8 @@ Non-matching globs are simply ignored, so one list covers every machine.")
   (diff-hl-flydiff-mode)
   (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
-;; Per-project direnv environment for Eglot, compilers and subprocesses.
-;; Kept last so envrc's major-mode hook runs before the hooks added above.
+;; Per-project direnv environment. Kept last so its hook runs before the
+;; mode hooks above (eglot-ensure needs the environment).
 (use-package envrc
   :if (executable-find "direnv")
   :hook (after-init . envrc-global-mode))

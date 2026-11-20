@@ -1,6 +1,5 @@
-# Profiles for every machine live in this one file: kanshi selects a profile
-# by matching the outputs that are actually connected, so profiles belonging
-# to different machines cannot collide. Named after the machine they serve.
+# Profiles for every machine. kanshi picks the one matching the connected
+# outputs, so machines cannot collide.
 
 profile prometheus-internal {
         output eDP-1 {

@@ -1,12 +1,9 @@
 # shellcheck shell=sh
 
-# Sourced, not executed. Where the session scripts look for projects, kept in
-# one place so they cannot drift apart.
-#
-# Two lists, because there are two kinds of thing: directories whose immediate
-# children are each a project, and directories that are themselves a project.
-# Space separated, so no spaces in the paths. Override by exporting either
-# before calling.
+# Sourced by tmux-session and agent-session: where projects live.
+# PROJECT_PARENTS holds directories whose children are projects; PROJECT_DIRS
+# holds projects themselves. Space separated (no spaces in paths); export
+# either to override.
 
 : "${PROJECT_PARENTS:=$HOME/100_projects $HOME/102_school_work $HOME/103_school_proj}"
 : "${PROJECT_DIRS:=$HOME/nixos $HOME/nixos/config $HOME/201_resumes}"
@@ -21,11 +18,9 @@ project_list() {
     printf '%s\n' $PROJECT_DIRS
 }
 
-# Session name for a project directory. Names are relative to $HOME and keep
-# the last two components, so ~/100_projects/notes and
-# ~/102_school_work/notes do not collapse onto one tmux session while ~/nixos
-# stays plain "nixos". Dots become underscores because tmux treats them
-# specially in target names.
+# tmux session name for a directory: its last two components relative to
+# $HOME (~/100_projects/notes -> 100_projects_notes, ~/nixos -> nixos), with
+# dots replaced since tmux reserves them in target names.
 session_name() {
     printf '%s\n' "$1" |
         sed "s:/*$::; s:^$HOME/*::" |

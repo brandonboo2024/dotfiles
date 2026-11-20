@@ -1,18 +1,21 @@
 ;; -*- lexical-binding: t; -*-
 
-;; These three are defcustoms in consult, which is loaded lazily. Declaring
+;; These two are defcustoms in consult, which is loaded lazily. Declaring
 ;; them special HERE, before anything below binds them, is what makes the
 ;; `let's in the search commands dynamic rather than lexical.
 
 ;; Keep these at the top of the file, above every use.
 (defvar consult-fd-args)
 (defvar consult-ripgrep-args)
-(defvar consult-async-min-input)
+
+(declare-function consult--read "consult")
+(declare-function consult--file-preview "consult")
+(declare-function project-root "project")
 
 (define-prefix-command 'my/tabs-map)
 (define-key mode-specific-map "t" 'my/tabs-map)
 
-(defun match-paren(arg)
+(defun match-paren (arg)
   "Go to the matching paren if on a paren; otherwise insert %."
   (interactive "p")
   (cond ((looking-at "\\s(") (forward-list 1) (backward-char 1))
@@ -25,21 +28,20 @@
   (let ((unsaved
          (seq-filter
           (lambda (buf)
-          (with-current-buffer buf
-            (and buffer-file-name
-                 (buffer-modified-p))))
-         (buffer-list))))
-  (if unsaved
-      (message "Unsaved %s"
-               (mapconcat #'buffer-name unsaved ", "))
-    (message "No unsaved file buffers."))))
+            (with-current-buffer buf
+              (and buffer-file-name
+                   (buffer-modified-p))))
+          (buffer-list))))
+    (if unsaved
+        (message "Unsaved %s"
+                 (mapconcat #'buffer-name unsaved ", "))
+      (message "No unsaved file buffers."))))
 
 ;;; Searching: project vs global
 ;;
-;; Project commands search the current project and respect ignore files --
-;; that is consult's own default behaviour, so they add nothing.
-;; Global commands search under `my/global-search-root' and additionally look
-;; inside ignored and hidden files.
+;; Project commands search the current project and respect ignore files.
+;; Global commands search under `my/global-search-root', including ignored
+;; and hidden files.
 
 (defvar my/global-search-root "~/"
   "Directory the global search commands start from.")
@@ -56,16 +58,29 @@ either may be customised into the other form, so handle both."
     (append args extra)))
 
 (defun my/project-fd ()
-  "Find files in the current project."
+  "Find files in the current project, Telescope `find_files' style.
+List every file once, filter locally with the completion style, and
+preview the candidate at point."
   (interactive)
   (require 'consult)
-  ;; Default 3 means the minibuffer opens empty and nothing previews until
-  ;; three characters are typed. A project is small and already
-  ;; ignore-filtered, so list it all immediately. Not done for my/global-fd
-  ;; (fd --no-ignore --hidden from ~/) or either ripgrep command, where an
-  ;; empty pattern matches every line of every file.
-  (let ((consult-async-min-input 0))
-    (consult-fd nil)))
+  ;; Not `consult-fd': with empty input its builder returns nil, so fd never
+  ;; runs whatever `consult-async-min-input' is, and it passes no :state, so
+  ;; it cannot preview. A project is small and ignore-filtered, so listing it
+  ;; up front is cheap. Outside a project the directory is often ~ (a million
+  ;; files), so fall back to search-as-you-type there, as my/global-fd does.
+  (if-let* ((project (project-current)))
+      (let ((default-directory (project-root project)))
+        (find-file
+         (consult--read
+          (process-lines "fd" "--type" "f" "--hidden" "--exclude" ".git"
+                         "--color=never")
+          :prompt "Find file: "
+          :category 'file
+          :sort nil
+          :require-match t
+          :state (consult--file-preview)
+          :history 'file-name-history)))
+    (consult-fd default-directory)))
 
 (defun my/global-fd ()
   "Find files under `my/global-search-root', including ignored ones."
@@ -131,6 +146,7 @@ either may be customised into the other form, so handle both."
       (browse-url
        (my/forge-url-from-remote (string-trim remote))))))
 
+;; Half-page moves that keep point on screen, standing in for C-v / M-v.
 (defun simple-scroll-down ()
   "Move half a screen below."
   (interactive)

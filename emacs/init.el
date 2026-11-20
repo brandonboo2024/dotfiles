@@ -1,6 +1,11 @@
-;; ===UI modifications===  -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; -*-
 
-;; Bootstrap code for straight.elp
+;; Pin package versions in a lockfile tracked by this repository, so updates
+;; can be rolled back and every host builds the same commits.
+(setq straight-profiles
+      `((nil . ,(expand-file-name "straight-lock.el" user-emacs-directory))))
+
+;; Bootstrap straight.el (installs itself into `straight-base-dir').
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -17,11 +22,13 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(setq straight-use-package-by-default 1) ;; use-package integration by default
+(setq straight-use-package-by-default 1)
 
-(dolist (pkg '(seq eldoc xref flymake external-completion project org zmq))
+;; Built into Emacs (or provided by Nix for zmq): never fetch these.
+(dolist (pkg '(seq eldoc xref flymake external-completion project org zmq which-key))
   (add-to-list 'straight-built-in-pseudo-packages pkg))
 
+;; Keep package data and state under XDG, out of this repository.
 (setq no-littering-etc-directory
       (expand-file-name "etc/" my/emacs-data-directory)
       no-littering-var-directory
@@ -30,32 +37,19 @@
 (use-package no-littering
   :demand t)
 
+;; Byte- and native-compile packages as they load. The config itself stays
+;; interpreted, since its use-package forms expect to run at load time.
 (use-package compile-angel
   :demand t
   :config
-  ;; Set `compile-angel-verbose' to nil to disable compile-angel messages.
-  ;; (When set to nil, compile-angel won't show which file is being compiled.)
   (setq compile-angel-verbose nil)
-
-  ;; The following directive prevents compile-angel from compiling your init
-  ;; files. If you choose to remove this push to `compile-angel-excluded-path-suffixes'
-  ;; and compile your pre/post-init files, ensure you understand the
-  ;; implications and thoroughly test your code. For example, if you're using
-  ;; the `use-package' macro, you'll need to explicitly add:
-  ;; (eval-when-compile (require 'use-package))
-  ;; at the top of your init file.
   (push "/init.el" compile-angel-excluded-path-suffixes)
   (push "/early-init.el" compile-angel-excluded-path-suffixes)
-
-  ;; Keep Straight's use-package setup interpreted in configuration modules.
   (compile-angel-exclude-directory
    (expand-file-name "modules/" user-emacs-directory))
-
-  ;; Uncomment the line below to compile automatically when an Elisp file is saved
+  ;; State files (custom.el, recentf, ...) are data, not code to compile.
+  (compile-angel-exclude-directory my/emacs-state-directory)
   ;; (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode)
-
-  ;; A global mode that compiles .el files when they are loaded
-  ;; using `load' or `require'.
   (compile-angel-on-load-mode 1))
 
 ;; Window Graphics
@@ -74,7 +68,7 @@
 (setq multiple-terminals-merge-keyboards 1)
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode 1)
-;; Emacs initializes this option after init.el, so disable it afterward.
+;; blink-cursor-mode is enabled after init.el runs, so turn it off later.
 (add-hook 'after-init-hook (lambda () (blink-cursor-mode -1)))
 (setq visible-cursor t
       cursor-in-non-selected-windows nil)
@@ -82,7 +76,7 @@
 (setq custom-safe-themes t)
 (electric-pair-mode -1)
 
-;; Keep convenience behavior explicit instead of loading a broad preset.
+;; Assorted defaults, set individually rather than via a preset package.
 (setq frame-resize-pixelwise t
       window-resize-pixelwise t
       frame-inhibit-implied-resize t
@@ -93,7 +87,8 @@
 (delete-selection-mode 1)
 (context-menu-mode 1)
 (global-xref-mouse-mode 1)
-(global-completion-preview-mode 1)
+;; Ghost-text completion for prose; code buffers use the Corfu popup.
+(add-hook 'text-mode-hook #'completion-preview-mode)
 
 (custom-set-faces
  '(default ((t (:family "Berkeley Mono" :height 230))))
@@ -107,11 +102,10 @@
   (lambda-themes-set-italic-comments t)
   (lambda-themes-set-italic-keywords t)
   (lambda-themes-set-variable-pitch t)
-  (lambda-themes-set-vibrant t))
+  (lambda-themes-set-vibrant t)
+  :config (load-theme 'lambda-light))
 
-(use-package vscode-dark-plus-theme
-  :ensure t
-  :config (load-theme 'vscode-dark-plus))
+(use-package vscode-dark-plus-theme)
 
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode
@@ -152,10 +146,10 @@
 (setq ring-bell-function 'ignore)
 
 ;; Symlink
-(setq vc-follow-symlinks t) ;; Disable prompt to follow symlink
+(setq vc-follow-symlinks t) ;; follow symlinks into Git without asking
 
-;; GUI and terminal frames can coexist under the daemon. Choose the clipboard
-;; backend when the operation happens, not while init.el is loading.
+;; The daemon serves GUI and terminal frames at once, so pick the clipboard
+;; backend per call: the GUI selection, or wl-copy/wl-paste in a terminal.
 (defun my/interprogram-cut (text)
   "Put TEXT on the clipboard for the selected frame."
   (if (display-graphic-p (selected-frame))
@@ -180,7 +174,7 @@
 
 (use-package kkp
   :config
-  ;; The global mode installs terminal-specific hooks and ignores GUI frames.
+  ;; Kitty keyboard protocol for terminal frames; GUI frames are unaffected.
   (global-kkp-mode +1))
 
 (add-to-list 'load-path (expand-file-name "modules" user-emacs-directory))

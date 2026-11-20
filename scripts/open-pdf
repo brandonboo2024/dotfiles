@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Pick a PDF or EPUB from the reading and school folders and open it in sioyek.
+
 filepath="$(
     fd -a -I -e pdf -e epub --full-path . \
         "$HOME/200_reading/" \
@@ -12,4 +14,4 @@ filepath="$(
 
 [ -n "$filepath" ] || exit 0
 
-setsid -f env sioyek "$filepath" >/tmp/sioyek.log 2>&1 </dev/null
+setsid -f sioyek "$filepath" >/tmp/sioyek.log 2>&1 </dev/null

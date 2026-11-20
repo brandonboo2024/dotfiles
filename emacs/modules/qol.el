@@ -1,9 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
-;; Contains many QOL and aesthetic improvements, except theme
-;; Most are nice to have, but not necessary. They should be the first
-;; to be removed should there be performance/cleanups
-;; Theme remains in init.el
+;; Quality-of-life and appearance tweaks (the theme is in init.el). Nice to
+;; have, and the first to go when trimming for performance.
 
 ;; Vanilla behaviour tweaks
 (setq use-short-answers t)
@@ -47,6 +45,7 @@
                  (ibuffer-do-sort-by-project-file-relative)))))
 
 (use-package paren
+  :straight nil
   :custom
   (show-paren-delay 0.1)
   (show-paren-highlight-openparen t)
@@ -72,9 +71,8 @@
      (motion . (" MOTION " . (:inherit mood-line-status-info
                             :inverse-video t :weight bold)))))
   :config
-  ;; Reloading mood-line can replace the already-loaded Flymake updater with
-  ;; its lazy stub. Load the small checker module explicitly so the advice
-  ;; always targets a real function, including after config/package reloads.
+  ;; Load the checker segment eagerly: a reload otherwise swaps its Flymake
+  ;; updater for a lazy stub and the advice lands on the stub.
   (load "mood-line-segment-checker" nil 'nomessage)
   (setq mood-line-glyph-alist mood-line-glyphs-unicode)
   (mood-line-mode))
@@ -108,14 +106,13 @@
   (tab-bar-mode 1))
 
 ;; Nicer dired
-(setq dired-kill-when-opening-new-dired-buffer t ;; prevent dired buffer overflow
+(setq dired-kill-when-opening-new-dired-buffer t ;; one dired buffer at a time
       dired-clean-confirm-killing-deleted-buffers nil)
 
 (use-package dirvish
   :demand t
   :custom
-  ;; Upstream ships (file-size) alone, so icons are an explicit opt-in. This
-  ;; line is what replaces nerd-icons-dired.
+  ;; Icons here replace nerd-icons-dired; upstream shows only file-size.
   (dirvish-attributes '(nerd-icons file-size collapse subtree-state vc-state))
   (dirvish-quick-access-entries
    '(("h" "~/"          "home")
@@ -138,6 +135,7 @@
 ;; Prose presentation
 (defun my/presentation ()
   "Use a quiet, readable presentation in Org and Markdown buffers."
+  (interactive)
   (when (derived-mode-p 'org-mode)
     (org-indent-mode 1))
   (visual-line-mode 1)
@@ -188,5 +186,14 @@
   (uniquify-buffer-name-style 'reverse)
   (uniquify-separator " • ")
   (uniquify-after-kill-buffer-p t))
+
+(use-package cphelper
+  :straight nil
+  :load-path "~/100_projects/cphelper.el"
+  :commands (cphelper cphelper-run cphelper-submit cphelper-lib)
+  :custom
+  (cphelper-library-directory "~/cp/library")
+  (cphelper-submit-command 'browser))
+
 
 (provide 'qol)

@@ -1,8 +1,9 @@
-;; To prevent straight.el and package.el to conflict  -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; -*-
+
+;; straight.el manages packages, so keep package.el from activating its own.
 (setq package-enable-at-startup nil)
 
-;; ensure native compilation for speed
-;; Ensure Emacs loads the most recent byte-compiled files.
+;; Prefer a newer .el over a stale .elc.
 (setq load-prefer-newer t)
 
 ;; Keep generated package and state data out of the Git-controlled config.
@@ -27,6 +28,9 @@
  (expand-file-name "eln-cache/" my/emacs-data-directory))
 
 (setq native-comp-async-report-warnings-errors 'silent)
+
+;; LSP servers send large JSON; read it in 1 MB chunks instead of 64 KB.
+(setq read-process-output-max (* 1024 1024))
 
 ;; Backups/Lockfiles
 (setq make-backup-files nil)

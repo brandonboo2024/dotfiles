@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Pick a PDF or EPUB under the current directory in a tmux popup and open it.
+
 select="$(
   fd -I -e pdf -e epub --strip-cwd-prefix . |
     sk --tmux center,80%

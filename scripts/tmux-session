@@ -1,12 +1,7 @@
 #!/bin/sh
 
-# Switch the current tmux client to a project's session, creating it if it
-# does not exist yet. With one argument, uses that directory directly, which
-# is how the tmux.conf bindings jump straight to a fixed place.
-#
-# Shares its idea of what a project is with agent-session, through
-# projects.sh, so the two pickers cannot drift apart. No bash needed now that
-# the directory list lives there.
+# Switch the tmux client to a project's session, creating it if needed.
+# Pick the project with sk, or pass a directory (used by tmux.conf bindings).
 
 # shellcheck source=/dev/null
 . "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
@@ -23,8 +18,6 @@ fi
 
 selected_name=$(session_name "$selected")
 
-# -A creates the session or does nothing if it already exists, in one atomic
-# step. Testing with has-session first left a window where two invocations
-# could both decide to create it and one would fail.
+# -A creates the session only if it does not exist, atomically.
 tmux new-session -d -A -s "$selected_name" -c "$selected"
 tmux switch-client -t "$selected_name"

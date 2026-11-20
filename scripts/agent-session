@@ -1,15 +1,8 @@
 #!/bin/sh
 
-# Pick an agent session with fuzzel: attach one that is already running, or
-# start a new one in a project.
-#
-# Sessions are tmux sessions, so an agent keeps running when the window is
-# closed and can be picked up again from here. The terminal is given the
-# app-id "agent" so River can place it by rule rather than by where it
-# happened to be launched.
-#
-# Running sessions are listed first, and a project that already has a session
-# is not offered a second time.
+# Open an agent terminal: a tmux session per project, so agents survive the
+# window closing. With no argument, pick from running sessions and projects
+# without one in fuzzel. The app-id "agent" lets River tag the window.
 
 # shellcheck source=/dev/null
 . "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
@@ -19,8 +12,7 @@ if [ "$#" -gt 1 ]; then
     exit 2
 fi
 
-# Emacs supplies its current project directly. The no-argument path below
-# remains the interactive River/Fuzzel picker.
+# Called from Emacs with the current project.
 if [ "$#" -eq 1 ]; then
     target=$1
     if [ ! -d "$target" ]; then
@@ -53,8 +45,7 @@ target=${choice#*: }
 
 case "$choice" in
     attach:*)
-        # -A so a session that died between listing and choosing is recreated
-        # rather than erroring.
+        # -A recreates a session that exited after it was listed.
         exec footclient --app-id=agent -e tmux new-session -A -s "$target"
         ;;
     new:*)

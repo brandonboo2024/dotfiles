@@ -1,15 +1,14 @@
 ;; -*- lexical-binding: t; -*-
 
-;; Contains extensions/functionalities to further extend emacs
-;; Are all useful/cannot be replaced, but I would not consider them important enough to be part of core.el in a major cleanse
+;; Extensions worth keeping, but not essential enough for core.el: terminal,
+;; mail, feeds, spelling, LLM and snippets.
 
 (use-package ghostel
   :bind (("C-x m" . ghostel)
          :map ghostel-semi-char-mode-map
          ("C-s"  . consult-line)
          ("C-k"  . my/ghostel-send-C-k-and-kill)
-         ;; I'm used to go up/down the shell history with M-n/p from eshell
-         ;; Simulate this behavior in ghostel by sending C-p and C-n
+         ;; Shell history on M-p/M-n, as in eshell.
          ("M-p" . (lambda () (interactive) (ghostel-send-key "p" "ctrl")))
          ("M-n" . (lambda () (interactive) (ghostel-send-key "n" "ctrl")))
          :map project-prefix-map
@@ -35,19 +34,21 @@ Like normal Emacs `C-k'.  Kill to end of line and put content in kill-ring."
   :straight ghostel
   :hook (after-init . ghostel-comint-global-mode))
 
-(setq send-mail-function 'mailclient-send-it)
+;; All mail goes out through msmtp's posteo account (set up by Home Manager
+;; in home/modules/mail.nix), whether or not notmuch has been loaded.
+(setq user-full-name "Brandon Boo"
+      user-mail-address "jwboo@posteo.com"
+      send-mail-function #'sendmail-send-it
+      message-send-mail-function #'message-send-mail-with-sendmail
+      sendmail-program "msmtp"
+      message-sendmail-extra-arguments '("-a" "posteo"))
 
 (use-package notmuch
   :straight nil
   :commands (notmuch-hello)
   :custom
   (notmuch-database-path "~/mail")
-  (sendmail-program "msmtp")
   :config
-  (setq user-full-name "Brandon Boo")
-  (setq user-mail-address "jwboo@posteo.com")
-  (setq message-sendmail-extra-arguments '("-a" "posteo"))
-  (setq message-send-mail-function 'message-send-mail-with-sendmail)
   (setq notmuch-saved-searches
         '((:name "inbox"  :query "tag:inbox"  :key "i")
           (:name "unread" :query "tag:unread" :key "u")
@@ -100,14 +101,11 @@ Like normal Emacs `C-k'.  Kill to end of line and put content in kill-ring."
 ;; uses ~/.authinfo
 (use-package gptel
   :config
-  (setq gptel-model 'deepseek-v4-flash
+  (setq gptel-model 'deepseek-flash
         gptel-backend
         (gptel-make-deepseek "DeepSeek"
           :stream t
           :key #'gptel-api-key)))
-
-;; meow lives in meow-config.el, which owns both its key tables and the
-;; package declaration.
 
 ;; snippets
 (use-package yasnippet

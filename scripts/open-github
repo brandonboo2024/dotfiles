@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Open the web page of a repository's origin remote (GitHub, Codeberg or
+# sourcehut). Defaults to the current directory.
+
 directory=${1:-"$PWD"}
 
 if ! url=$(git -C "$directory" remote get-url origin 2>/dev/null); then

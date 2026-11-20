@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-;; Config for note taking
+;; Notes: Org (agenda, capture, roam), Jupyter in Org, and LaTeX.
 
 (defun my/org-project-files ()
   "Return Org files below the projects directory."
@@ -84,7 +84,7 @@
   (face-remap-add-relative
    'org-level-4 '(:inherit variable-pitch :height 270)))
 
-; for html exports
+;; Syntax highlighting in HTML exports.
 (use-package htmlize
   :defer t)
 
@@ -93,7 +93,8 @@
   :defer t)
 
 (with-eval-after-load 'jupyter-org-client
-  ;; Restarted kernels cannot finish requests belonging to the old process.
+  ;; A restarted kernel never answers the old process's requests, so abort
+  ;; their pending markers in Org buffers.
   (defun my/jupyter-clear-restarted-org-requests (client)
     "Clear stale Org execution markers after CLIENT successfully restarts."
     (when (object-of-class-p client 'jupyter-org-client)
@@ -166,7 +167,8 @@
     (add-to-list 'org-latex-packages-alist '("" "minted")))
   (setq jupyter-org-auto-connect nil)
 
-  ; we remove hook to load on org-mode, and shift it to envrc
+  ;; Jupyter lives in the project's direnv environment, so set up the
+  ;; jupyter-LANG babel aliases once envrc has loaded it, not on org-mode.
   (remove-hook 'org-mode-hook #'org-babel-jupyter-make-local-aliases)
 
   (with-eval-after-load 'envrc
@@ -175,10 +177,8 @@
                 (when (and envrc-mode
                            (derived-mode-p 'org-mode)
                            (executable-find jupyter-executable))
-                  (org-babel-jupyter-make-local-aliases)))))
-
-  ;; when we restart the jupyter-kernel or export into other buffers, get envrc to carry over the environment to other buffers created
-    (with-eval-after-load 'envrc
+                  (org-babel-jupyter-make-local-aliases))))
+    ;; Carry the environment into the buffers these commands create.
     (dolist (command '(jupyter-run-repl jupyter-repl-restart-kernel
                        org-export-as))
       (advice-add command :around #'envrc-propagate-environment)))
@@ -225,7 +225,7 @@
 
 * Connections
 
-*Recap
+* Recap
 
 * Further Reading
 "

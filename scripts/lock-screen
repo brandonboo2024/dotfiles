@@ -1,7 +1,6 @@
 #!/bin/sh
-# WALLPAPER is exported by river/init; the fallback keeps this usable when
-# run outside a River session.
-
-# swayidle runs with -w, so return once the compositor has securely locked.
-# Keeping swaylock in the foreground would block later idle timeouts until unlock.
+# Lock with the wallpaper. WALLPAPER comes from river/environment; the fallback
+# covers running outside River.
+#
+# -f returns once locked, so swayidle (-w) can still fire later timeouts.
 swaylock -f -s fill -i "${WALLPAPER:-${XDG_CONFIG_HOME:-$HOME/.config}/wallpaper}"

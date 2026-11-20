@@ -1,17 +1,13 @@
 ;; -*- lexical-binding: t; -*-
 
-;; This is the bare minimum needed for future emacs bankruptcy
-;; Vertico: Minibuffer utility
-;; Corfu: Autocomplete
-;; Whichkey + Helpful: Self-documentation
-;; Consult: Better commands
-;; Embark: Context aware actions
-;; Orderless: Better matching
-;; Marginalia: Pretty Info
-;; Helpful: Nicer info
+;; Completion and self-documentation: the minimum to keep after an Emacs
+;; bankruptcy.
+;;   Vertico      minibuffer UI          Orderless   matching
+;;   Corfu, Cape  in-buffer completion   Marginalia  annotations
+;;   Consult      search and navigation  Embark      actions on candidates
+;;   which-key, Helpful                  self-documentation
 
-
-(use-package vertico ;; Displays minibuffers in a nicer window
+(use-package vertico
   :demand t
   :bind (:map vertico-map
               ("RET" . vertico-directory-enter)
@@ -24,6 +20,8 @@
 
 (use-package corfu
   :custom
+  ;; Code only; text-mode buffers get completion-preview ghost text instead.
+  (global-corfu-modes '(prog-mode))
   (corfu-cycle t)
   (corfu-auto t)
   (corfu-auto-prefix 3)
@@ -33,15 +31,15 @@
   (corfu-popupinfo-mode +1)
   (global-corfu-mode))
 
-;; Complements corfu by adding additional completion extensions
+;; Extra completion sources (file names, dabbrev) for Corfu.
 (use-package cape
-  :defer 10 ;; Loads function lazily
+  :defer 10
   :init
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-dabbrev))
 
 (use-package which-key
-  :diminish which-key-mode ;; Hides minor mode from status bar
+  :straight nil
   :custom
   (which-key-prefix-prefix "◉ ")
   (which-key-idle-delay 0.3)
@@ -75,7 +73,7 @@
   ("C-c p r" . my/project-rg)
   ("C-c f" . my/global-fd)
   ("C-c p f" . my/project-fd)
-  ("C-c p b" . consult-project-buffer)) ;; C-x r to see register info, bookmarks are stored in registers
+  ("C-c p b" . consult-project-buffer))
 
 (use-package embark
   :bind
@@ -88,14 +86,14 @@
 (use-package embark-consult
   :after  (embark consult))
 
-(use-package orderless ;; No more prefix-only matching
+(use-package orderless
   :config
   (setq completion-styles '(orderless basic)
         completion-category-defaults nil
         completion-category-overrides
         '((file (styles basic partial-completion)))))
 
-(use-package marginalia ;; Gives rich info on files selected in minibuffer
+(use-package marginalia
   :config
   (marginalia-mode))
 

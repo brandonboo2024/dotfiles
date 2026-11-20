@@ -14,20 +14,19 @@ riverctl input "$POINTER_PATTERN" pointer-accel 1.0
 riverctl input "$POINTER_PATTERN" drag enabled
 riverctl input "$POINTER_PATTERN" tap enabled
 
-if [ -n "${NATURAL_SCROLL_DISABLED_PATTERN:-}" ]; then
-    riverctl input "$NATURAL_SCROLL_DISABLED_PATTERN" natural-scroll disabled
-fi
+# Per-host exceptions, newline separated (see river/hosts/*.sh).
+for device in $NATURAL_SCROLL_DISABLE_PATTERNS; do
+    riverctl input "$device" natural-scroll disabled
+done
 
 riverctl set-cursor-warp on-focus-change
 riverctl xcursor-theme Bibata-Modern-Ice "$CURSOR_SIZE"
 riverctl focus-follows-cursor normal
 
-# Core keybinds
-# Three ways in, deliberately distinct:
-#   Super+E             a GUI Emacs frame, for org, images and PDFs
-#   Super+Return        a plain terminal
-#   Super+Shift+Return  Emacs in a terminal, for a quick edit
-# All three share one daemon, so they are views onto the same buffers.
+# Core keybinds. Both Emacs bindings attach to the one daemon:
+#   Super+E             GUI Emacs frame
+#   Super+Return        terminal
+#   Super+Shift+Return  Emacs in a terminal
 riverctl map normal Super E spawn "emacsclient -c"
 riverctl map normal Super Return spawn footclient
 riverctl map normal Super+Shift Return spawn "footclient -e emacsclient -nw"
@@ -71,7 +70,7 @@ riverctl map normal Super+Shift Comma send-to-output previous
 riverctl map normal Super H send-layout-cmd rivertile "main-ratio -0.05"
 riverctl map normal Super L send-layout-cmd rivertile "main-ratio +0.05"
 
-# Super+Shift+H and Super+Shift+L to increment/decrement the main count of rivertile(1)
+# Super+I and Super+Shift+I to increment/decrement the main count of rivertile(1)
 riverctl map normal Super I send-layout-cmd rivertile "main-count +1"
 riverctl map normal Super+Shift I send-layout-cmd rivertile "main-count -1"
 
@@ -125,7 +124,7 @@ all_tags=$(((1 << 32) - 1))
 riverctl map normal Super 0 set-focused-tags $all_tags
 riverctl map normal Super+Shift 0 set-view-tags $all_tags
 
-# Super+Space to toggle float
+# Super+Shift+F to toggle float
 riverctl map normal Super+Shift F toggle-float
 
 # Super+F to toggle fullscreen
@@ -137,8 +136,8 @@ riverctl map normal Super Right send-layout-cmd rivertile "main-location right"
 riverctl map normal Super Down  send-layout-cmd rivertile "main-location bottom"
 riverctl map normal Super Left  send-layout-cmd rivertile "main-location left"
 
-# Declare a passthrough mode. This mode has only a single mapping to return to
-# normal mode. This makes it useful for testing a nested wayland compositor
+# Passthrough mode has a single mapping back to normal mode, for nested
+# compositors.
 riverctl declare-mode passthrough
 
 # Super+F11 to enter passthrough mode
@@ -147,8 +146,8 @@ riverctl map normal Super F11 enter-mode passthrough
 # Super+F11 to return to normal mode
 riverctl map passthrough Super F11 enter-mode normal
 
-# Various media key mapping examples for both normal and locked mode which do
-# not have a modifier
+# Media keys, also active on the lock screen. Volume and brightness changes
+# are echoed to wob for an on-screen bar.
 for mode in normal locked
 do
     # Remove River's defaults first so reloads do not emit overwrite warnings.
@@ -160,7 +159,7 @@ do
         riverctl unmap "$mode" None "$key" 2>/dev/null || true
     done
 
-    # Eject the optical drive (well if you still have one that is)
+    # Eject the optical drive
     riverctl map "$mode" None XF86Eject spawn 'eject -T'
 
     # Control pulse audio volume with pamixer (https://github.com/cdemoulins/pamixer)
@@ -188,26 +187,14 @@ riverctl border-color-unfocused "$BORDER_UNFOCUSED"
 # Set keyboard repeat rate
 riverctl set-repeat 35 300
 
-# Make all views with an app-id that starts with "float" and title "foo" start floating.
-riverctl rule-del -app-id 'float*' -title 'foo' float 2>/dev/null || true
-riverctl rule-add -app-id 'float*' -title 'foo' float
-
-# Make all views with app-id "bar" and any title use client-side decorations
-riverctl rule-del -app-id "bar" csd 2>/dev/null || true
-riverctl rule-add -app-id "bar" csd
-
-# Tag layout. Rules place a window on its tag on its own, so the tag you are
-# on is a statement about what you are doing rather than where a window
-# happened to open. Tags 6-9 are deliberately left unruled and free.
+# Each rule is deleted before it is added so reloads do not stack duplicates.
 #
-#   1  Emacs and the main working environment
-#   2  tmux and agent sessions
+# Tags are assigned by app, leaving 6-9 free:
+#   1  Emacs
+#   2  agent sessions (app-id "agent", set by agent-session)
 #   3  browser
 #   4  reading
 #   5  music and messaging
-#
-# Agent terminals carry app-id "agent", set by agent-session; without that
-# every foot window would be indistinguishable from every other.
 riverctl rule-del -app-id "emacs" tags 2>/dev/null || true
 riverctl rule-del -app-id "agent" tags 2>/dev/null || true
 riverctl rule-del -app-id "firefox" tags 2>/dev/null || true
@@ -216,23 +203,19 @@ riverctl rule-add -app-id "emacs" tags $((1 << 0))
 riverctl rule-add -app-id "agent" tags $((1 << 1))
 riverctl rule-add -app-id "firefox" tags $((1 << 2))
 riverctl rule-add -app-id "sioyek" tags $((1 << 3))
-riverctl rule-add -app-id "slack" tags $((1 << 4))
 
-# Several candidates per application because the app-id differs between the
-# Wayland and XWayland builds, and a rule whose app-id does not match is
-# silently inert rather than an error. Confirm with `lswt` and prune.
-for app in spotify org.telegram.desktop telegram-desktop \
+# Some apps use different app-ids under Wayland and XWayland, so both are
+# listed; a non-matching rule is silently inert. Check with `lswt`.
+for app in slack spotify org.telegram.desktop telegram-desktop \
            com.github.dagmoller.whatsapp-electron vesktop
 do
     riverctl rule-del -app-id "$app" tags 2>/dev/null || true
     riverctl rule-add -app-id "$app" tags $((1 << 4))
 done
 
-# Zoom runs under XWayland (xwayland=true in zoomus.conf), so every window
-# shares the app-id "zoom". Float all of them by default, which catches the
-# toasts, settings, chat, participants, and screen-share toolbars, then tile
-# the main and meeting windows back in. Per-title rules beat the app-id-only
-# rule because river applies the most specific match.
+# Every Zoom window shares the app-id "zoom" under XWayland. Float them all
+# (toasts, toolbars, dialogs), then tile the main and meeting windows back in;
+# the more specific title rules win.
 riverctl rule-del -app-id "zoom" float 2>/dev/null || true
 riverctl rule-add -app-id "zoom" float
 for title in "Zoom Workplace*" "Zoom Meeting" "Meeting" "Zoom - *"

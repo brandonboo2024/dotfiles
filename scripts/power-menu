@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Lock, reboot or shut down, chosen in fuzzel.
+
 choice=$(
     printf '%s\n' "Lock" "Reboot" "Shutdown" |
         fuzzel --dmenu --minimal-lines
@@ -13,6 +15,6 @@ case "$choice" in
         systemctl poweroff
         ;;
     Reboot)
-        reboot
+        systemctl reboot
         ;;
 esac

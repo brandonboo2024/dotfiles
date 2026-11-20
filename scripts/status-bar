@@ -1,30 +1,19 @@
 #!/bin/sh
 
-# Status line for creek: one line per tick on stdout.
+# Status line for creek, one line per tick. $BAR_MODULES (set per host in
+# river/) picks the modules and their order.
 #
-# Which modules appear, and in what order, is $BAR_MODULES. River exports it
-# from river/hosts/<hostname>.sh, so a machine takes only what it has -- there
-# is no point printing a battery on the desktop.
-#
-# Everything available from /proc or /sys is read with shell builtins and no
-# subprocesses. The two modules that genuinely need a helper program, network
-# name and bluetooth, describe things that change on the timescale of minutes,
-# so they refresh every $BAR_SLOW_EVERY ticks and are cached in between. An
-# ordinary tick costs two forks, pamixer and date; the previous version
-# measured at roughly forty.
-#
-# Each module assigns to $out rather than printing. That is deliberate: a
-# command substitution would run the module in a subshell, and the CPU and
-# cache variables would not survive between ticks.
+# /proc and /sys are read with builtins to avoid forks. Network and bluetooth
+# need helper programs, so they refresh every $BAR_SLOW_EVERY ticks and are
+# cached in between. Modules assign to $out instead of printing, because a
+# command substitution would run them in a subshell and lose their state.
 
 : "${BAR_MODULES:=cpu ram bat vol net bt clock}"
 : "${BAR_INTERVAL:=2}"
 : "${BAR_SLOW_EVERY:=30}"
 
 # ─── CPU ────────────────────────────────────────────
-# Usage is the delta between ticks, so the module holds no sleep of its own
-# and the loop period really is $BAR_INTERVAL. The priming call before the
-# loop gives the first real tick something to compare against.
+# Usage since the previous tick; primed once before the loop.
 prev_idle=0
 prev_total=0
 
@@ -45,8 +34,7 @@ cpu_module() {
 }
 
 # ─── Memory ─────────────────────────────────────────
-# Used is total minus available, which is what "how much is left for me"
-# actually means. Integer arithmetic only, so the decimal is done by hand.
+# Used = total - available, printed in GiB with one decimal.
 ram_module() {
     mem_total=0
     mem_avail=0
@@ -62,9 +50,8 @@ ram_module() {
 }
 
 # ─── Battery ────────────────────────────────────────
-# Produces nothing when there is no battery, so a machine that lists this
-# module but has none simply omits the field instead of showing "N/A".
-battery_module() {
+# Empty when there is no battery, so the field is omitted.
+bat_module() {
     out=""
     for bat in /sys/class/power_supply/BAT*; do
         [ -r "$bat/capacity" ] || continue
@@ -82,8 +69,6 @@ battery_module() {
     done
 }
 
-bat_module() { battery_module; }
-
 # ─── Volume ─────────────────────────────────────────
 vol_module() {
     if [ "$(pamixer --get-mute 2>/dev/null)" = "true" ]; then
@@ -94,28 +79,22 @@ vol_module() {
 }
 
 # ─── Network (slow) ─────────────────────────────────
-# Link state comes from sysfs, but the network's name needs nmcli, so the
-# whole module is refreshed only on a slow tick.
-net_cache="NET:off"
+# Uses the default-route interface, so docker bridges and veths are ignored.
+net_cache="offline"
 
 net_refresh() {
-    for dev in /sys/class/net/*; do
-        name=${dev##*/}
-        [ "$name" = "lo" ] && continue
-        [ -r "$dev/operstate" ] || continue
-        read -r state < "$dev/operstate"
-        [ "$state" = "up" ] || continue
-
-        if [ -d "$dev/wireless" ]; then
+    net_cache="offline"
+    while read -r iface dest _; do
+        [ "$dest" = "00000000" ] || continue
+        if [ -d "/sys/class/net/$iface/wireless" ]; then
             ssid=$(nmcli -t -f active,ssid dev wifi 2>/dev/null |
                        sed -n 's/^yes://p' | head -n 1)
-            net_cache="NET:${ssid:-wifi}"
+            net_cache="${ssid:-wifi}"
         else
-            net_cache="NET:eth"
+            net_cache="eth"
         fi
         return
-    done
-    net_cache="NET:off"
+    done < /proc/net/route
 }
 
 net_module() { out="$net_cache"; }
@@ -147,8 +126,7 @@ clock_module() {
 }
 
 # ─── Main loop ──────────────────────────────────────
-# Prime only the modules this host shows: priming a module that is not in
-# BAR_MODULES pays its startup cost for output nobody reads.
+# Prime only the modules this host shows.
 case " $BAR_MODULES " in *" cpu "*) cpu_module ;; esac
 case " $BAR_MODULES " in *" net "*) net_refresh ;; esac
 case " $BAR_MODULES " in *" bt "*)  bt_refresh  ;; esac
