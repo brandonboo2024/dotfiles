@@ -73,16 +73,15 @@
                   org-verbatim))
     (face-remap-add-relative face 'fixed-pitch))
   (face-remap-add-relative 'org-table '(:height 0.9))
-  (face-remap-add-relative
-   'org-document-title '(:inherit variable-pitch :height 386))
-  (face-remap-add-relative
-   'org-level-1 '(:inherit variable-pitch :height 347))
-  (face-remap-add-relative
-   'org-level-2 '(:inherit variable-pitch :height 309))
-  (face-remap-add-relative
-   'org-level-3 '(:inherit variable-pitch :height 289))
-  (face-remap-add-relative
-   'org-level-4 '(:inherit variable-pitch :height 270)))
+  ;; Absolute heights from `my/font-scaled': a float here would multiply
+  ;; onto the theme's own relative heading sizes.
+  (pcase-dolist (`(,face . ,ratio) '((org-document-title . 1.678)
+                                      (org-level-1 . 1.509)
+                                      (org-level-2 . 1.343)
+                                      (org-level-3 . 1.257)
+                                      (org-level-4 . 1.174)))
+    (face-remap-add-relative
+     face `(:inherit variable-pitch :height ,(my/font-scaled ratio)))))
 
 ;; Syntax highlighting in HTML exports.
 (use-package htmlize

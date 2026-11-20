@@ -52,11 +52,19 @@
   ;; (add-hook 'emacs-lisp-mode-hook #'compile-angel-on-save-local-mode)
   (compile-angel-on-load-mode 1))
 
+;; Fonts: one base height (1/10 pt); every other size is a ratio of it.
+;; Set through faces, not a frame `font' parameter, which would override them.
+(defconst my/font-height 230
+  "Base font height for code, in 1/10 pt.")
+
+(defun my/font-scaled (ratio)
+  "Return `my/font-height' scaled by RATIO, as an absolute face height."
+  (round (* my/font-height ratio)))
+
 ;; Window Graphics
 (setq default-frame-alist
       '((undecorated . t)
-        (internal-border-width . 24)
-        (font . "Berkeley Mono-22")))
+        (internal-border-width . 24)))
 (setq inhibit-startup-message t)
 (setq use-dialog-box nil)
 (scroll-bar-mode -1)
@@ -90,10 +98,12 @@
 ;; Ghost-text completion for prose; code buffers use the Corfu popup.
 (add-hook 'text-mode-hook #'completion-preview-mode)
 
+;; custom-set-faces, not set-face-attribute: these specs survive `load-theme'.
 (custom-set-faces
- '(default ((t (:family "Berkeley Mono" :height 230))))
+ `(default ((t (:family "Berkeley Mono" :height ,my/font-height))))
  '(fixed-pitch ((t (:family "Berkeley Mono"))))
- '(variable-pitch ((t (:family "IBM Plex Sans" :height 260)))))
+ `(variable-pitch ((t (:family "IBM Plex Sans"
+                       :height ,(my/font-scaled 1.13))))))
 
 ;; Theme
 (use-package lambda-themes
