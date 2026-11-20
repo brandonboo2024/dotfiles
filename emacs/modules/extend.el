@@ -14,6 +14,11 @@
          :map project-prefix-map
          ("m" . ghostel-project)
          ("M" . ghostel-project-list-buffers))
+  :custom
+  ;; Keep the native module out of straight/build/, which straight wipes
+  ;; whenever it rebuilds the package (e.g. after an update).
+  (ghostel-module-directory
+   (expand-file-name "ghostel/" my/emacs-data-directory))
   :config
   (defun my/ghostel-send-C-k-and-kill ()
     "Send `C-k' to ghostel.
@@ -33,6 +38,10 @@ Like normal Emacs `C-k'.  Kill to end of line and put content in kill-ring."
 (use-package ghostel-comint
   :straight ghostel
   :hook (after-init . ghostel-comint-global-mode))
+
+(use-package ghostel-shell-command
+  :straight ghostel
+  :hook (after-init . ghostel-shell-command-global-mode))
 
 ;; All mail goes out through msmtp's posteo account (set up by Home Manager
 ;; in home/modules/mail.nix), whether or not notmuch has been loaded.
