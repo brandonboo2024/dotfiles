@@ -122,7 +122,7 @@
 ;; Buffer Settings
 (setq initial-major-mode 'org-mode
       initial-scratch-message ""
-      initial-buffer-choice t)
+      initial-buffer-choice nil)
 (auto-save-visited-mode 1)
 (global-auto-revert-mode 1)
 (repeat-mode 1)

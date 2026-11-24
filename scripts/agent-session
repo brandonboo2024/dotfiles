@@ -8,6 +8,10 @@
 # shellcheck source=/dev/null
 . "${XDG_CONFIG_HOME:-$HOME/.config}/scripts/projects.sh"
 
+# River spawns us with the compositor's VT as stdin. Never let tmux see it,
+# or a client attaches to that VT and the server blocks writing to it.
+exec </dev/null
+
 if [ "$#" -gt 1 ]; then
     printf 'usage: agent-session [project-directory]\n' >&2
     exit 2
@@ -30,10 +34,13 @@ open_agent_session() {
     tty=$(find_agent_client)
 
     if [ -n "$tty" ]; then
-        if [ -n "$dir" ]; then
-            tmux new-session -d -A -s "$session" -c "$dir"
-        else
-            tmux new-session -d -A -s "$session"
+        # Not new-session -A: for an existing session it attaches even with -d.
+        if ! tmux has-session -t "=$session" 2>/dev/null; then
+            if [ -n "$dir" ]; then
+                tmux new-session -d -s "$session" -c "$dir"
+            else
+                tmux new-session -d -s "$session"
+            fi
         fi
         exec tmux switch-client -c "$tty" -t "=$session"
     fi

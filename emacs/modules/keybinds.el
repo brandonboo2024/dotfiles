@@ -159,6 +159,22 @@ preview the candidate at point."
   (forward-line (- (floor (window-height) 2)))
   (setq this-command 'scroll-down-command))
 
+;;; Floating Dirvish popup, spawned by scripts/dirvish-quick.
+(defun my/dirvish-quick-frame ()
+  "Open Dirvish on ~/Downloads in the dedicated floating frame."
+  (interactive)
+  (select-frame-by-name "dirvish-quick")
+  (delete-other-windows)
+  (dirvish "~/Downloads/"))
+
+(defun my/dirvish-quick-delete-frame ()
+  "Delete the dirvish-quick popup frame once its Dirvish session quits."
+  (when (equal (frame-parameter nil 'name) "dirvish-quick")
+    (delete-frame)))
+
+(with-eval-after-load 'dirvish
+  (advice-add 'dirvish-quit :after #'my/dirvish-quick-delete-frame))
+
 
 (global-set-key (kbd "C-v") #'simple-scroll-down)
 (global-set-key (kbd "M-v") #'simple-scroll-up)

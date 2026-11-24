@@ -184,6 +184,11 @@
   :hook (org-mode . my/org-variable-pitch)
   :config
   (require 'org-tempo)
+  ;; Org remaps self-insert and backspace, so register them with
+  ;; completion-preview-mode (enabled via text-mode-hook in init.el).
+  (with-eval-after-load 'completion-preview
+    (add-to-list 'completion-preview-commands #'org-self-insert-command)
+    (add-to-list 'completion-preview-commands #'org-delete-backward-char))
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)

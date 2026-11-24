@@ -38,6 +38,7 @@ riverctl map normal Super+Shift R spawn "$config_home/river/reload"
 riverctl map normal Super P spawn open-pdf
 riverctl map normal Super A spawn agent-session
 riverctl map normal Super C spawn org-capture-quick
+riverctl map normal Super D spawn dirvish-quick
 riverctl map normal Super M spawn audio-menu
 riverctl map normal None F10 spawn power-menu
 riverctl map normal None F12 spawn screenshot-full
@@ -245,9 +246,16 @@ do
     riverctl rule-add -app-id "firefox" -title "$title" float
 done
 
-# Floating Org quick-capture popup frame (spawned by org-capture-quick).
-riverctl rule-del -app-id "emacs" -title "org-capture" float 2>/dev/null || true
-riverctl rule-add -app-id "emacs" -title "org-capture" float
+# Floating Emacs popup frames, titled by their scripts/<name> launcher.
+# Emacs frames all share app-id "emacs" (tag 1 above); all tags keeps a
+# popup on whichever tag is focused.
+for title in "org-capture" "dirvish-quick"
+do
+    riverctl rule-del -app-id "emacs" -title "$title" float 2>/dev/null || true
+    riverctl rule-add -app-id "emacs" -title "$title" float
+    riverctl rule-del -app-id "emacs" -title "$title" tags 2>/dev/null || true
+    riverctl rule-add -app-id "emacs" -title "$title" tags $(((1 << 9) - 1))
+done
 
 # Consistent decorations
 riverctl rule-del ssd 2>/dev/null || true

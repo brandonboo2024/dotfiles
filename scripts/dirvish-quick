@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Open a floating Dirvish frame against the Emacs daemon.
+
+exec emacsclient -c -n \
+    -F '((name . "dirvish-quick") (title . "dirvish-quick") (width . 120) (height . 35))' \
+    -e '(my/dirvish-quick-frame)'

@@ -142,7 +142,8 @@
 
 ;; Nicer dired
 (setq dired-kill-when-opening-new-dired-buffer t ;; one dired buffer at a time
-      dired-clean-confirm-killing-deleted-buffers nil)
+      dired-clean-confirm-killing-deleted-buffers nil
+      dired-dwim-target t) ;; copy/rename target defaults to the other pane
 
 (use-package dirvish
   :demand t
@@ -152,7 +153,8 @@
   (dirvish-quick-access-entries
    '(("h" "~/"          "home")
      ("n" "~/nixos/"    "nixos")
-     ("o" "~/org/"      "org")))
+     ("o" "~/org/"      "org")
+     ("d" "~/Downloads/" "downloads")))
   :bind
   (("M-`" . dirvish-side)
    :map dirvish-mode-map

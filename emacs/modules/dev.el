@@ -10,6 +10,10 @@
   (add-hook 'sh-mode-hook #'flymake-mode)
   (add-hook 'sh-mode-hook #'sh-shellcheck-flymake))
 
+;; by default ediff creates a new frame
+(setq ediff-window-setup-function #'ediff-setup-windows-plain
+      ediff-split-window-function #'split-window-horizontally)
+
 (use-package nix-mode
   :mode "\\.nix\\'")
 
